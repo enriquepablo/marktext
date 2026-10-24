@@ -136,6 +136,14 @@
       "exportSvg": "Export as SVG next to the drawing",
       "missing": "File not found: {file}",
       "loadError": "The drawing could not be read."
+    },
+    "events": {
+      "title": "Events",
+      "back": "Back to files",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "week": "This week",
+      "later": "Later"
     }
   }
 }

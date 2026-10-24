@@ -20,11 +20,25 @@
           <Search aria-hidden="true" />
         </button>
       </icon-tooltip>
+      <icon-tooltip :content="t('cazalla.events.title')">
+        <button
+          type="button"
+          class="plain-button search-button"
+          :aria-label="t('cazalla.events.title')"
+          @click="layoutStore.SET_LAYOUT({ rightColumn: 'events' })"
+        >
+          <CalendarClock aria-hidden="true" />
+        </button>
+      </icon-tooltip>
     </div>
     <div class="sidebar-content">
       <cazalla-explorer v-if="rightColumn === 'files'" />
       <side-bar-search
         v-else-if="rightColumn === 'search'"
+        @back="returnToFiles"
+      />
+      <cazalla-events
+        v-else-if="rightColumn === 'events'"
         @back="returnToFiles"
       />
     </div>
@@ -66,6 +80,8 @@ import { useEditorStore } from '@/store/editor'
 import { Search, Setting, Plus } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n'
 import CazallaExplorer from '@cazalla/renderer/explorer/Explorer.vue'
+import CazallaEvents from '@cazalla/renderer/events/EventsView.vue'
+import { CalendarClock } from 'lucide-vue-next'
 import SideBarSearch from './search.vue'
 import IconTooltip from '@/components/iconTooltip/index.vue'
 import { storeToRefs } from 'pinia'
