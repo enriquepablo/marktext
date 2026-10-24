@@ -858,3 +858,13 @@ and also the panel should occupy all the central panel space
 ### Status
 
 Fixed on 2026-10-24. `vue-pdf-embed` carries its own copy of pdf.js and points the worker at `./pdf.worker.mjs`, a path relative to the page that exists neither in the dev server nor in the built app, so every load failed. The pane now renders pages on canvases with `pdfjs-dist` directly, whose worker URL Vite emits as an asset (the search indexer already used it); the dependency is removed. The error text, when any, is shown in full. PDFs and drawings opened from the explorer, from links or after generating a report fill the editor column in a viewer overlay with a close button and Escape; "Open in split" still gives a pane.
+
+## back to file explorer
+
+I open the app and I can see the file explorer.
+I open either the search or the events interfaces and I can see them fine.
+I close search or events and I get back to "No Data", no file explorer.
+
+### Status
+
+Fixed on 2026-10-24. In lazy mode `el-tree` fills its root level from the `load` callback when it is created and from the `data` prop only on later changes. The explorer returned an empty root level from `load`, so a remount with the roots already known showed "No data". The roots are now served from both paths.

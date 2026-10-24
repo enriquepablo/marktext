@@ -107,13 +107,16 @@ const readEntries = async(dir: string): Promise<Entry[]> => {
   return entries.sort((a, b) => Number(b.isDir) - Number(a.isDir) || a.name.localeCompare(b.name))
 }
 
-// Roots arrive over IPC after mount, so they are reactive data; only folders below them load lazily.
+// Roots arrive over IPC after mount, so they are also reactive data. In lazy
+// mode el-tree builds the root level from `load` when it is created and from
+// `data` only when that prop changes later; serving the roots from both covers
+// a first start (roots come late) and a remount (roots already known).
 const roots = computed<Entry[]>(() =>
   projectStore.availableRoots.map((r) => ({ path: r.pathname, name: basename(r.pathname), isDir: true, leaf: false, root: true }))
 )
 
 const load = async(node: TreeNode, resolve: (data: Entry[]) => void): Promise<void> => {
-  if (node.level === 0) return resolve([])
+  if (node.level === 0) return resolve(roots.value)
   resolve(await readEntries(node.data.path))
 }
 
