@@ -4,7 +4,7 @@ import notice from '@/services/notification'
 import { DIALOG_EVENT, type Option, type Values } from '../dialogs/types'
 import { useContentFolder } from '../core/contentFolder'
 import { useMetadataStore } from '../metadata/store'
-import { usePaneStore } from '../panes/store'
+import { useCazallaLayoutStore } from '../core/layout'
 import { ExistsError } from '../tasks/create'
 import { createDrawing } from './create'
 
@@ -37,7 +37,7 @@ export const openDrawingDialog = (): void => {
       try {
         const file = await createDrawing(folder, project, String(v.name))
         notice.notify({ title: t('cazalla.dialog.created', { file }), type: 'primary', message: '' })
-        usePaneStore().OPEN_IN_PANE('drawing', file)
+        useCazallaLayoutStore().OPEN_VIEWER('drawing', file)
       } catch (err) {
         return err instanceof ExistsError ? t('cazalla.dialog.exists', { file: err.file }) : String(err)
       }

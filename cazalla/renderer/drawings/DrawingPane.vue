@@ -33,7 +33,7 @@
         type="button"
         class="plain-button pane-button"
         :aria-label="t('cazalla.panes.close')"
-        @click.stop="panes.CLOSE(id)"
+        @click.stop="close"
       >
         <X
           :size="14"
@@ -71,7 +71,12 @@ import { isDarkThemeId } from 'common/theme'
 import { basename, exists, readText, writeBytes, writeText } from '../core/fs'
 import { usePaneStore } from '../panes/store'
 
-const props = defineProps<{ id: string; file: string }>()
+const props = defineProps<{ id: string; file: string; overlay?: boolean }>()
+const emit = defineEmits<{ close: [] }>()
+const close = (): void => {
+  if (props.overlay) emit('close')
+  else panes.CLOSE(props.id)
+}
 const { t } = useI18n()
 const panes = usePaneStore()
 const { theme, language } = storeToRefs(usePreferencesStore())

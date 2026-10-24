@@ -132,7 +132,7 @@
       "zoomIn": "Acercar",
       "zoomOut": "Alejar",
       "missing": "Archivo no encontrado: {file}",
-      "loadError": "No se pudo leer el PDF."
+      "loadError": "No se pudo leer el PDF: {error}"
     },
     "drawing": {
       "title": "Nuevo dibujo",

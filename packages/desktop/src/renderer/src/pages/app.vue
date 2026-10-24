@@ -42,6 +42,7 @@
       <import-modal />
       <kanban-view v-if="init && cazallaLayout.mainView === 'kanban'" />
       <terminal-overlay v-if="init && cazallaLayout.mainView === 'terminal'" />
+      <viewer-overlay v-if="init && cazallaLayout.mainView === 'viewer'" />
     </div>
     <daily-notes-panel v-if="init" />
   </div>
@@ -65,6 +66,7 @@ import DailyNotesPanel from '@cazalla/renderer/dailyNotes/Panel.vue'
 import ActivityBar from '@cazalla/renderer/activityBar/ActivityBar.vue'
 import KanbanView from '@cazalla/renderer/kanban/KanbanView.vue'
 import TerminalOverlay from '@cazalla/renderer/terminal/TerminalOverlay.vue'
+import ViewerOverlay from '@cazalla/renderer/panes/ViewerOverlay.vue'
 import PaneLayout from '@cazalla/renderer/panes/PaneLayout.vue'
 import { usePaneStore } from '@cazalla/renderer/panes/store'
 import { useCazallaLayoutStore } from '@cazalla/renderer/core/layout'

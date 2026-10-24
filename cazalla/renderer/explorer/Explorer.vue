@@ -58,7 +58,7 @@ import { useTaskStore } from '../tasks/store'
 import { getKanbanMenuItem } from '../kanban/sidebarMenu'
 import { getOpenInSplitMenuItem } from '../panes/sidebarMenu'
 import { moveEntry, MoveError } from './move'
-import { usePaneStore } from '../panes/store'
+import { useCazallaLayoutStore } from '../core/layout'
 import { paneKindFor } from '../panes/linkRouter'
 
 interface Entry {
@@ -157,7 +157,7 @@ const onClick = (e: Entry, _node: TreeNode, _comp: unknown, event?: MouseEvent):
   if (e.isDir || event?.detail === 2) return
   if (!isMarkdown(e.name)) {
     const kind = paneKindFor(e.path)
-    if (kind) usePaneStore().OPEN_IN_PANE(kind, e.path)
+    if (kind === 'pdf' || kind === 'drawing') useCazallaLayoutStore().OPEN_VIEWER(kind, e.path)
     else void window.electron.ipcRenderer.invoke('mt::shell::open-path', e.path)
     return
   }

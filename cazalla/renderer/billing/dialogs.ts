@@ -21,7 +21,7 @@ import {
 } from './data'
 import { renderInvoicePdf } from './invoicePdf'
 import { renderReportPdf } from './reportPdf'
-import { usePaneStore } from '../panes/store'
+import { useCazallaLayoutStore } from '../core/layout'
 
 const open = (spec: DialogSpec): void => {
   if (!useContentFolder().value) {
@@ -64,7 +64,7 @@ const writePdf = async(
 
 const done = (title: string, file: string): void => {
   notice.notify({ title, type: 'primary', message: t('cazalla.billing.written', { file }) })
-  usePaneStore().OPEN_IN_PANE('pdf', file)
+  useCazallaLayoutStore().OPEN_VIEWER('pdf', file)
 }
 
 export const openReportDialog = (): void =>

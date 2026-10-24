@@ -240,9 +240,6 @@ importers:
       vue-i18n:
         specifier: ^11.4.13
         version: 11.4.13(vue@3.5.43(typescript@6.0.3))
-      vue-pdf-embed:
-        specifier: ^2.1.7
-        version: 2.1.7(vue@3.5.43(typescript@6.0.3))
       vue-router:
         specifier: ^5.4.0
         version: 5.4.0(@vue/compiler-sfc@3.5.43)(esbuild@0.28.1)(pinia@4.0.3(@vue/devtools-api@8.2.1)(typescript@6.0.3)(vue@3.5.43(typescript@6.0.3)))(rolldown@1.2.13)(rollup@4.62.2)(vite@8.3.4(@types/node@26.6.4)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.36.0)(tsx@4.23.15)(yaml@2.9.1))(vue@3.5.43(typescript@6.0.3))
@@ -10265,11 +10262,6 @@ packages:
     engines: {node: '>= 22'}
     peerDependencies:
       vue: ^3.0.0
-
-  vue-pdf-embed@2.1.7:
-    resolution: {integrity: sha512-hBtlTsqkAg93s8erZUCeVSFAqqfBtsLzpmS9NAiWOGQ5ZZa0FksGNgzSI79cvGJBkYqGPpNqIlazbImZnb/2wA==}
-    peerDependencies:
-      vue: ^3.3.0
 
   vue-router@5.4.0:
     resolution: {integrity: sha512-pFvcYcxinDHjZUlf7AzFBrT8r8Xqvv4uMHoJnjc+EqPawXQvHTkF8S4tfSmQLpriVHUGfkaKlI7Et0KRjTMTdw==}
@@ -21527,11 +21519,6 @@ snapshots:
       '@intlify/devtools-types': 11.4.13
       '@intlify/shared': 11.4.13
       '@vue/devtools-api': 6.6.4
-      vue: 3.5.43(typescript@6.0.3)
-
-  vue-pdf-embed@2.1.7(vue@3.5.43(typescript@6.0.3)):
-    dependencies:
-      pdfjs-dist: 6.4.299
       vue: 3.5.43(typescript@6.0.3)
 
   vue-router@5.4.0(@vue/compiler-sfc@3.5.43)(esbuild@0.28.1)(pinia@4.0.3(@vue/devtools-api@8.2.1)(typescript@6.0.3)(vue@3.5.43(typescript@6.0.3)))(rolldown@1.2.13)(rollup@4.62.2)(vite@8.3.4(@types/node@26.6.4)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.36.0)(tsx@4.23.15)(yaml@2.9.1))(vue@3.5.43(typescript@6.0.3)):

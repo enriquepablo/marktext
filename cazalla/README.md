@@ -75,7 +75,7 @@ cazalla/
   renderer/billing/         data.ts, reportPdf.ts, invoicePdf.ts (ported from cazalla-net.plugin, pdf-lib), dialogs.ts (item 9); output under organizations/<slug>/assets/invoices/YYYY/MM
   renderer/panes/           tree.ts (pure layout tree), store.ts, PaneLayout.vue, FilePane.vue (second Muya instance per pane), sidebarMenu.ts (item 7)
   renderer/explorer/        Explorer.vue (el-tree file explorer, all files, drag and drop), move.ts (move with metadata sync), links.ts (link rewriting) (item 15)
-  renderer/pdf/             PdfPane.vue (vue-pdf-embed viewer as a pane leaf), panes/linkRouter.ts routes .pdf and .excalidraw links to panes (item 12)
+  renderer/pdf/             pdfjs.ts (worker setup shared with search), PdfPane.vue (pages rendered on canvases with pdfjs-dist); panes/ViewerOverlay.vue fills the editor column for PDFs and drawings (item 12)
   renderer/drawings/        DrawingPane.vue (Excalidraw React component in a pane, react + react-dom), create.ts, dialogs.ts (item 11)
   renderer/events/          group.ts (today / tomorrow / this week / later), EventsView.vue (third sidebar column) (item 14)
   renderer/sites/           pages.ts (web pages and sub-pages), dialogs.ts, subpageMenu.ts, publish.ts, PublishDialog.vue (item 13)

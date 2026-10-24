@@ -24,7 +24,8 @@ export const routeLinkToPane = (href: string | null | undefined, dirname: string
   const kind = paneKindFor(target)
   if (!kind) return false
   const file = window.path.isAbsolute(target) ? target : window.path.resolve(dirname ?? '', target)
+  if (kind !== 'pdf' && kind !== 'drawing') return false
   // Loaded on use: the editor store imports this module, and its specs run without pinia globals.
-  void import('./store').then(({ usePaneStore }) => usePaneStore().OPEN_IN_PANE(kind, file))
+  void import('../core/layout').then(({ useCazallaLayoutStore }) => useCazallaLayoutStore().OPEN_VIEWER(kind, file))
   return true
 }
