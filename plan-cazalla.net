@@ -1,0 +1,436 @@
+# cazalla.net workspace on MarkText
+
+This document completes the roadmap notes. Each numbered section starts with the original notes, unchanged. The design follows. Open questions close each section.
+
+## Scope and conventions
+
+The target is the desktop app in `packages/desktop`. The website package is out of scope.
+
+Feature code lives under `cazalla/` at the repository root. The alias `@cazalla` resolves to it in Vite, Vitest and TypeScript. Upstream files are changed only where a hook is unavoidable, by one to three lines each. `cazalla/README.md` lists the hooks that exist today.
+
+The content folder is the preference `defaultDirectoryToOpen`. It plays the role of an Obsidian vault. All paths below are relative to it unless stated.
+
+All feature logic runs in the renderer through the preload bridge `window.fileUtils` and `window.path`. The main process receives only menu and context-menu hooks. PDF generation runs in the renderer too: pdf-lib is pure JavaScript and `fileUtils.writeFile` accepts a `Uint8Array`.
+
+New dependencies of `packages/desktop`:
+
+| Package | Use |
+| --- | --- |
+| `yaml` 2.x | parse and serialize frontmatter; the Obsidian plugin already uses it |
+| `@sindresorhus/slugify` | slugs; same algorithm as the Obsidian vault, so existing slugs keep matching; ESM only, renderer only |
+| `lucide-vue-next` | icons; Lucide is the set Obsidian uses |
+| `vue-draggable-plus` | SortableJS wrapper for the kanban columns |
+| `pdf-lib` 1.17.1 | the ported invoice and report renderers |
+
+Shared module `cazalla/renderer/core/`:
+
+- `frontmatter.ts`: `split(markdown)` returns the fenced YAML block and the body; `parse(markdown)` returns an object; `serialize(fields, body)` writes a block with `yaml.stringify`; `updateFields(markdown, patch)` rewrites named keys and keeps the body. This generalizes `touchModified` in `cazalla/renderer/dailyNotes/util.ts`. The Obsidian plugin builds frontmatter with string templates and breaks on titles with `:`; serialization through `yaml` removes that class of error.
+- `slug.ts`: wraps `@sindresorhus/slugify`.
+- `time.ts`: `isoNow()` returns `toISOString()` (UTC, `Z`), used for notes, tasks and metadata as in the samples below; `localStamp()` returns the local time with offset, used by daily notes.
+- `fs.ts`: typed wrappers over `window.fileUtils` and a recursive listing of `.md` files.
+- `i18n.ts`: one registration of all cazalla locale files into vue-i18n; the daily-notes registration moves here.
+- `contentFolder.ts`: a computed over `preferencesStore.defaultDirectoryToOpen`, shared by every store.
+
+Frontmatter keys are written in the order shown in the samples. Timestamps in notes, tasks and metadata are UTC ISO strings. Daily notes keep their local-offset format; this difference is inherited from the Obsidian vault and is kept so existing files parse unchanged.
+
+Implementation order: 2, 3, 6, 4, 5, 8, 9, then 7. Items 3 to 9 depend on 2. Item 6 depends on 3. Item 4 depends on 6. Items 5 and 8 depend on 4. Item 9 depends on 4. Item 7 is independent and comes last because it is the largest.
+
+# 1 calendar and daily notes.
+
+Once a base dir is selected
+daily notes live under _daily
+a calendar is shown in a right panel in the top sub-panel
+daily notes are edited in lower sub-panel of the right panel
+
+frontmatter:
+
+title: "2026-10-24"
+slug: 2026-10-24
+created: 2026-10-24T00:12:56+02:00
+modified: 2026-10-24T00:12:56+02:00
+category: daily
+tags: []
+
+## Status
+
+Implemented. The design is in `cazalla/README.md`. The panel toggles from View › Daily Notes, `Ctrl+Shift+A`, or the command palette. Notes live at `_daily/YYYY/MM/YYYY-MM-DD.md`.
+
+Follow-up from this roadmap: the daily-notes `util.ts` frontmatter helpers migrate to `cazalla/renderer/core/frontmatter.ts` when item 2 lands. Behaviour does not change.
+
+# 2 metadata
+
+in the root dir there is a directory _metadata/
+with 3 subdirectories people/ organizations/ projects.
+these contain md docs that only have yaml frontmatter.
+
+people have frontmatter:
+
+name: Some Name
+slug: some-name
+organization: <organization-slug>
+email:
+phone:
+
+organizations have common frontmatter:
+
+name:
+slug:
+leader: <person-slug>
+
+for organizations that can invoice:
+
+price_hour: 55
+invoice_number: 0026
+iban: ES62...
+swift: INGDESMMXXX
+payment_details: 30 days
+invoice_details: []
+
+for organizations that can be invoiced:
+
+name:
+slug:
+leader: <person-slug>
+phone:
+billing:
+  - <project-slug>
+  - ...
+invoice_details: []
+
+projects have frontmatter:
+
+name:
+slug:
+organization: <organization-slug>
+leader: <person-slug>
+service:
+path: path/to/project/files/from/root
+
+All this metadata is loaded at startup and kept for use in other tasks,
+look in ~/cazalla/cazalla-net.plugin/main.ts and
+~/cazalla/cazalla-net.plugin/src/metadata.ts,
+we will want to import some functionality from that repo
+
+## File format
+
+Each metadata file is a markdown document whose content is one fenced `---` YAML block and an empty body. MarkText renders it as a normal document. The loader parses only the block.
+
+The Obsidian plugin reads `Metadata/companies`, `Metadata/projects` and `Metadata/people` as plain YAML without fences (`src/metadata.ts:150-169`). The new layout renames `companies` to `organizations`, lowercases the directory with a leading underscore, and adds fences. Existing vault files need a one-time migration: add fences, move directories, rename the key `company` to `organization`. The migration is a script under `cazalla/scripts/`, run by hand.
+
+## Data model
+
+Types port from `src/metadata.ts:5-118` with these changes: `Company` becomes `Organization`; `Person.company: string[]` becomes `Person.organization: string`; `Project.company: string[]` becomes `Project.organization: string`; `Person` gains `phone`; `Organization` gains `phone`. The invoicing and invoiced field groups are optional on `Organization`. Each record also carries `file`, the absolute path it was read from.
+
+An organization can invoice when `iban` is set. An organization can be invoiced when `billing` is a non-empty list.
+
+## Store
+
+`cazalla/renderer/metadata/store.ts` is a Pinia setup store with `people`, `organizations` and `projects` as maps keyed by slug, plus `loaded` and `errors`.
+
+`load()` lists `_metadata/people`, `_metadata/organizations` and `_metadata/projects`, reads each `.md`, parses the frontmatter, and fills the maps. A record without `slug` gets the file stem as slug. A duplicate slug is kept once and reported through `notice.notify`. A file that fails to parse is reported and skipped.
+
+The trigger is `watch(contentFolder, load, { immediate: true })`, the pattern already used in `cazalla/renderer/dailyNotes/store.ts`. The store reloads after each of its own writes. When the content folder is also an open sidebar root, the store listens to the `mt::update-object-tree` events the main watcher already sends and reloads when a changed path is under `_metadata/`. There is no separate watcher.
+
+Consumers read the maps directly. Dialog selects list `projects`, `organizations` and `people` by name, sorted.
+
+The plugin loads once and never invalidates (`src/metadata.ts:136-147`). The store above replaces that behaviour with reload on change.
+
+## Open questions
+
+- Which organization is "us" for invoices. The plugin hardcodes the slug `cazalla-net` (`src/metadata.ts:233`). Proposed convention: the single organization with `iban` set; when several qualify, the invoice dialog asks.
+- Whether `_metadata/` should be hidden from the sidebar tree. Proposed: no; the files are editable documents.
+
+# 3 side bar with clickable icons
+
+if no icon library present select one - the one in obsidian is good
+  in tasks below we will be adding icons to the bar.
+
+  To start with, we want icons to create a person, a project, or a company.
+  clicking on them will open a dialog with the pertinent fields,
+  and saving the dialogs will create the pertinent files.
+
+## Icon library
+
+The desktop package ships `@element-plus/icons-vue`. Obsidian uses Lucide. `lucide-vue-next` is added for the activity bar; it tree-shakes to the icons imported.
+
+## Activity bar
+
+`cazalla/renderer/activityBar/ActivityBar.vue` is a 40 px vertical strip placed left of the sidebar. It is always visible and does not depend on the sidebar toggle. Each entry is a lucide icon inside the upstream `IconTooltip` component with a translated title. Clicking an entry emits a bus event named `cazalla:<action>`.
+
+Hook: one tag in `pages/app.vue` before `<side-bar>`. The bar's width is added to the width the cazalla store already reports to `editorWithTabs/index.vue`, so no further upstream change is needed. The daily-notes store's `effectiveWidth` moves to a small cazalla layout store that both the panel and the bar feed.
+
+Entries, in order, as the roadmap grows: New Person, New Organization, New Project (this item); New Note, New Task (item 4); Kanban (item 5); Effort Report, Invoice (item 9).
+
+## Dialog framework
+
+`cazalla/renderer/dialogs/EntityDialog.vue` wraps `el-dialog` and `el-form`. It is mounted once from `ActivityBar.vue`, so no upstream mount is needed. It opens on the bus event `cazalla:dialog` with a spec:
+
+- `title`: translated heading.
+- `fields`: a list of `{ key, label, type, required, options, default }` where `type` is `text`, `textarea`, `number`, `date` or `select`; `options` for a select is a function returning `{ value, label }[]`, usually from the metadata store.
+- `submit(values)`: an async function; it returns an error string to show, or nothing on success.
+
+Validation is by hand, as in the upstream dialogs: required fields, slug uniqueness against the metadata store, and target path existence before writing. Errors show inline under the field. The dialog closes on success.
+
+The upstream pattern this follows is `components/rename/index.vue` (bus-opened `el-dialog`, focus on open, Enter to confirm).
+
+## Entity dialogs
+
+`cazalla/renderer/metadata/dialogs.ts` defines the three specs and their submit functions.
+
+New Person: name, organization (select), email, phone. Writes `_metadata/people/<slug>.md`.
+
+New Organization: name, leader (select of people), phone; a checkbox "can invoice" revealing price_hour, invoice_number, iban, swift, payment_details, invoice_details (textarea, one line per entry); a checkbox "can be invoiced" revealing billing (multi-select of projects) and invoice_details. Writes `_metadata/organizations/<slug>.md`.
+
+New Project: see item 6.
+
+Each submit serializes the frontmatter with `yaml`, writes the file, and calls `metadata.load()`. The slug is derived from the name and shown read-only in the dialog.
+
+The plugin has no dialogs for people, companies or projects; these are new. Its task and note dialogs (`main.ts:932-1080`) are the model for the fields.
+
+## Open questions
+
+- Whether the activity bar replaces the sidebar footer buttons (settings, open folder) or leaves them. Proposed: leave them.
+
+# 4 new categories of md docs: notes and tasks
+
+frontmatter for notes:
+
+title: Some Note
+slug: some-note
+tags:
+date: 2026-10-22T15:06:42.215Z
+modified: 2026-10-22T15:06:42.215Z
+category: note
+project: <project-slug>
+
+frontmatter for tasks:
+
+title: Some Task
+slug: some-task
+tags: []
+date: 2026-10-22T13:09:21.904Z
+modified: 2026-10-22T13:09:21.904Z
+category: task
+project: <project-slug>
+path:
+status: new
+due: 2026-11-22T14:09:21.904Z
+effort: []
+subtasks: []
+
+the left icon bar has 2 icons, for "New Note" and "New Task"
+each of them opens a dialog, asking for title, project (choosing from the project metadata)
+(due in the case of task)
+and creates the file under the project path, either under notes/ or tasks/
+
+## Dialogs
+
+New Note: title, project (select). Writes `<project.path>/notes/<slug>.md` with the note frontmatter and an empty body. `tags` is written as `[]`.
+
+New Task: title, project (select), due (date, default today plus one month, the plugin's rule at `main.ts:633`). Writes `<project.path>/tasks/<slug>.md` with the task frontmatter. `path` is `/` for a top-level task. `status` is `new`. `effort` and `subtasks` are `[]`.
+
+Both refuse an existing path. Both open the new file as a tab through `mt::open-file`, the channel the sidebar uses. The sidebar tree updates by itself through the main-process watcher when the project folder is under an open root.
+
+## Task index
+
+`cazalla/renderer/tasks/store.ts` indexes every task. For each project it lists `tasks/**/*.md` and `archived/**/*.md`, parses the frontmatter, and keeps `{ file, title, slug, project, path, status, due, effort, subtasks }`. It loads when metadata loads, reloads on tree events under a project path, and after its own writes.
+
+The index serves the kanban (item 5), subtasks (item 8) and reports (item 9). The plugin instead scans the whole vault through Obsidian's metadata cache (`src/metadata.ts:193-210`); the index replaces that.
+
+Writes to a task go through `frontmatter.updateFields`, which also sets `modified`.
+
+## Effort entries
+
+`effort` is a list of one-key maps, `- 2026-10-22: 2.5`, as the plugin reads them (`src/metadata.ts:170-212`). Entering effort is done by editing the frontmatter in the editor. No dialog is planned in this roadmap.
+
+## Open questions
+
+- Whether `status` values other than the six column names should be tolerated in the index. Proposed: unknown values show in `new` and are reported once.
+
+# 5 kanban board
+
+Investigate which kanban board might be
+appropriate to integrate here.
+
+will have columns:
+
+continuous, new, pending, wip, done, archived
+
+## Investigation
+
+Candidates found: SVAR Vue Kanban (`@svar-ui/vue-kanban`), a complete Vue 3 board with TypeScript and themes; Syncfusion Vue Kanban, commercial; kanvue and drag-and-drop-vue, small and little maintained; vue-kanban (BrockReece), Vue 2 era, dragula based. Building blocks: `vue-draggable-plus` and `vue-draggable-next`, both SortableJS wrappers.
+
+Decision: build the board on `vue-draggable-plus`. The board has six fixed columns, cards with a title and a due date, and one behaviour on drop. A full kanban component brings its own data model and styling for little gain, and SVAR's licence would need checking. The desktop package already depends on `dragula`, but it is used for tab ordering only and has no Vue 3 binding; SortableJS is the common choice for Vue 3 lists.
+
+## Data
+
+There is no board file. The board is a view over the task index. A column holds the tasks whose `status` equals the column name. The plugin used Obsidian Kanban markdown files and never synced status (`main.ts:326-437`); that format is dropped.
+
+## View
+
+`cazalla/renderer/kanban/KanbanView.vue` fills the main editor area. Hook: one tag in `pages/app.vue` beside `<editor-with-tabs>`, shown when a cazalla layout flag `mainView === 'kanban'` is set; the editor is hidden with `v-show` so its state survives.
+
+The header has a project select, from the metadata store, and a close button. The default project is the `project` of the current file when it has one. Columns are `continuous`, `new`, `pending`, `wip`, `done`, `archived`, in that order. A card shows the title, the due date, and a subtask count. Clicking a card opens the task through `mt::open-file`. Cards of subtasks are indented under their parent's slug label.
+
+The view opens from the activity bar icon and from a sidebar context-menu entry "Kanban" on a project folder. The sidebar hook is one entry in `contextMenu/sideBar/index.ts` and a handler for the bus event it emits.
+
+## Behaviour
+
+Dropping a card in a column other than `archived` writes `status: <column>` and `modified` through `frontmatter.updateFields`. The index refreshes and the card stays where it was dropped.
+
+Dropping a card in `archived` runs the archive procedure of item 8. A task that still has subtasks is refused with a notice and the card snaps back.
+
+`continuous` is a status for tasks that never close, such as support contracts. It behaves like any other non-archived column.
+
+## Open questions
+
+- Whether cards should be reorderable inside a column and the order persisted. Proposed: no; order is by due date.
+
+# 6 projects
+
+a project has a path from the root under projects/
+it has subfolders archived/, notes/, and tasks/,
+and has a kanban board.
+
+The icon for "New Project" mentioned in 3
+should create all the relevant directories and files.
+
+## Dialog
+
+New Project: name, organization (select), leader (select), service (text), path (text, default `projects/<slug>`).
+
+Submit creates `<path>/`, `<path>/archived/`, `<path>/notes/` and `<path>/tasks/` with `fileUtils.ensureDir`, then writes `_metadata/projects/<slug>.md` with the project frontmatter, then reloads metadata. The sidebar tree shows directories, so empty folders are visible without placeholder files.
+
+A project has no board file. Its board is the kanban view filtered by its slug.
+
+The plugin stores `path` with a trailing slash and resolves `Tasks/` with a capital T (`main.ts:615-663`). The new layout uses lowercase `tasks/`, `notes/`, `archived/` and no trailing slash. The migration script of item 2 renames the directories.
+
+## Open questions
+
+- Whether a project's `path` may point outside `projects/`. Proposed: allowed, since `path` is explicit in the frontmatter.
+
+# 7 split panels
+
+it should be possible to split the editing/viewing main panel
+both vertically and horizontally,
+and also close a subpanel,
+through entries in the contextual menu of the main panel(s)
+"split horiz" "split vert" "Close panel".
+
+## Finding
+
+The upstream editor is single-pane by construction. The store holds one `currentFile` (`store/editor.ts:140-149`). The editor component swaps documents through untargeted bus events (`editor.vue:1831-1873`). Menu actions, find and replace, and the IPC context-menu handlers address "the" editor. `window.DIRNAME` is one value. Full multi-pane support means rewriting `editor.vue` and the editor store, which conflicts with the minimal-hook rule.
+
+## Design
+
+The upstream editor stays the primary pane. It keeps tabs, menus, find and replace, and source-code mode.
+
+Secondary panes are instances of `cazalla/renderer/panes/FilePane.vue`, a generalization of `cazalla/renderer/dailyNotes/NoteEditor.vue`. A file pane owns one Muya instance bound to an absolute path. It reads the file on open, autosaves with a one-second debounce through `fileUtils.writeFile`, flushes on blur and close, and reloads when a tree `change` event names its path and it has no unsaved edits. The daily-notes editor becomes a file pane with a fixed path.
+
+`cazalla/renderer/panes/store.ts` holds the layout: a binary tree whose leaves are either `primary` or `{ file }`, whose inner nodes have a direction and a split ratio. The tree is persisted per window in `localStorage`. `cazalla/renderer/panes/PaneLayout.vue` renders the tree recursively with draggable dividers, the divider logic coming from the daily-notes panel.
+
+Hook: `pages/app.vue` wraps `<editor-with-tabs>` in `<pane-layout>`, which renders the primary slot where the tree says. That is one tag pair.
+
+## Context-menu entries
+
+The editor's right-click menu is built in the main process (`src/main/contextMenu/editor/index.ts`, items in `menuItems.ts`). `cazalla/main/contextMenu.ts` exports factories for "Split horizontally", "Split vertically" and "Close panel". Each sends `mt::cm-cazalla-pane` with an action name to the focused window. Hook: one spread line in `getContextItems()`. The panes store listens for the channel and acts on the focused pane. Labels come from the cazalla locale files, as the Daily Notes menu label does.
+
+Split creates a sibling file pane showing the file of the focused pane. Close removes the focused pane; the primary pane cannot be closed. A sidebar entry "Open in split" opens a tree file in a new file pane; it is one entry in the sidebar context menu.
+
+Focus tracking: a pane records itself as focused on `mousedown` and on Muya `focus`.
+
+## Limitations
+
+Secondary panes have no tabs. Menu formatting shortcuts, find and replace, and the outline act on the primary pane. Secondary panes have no source-code mode. Muya UI plugins are registered process-wide, so image actions in a secondary pane resolve against the primary pane's file.
+
+## Alternative recorded
+
+A full pane model: per-pane `fileId` in the editor store, `currentFile` derived from the focused pane, bus payloads carrying a `paneId`, `editor.vue` taking a `fileId` prop. It removes the limitations above and touches most of `editor.vue` and the editor store. It is not chosen for this roadmap.
+
+## Open questions
+
+- Whether a secondary pane should be able to show the kanban view. Proposed: later.
+
+# 8 subtasks
+
+Any task can have subtasks.
+On the contextual menu of a task in main panel
+there is an entry "add subtask".
+clicking it opens a dialog asking for a title.
+saving it:
+- at the same level as the task, create a subdir with name the slug of the task if it does not exist
+- create a subtask within the created subdir
+- same project as task
+- as path of the subtask, set the path of the task slash the slug of the task
+- add an entry in the tasks' frontmatter, subtasks, with value the path of the subtask slash the slug of the filename of the subtag
+- add a card in the kanban board with a link to the subtask, in column new
+
+When a card in a kanban boar is moved to archived column,
+the corresponding subtask is moved to the archived/ dir of the project,
+with the same subpath as set in the subtasks frontmatter of the parent task,
+its entry is removed from the parent subtasks frontmatter,
+if there are no more subtasks, the parent task directory is removed,
+and the card is removed from the board.
+
+## Context-menu entry
+
+"Add subtask" is a fourth factory in `cazalla/main/contextMenu.ts`, sending `mt::cm-cazalla-subtask`. It uses the same spread-line hook as item 7. The main process cannot see the document, so the entry always shows. The renderer handler checks that the current file's frontmatter has `category: task`; otherwise it shows a notice and stops.
+
+## Create procedure
+
+Given parent task file `<dir>/<parent-slug>.md` with `path: P` (where `P` is `/` for a top-level task):
+
+1. Ask for a title in the dialog. Derive `<slug>`.
+2. Ensure directory `<dir>/<parent-slug>/`.
+3. Write `<dir>/<parent-slug>/<slug>.md` with the task frontmatter, `project` copied from the parent, `path: P/<parent-slug>` normalized to a single leading slash, `status: new`, `due` default plus one month.
+4. Append `P/<parent-slug>/<slug>` to the parent's `subtasks` through `updateFields`.
+5. Refresh the task index. The card appears in `new` because the board derives from the index.
+
+The plugin's version (`main.ts:666-750`) also inserts a wiki link into the parent body and a card into a kanban file. Both are dropped: the board is derived, and the `subtasks` list is the link.
+
+## Archive procedure
+
+Used by the kanban `archived` drop, for subtasks and top-level tasks alike. Given task file `F` in project `R` with `path: P` and slug `S`:
+
+1. If the task's `subtasks` is non-empty, refuse with a notice.
+2. Compute the target `R/archived/P/S.md`, ensure its directory, move `F` there with `fileUtils.move`.
+3. Set `status: archived` and `modified` in the moved file.
+4. If `P` is not `/`, find the parent task: its slug is the last segment of `P`, its file is the sibling of the directory `F` was in. Remove `P/S` from its `subtasks`.
+5. If the directory `F` was in is now empty, remove it.
+6. Refresh the index. The card disappears because the task is no longer in a column.
+
+The plugin's archive (`main.ts:385-437`) moves `path` to `archived-path` and rewrites `path` as `/archived/`. The new procedure keeps `path` unchanged, since the archived location already encodes it.
+
+## Open questions
+
+- Whether a parent with subtasks may be archived together with them. Proposed above: refuse; archive the children first.
+- Whether `effort` on a subtask should count toward the parent in reports. Proposed: reports sum by `project`, so both count once.
+
+# 9 effort reports and invoices.
+
+add 2 icons to the left bar
+and port to them the behaviour of generating effort reports and invoices
+from ~/cazalla/cazalla-net.plugin/
+
+## Port
+
+`src/invoice.ts` (200 lines) is pure code over pdf-lib and Node `fs`; it moves to `cazalla/renderer/billing/invoicePdf.ts` with `fs.writeFileSync` replaced by returning the bytes. `generateReport` (`main.ts:12-88`) is pure in practice and moves to `cazalla/renderer/billing/reportPdf.ts` the same way. The caller writes the bytes with `fileUtils.writeFile(path, bytes)`.
+
+The data functions `getProjectData` and `getInvoiceData` (`src/metadata.ts:170-312`) are rewritten over the task index and the metadata store in `cazalla/renderer/billing/data.ts`. Effort entries are `{ 'YYYY-MM-DD': hours }`; the date range is inclusive, the end date pushed to 23:59, as in the plugin.
+
+Two fixes carried into the port: the `forEach(async …)` at `src/metadata.ts:193` becomes a plain loop; month names in paths become numeric so the path does not depend on the system locale.
+
+## Dialogs
+
+Effort Report: project (select), start date, end date (defaults: first and last day of the previous month). Output `_invoices/YYYY/MM/report-<project>-YYYY-MM.pdf`.
+
+Invoice: organization (select of organizations with `billing`), start date, end date. One service line per project in the organization's `billing`: description `<project.service> <month>`, quantity the summed hours, unit price our `price_hour`, VAT as in the plugin. Our details come from our organization record (see item 2, open question). Output `_invoices/YYYY/MM/invoice-<org>-YYYY-MM-<nnnn>.pdf`.
+
+The invoice number is `<year><nnnn>` with `nnnn` zero-padded. The counter is `invoice_number` in our organization file. It is incremented through `updateFields` after the PDF is written. The plugin increments before writing (`src/metadata.ts:213-230`), which skips a number when the write fails.
+
+Both dialogs refuse to overwrite an existing output file. On success a notice shows the written path.
+
+## Open questions
+
+- Whether the invoice layout should move from hardcoded coordinates to a template. Proposed: port as is; a template is a later item.
+- Currency and VAT rate are constants in the plugin. Proposed: keep constants in `cazalla/renderer/billing/config.ts` until a second client needs different ones.

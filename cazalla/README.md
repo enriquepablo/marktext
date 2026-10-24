@@ -67,6 +67,9 @@ All code for this feature lives under `cazalla/` at the repository root, so that
 cazalla/
   README.md                 this document
   renderer/dailyNotes/      util.ts, store.ts, i18n.ts, commands.ts, locales/, Panel.vue, Calendar.vue, NoteEditor.vue
+  renderer/core/            frontmatter.ts, slug.ts, time.ts, fs.ts, contentFolder.ts (shared by every item)
+  renderer/metadata/        types.ts, store.ts (item 2 of plan-cazalla.net)
+  scripts/migrate-vault.ts  one-time Obsidian vault migration (tsx cazalla/scripts/migrate-vault.ts <vault> [--apply])
   main/dailyNotes.ts        menu item, command, default shortcut, menu check state
   test/unit/                Vitest specs
   test/e2e/                 Playwright specs
