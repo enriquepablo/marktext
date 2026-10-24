@@ -194,6 +194,12 @@
         "pdf": "PDF",
         "drawing": "Drawings"
       }
+    },
+    "terminal": {
+      "title": "lazygit",
+      "restart": "Restart",
+      "exited": "[process exited with code {code}]",
+      "failed": "Could not start lazygit: {error}. Install lazygit and make sure it is on PATH."
     }
   }
 }

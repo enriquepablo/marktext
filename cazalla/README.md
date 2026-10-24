@@ -83,6 +83,7 @@ cazalla/
   renderer/links/           docIndex.ts (document titles, newest first), linkDialog.ts (`[[` opens the link dialog) (item 16)
   renderer/dates/           dialog.ts (Insert date) (item 17)
   renderer/search/          extract.ts, pdfText.ts, store.ts (MiniSearch index persisted in <content>/.cazalla/search-index.json), SearchView.vue (item 15 search)
+  renderer/terminal/        TerminalPane.vue (xterm.js pane running lazygit in the content folder) (item 20)
   renderer/core/i18n.ts     registerLocales(): runtime merge of cazalla locale bundles
   renderer/core/layout.ts   reservedWidth = activity bar + daily notes panel
   renderer/dialogs/         EntityDialog.vue, a field-spec driven el-dialog opened by the bus event cazalla:dialog
@@ -91,6 +92,7 @@ cazalla/
   main/dailyNotes.ts        menu item, command, default shortcut, menu check state
   main/contextMenu.ts       editor right-click entries (Add subtask, Add sub-webpage, split and close panel), labels from renderer/core/locales
   main/sites.ts             IPC handler that runs the Pelican venv setup, make draft/publish/rsync_upload per site, streaming the log
+  main/terminal.ts          node-pty sessions for the terminal pane (lazygit by default)
   pelican/                  Pelican project copied from cazalla-net-site.plugin (theme, vault_metadata plugin, Makefile); shipped as an extra resource
   test/unit/                Vitest specs
   test/e2e/                 Playwright specs
@@ -107,7 +109,7 @@ Upstream files are changed only where a hook is unavoidable, each by one to thre
 - `packages/desktop/src/renderer/src/store/editor.ts`: one line in `FORMAT_LINK_CLICK` routes `.pdf` and `.excalidraw` link targets to a pane.
 - `packages/desktop/src/renderer/src/contextMenu/sideBar/index.ts`: the "Open in split panel" and "Kanban board" entries at the end of the file-tree context menu.
 - `packages/desktop/src/main/contextMenu/editor/index.ts`: cazalla entries spread at the end of the editor context menu; `src/shared/types/ipc.ts` gains their channels.
-- `packages/desktop/src/main/ipc/index.ts`: registers the cazalla site handler; `electron-builder.yml` ships `cazalla/pelican` as an extra resource.
+- `packages/desktop/src/main/ipc/index.ts`: registers the cazalla site and terminal handlers; `electron-builder.yml` ships `cazalla/pelican` as an extra resource; `pnpm-workspace.yaml` allows node-pty's build.
 - `packages/desktop/src/renderer/src/components/editorWithTabs/editor.vue`: `setPrimaryMuya(muya)` after the instance is created and `setPrimaryMuya(null)` before it is destroyed.
 - `packages/desktop/src/renderer/src/components/editorWithTabs/index.vue`: subtract the panel width.
 - `packages/desktop/src/main/menu/templates/view.ts`, `src/main/menu/actions/view.ts`: menu item, command registration, check-state sync.
@@ -136,3 +138,7 @@ Sites are `_metadata/sites/<slug>.md` records with the hyphenated keys of the ro
 ## Search (item 15)
 
 The sidebar search is a MiniSearch index over markdown (frontmatter and body), PDFs (text through pdf.js) and drawings (text elements), with fuzzy and prefix matching and a title boost. The index and the file mtimes are stored in `<content folder>/.cazalla/search-index.json`; on start the saved index loads and changed files are re-indexed. Watcher events trigger incremental refreshes, and the view has a rebuild button. The upstream ripgrep search is no longer reachable from the sidebar.
+
+## Terminal (item 20)
+
+The git icon opens a pane running `lazygit` in the content folder: xterm.js in the renderer, a node-pty pseudo-terminal in the main process, with data, input and resize relayed over IPC. node-pty is a native module; the upstream postinstall rebuilds it for Electron along with the other native modules. If lazygit is not on PATH the pane shows the error and a restart button.

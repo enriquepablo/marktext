@@ -194,6 +194,12 @@
         "pdf": "PDF",
         "drawing": "Dibujos"
       }
+    },
+    "terminal": {
+      "title": "lazygit",
+      "restart": "Reiniciar",
+      "exited": "[proceso terminado con código {code}]",
+      "failed": "No se pudo iniciar lazygit: {error}. Instale lazygit y asegúrese de que esté en el PATH."
     }
   }
 }

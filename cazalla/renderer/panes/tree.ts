@@ -3,9 +3,9 @@
 
 export type Direction = 'horizontal' | 'vertical'
 
-/** Leaf kinds that show a file: the markdown editor, the PDF viewer, the drawing board. */
-export type FileLeafKind = 'file' | 'pdf' | 'drawing'
-export const FILE_LEAF_KINDS: readonly FileLeafKind[] = ['file', 'pdf', 'drawing']
+/** Leaf kinds that show a path: the markdown editor, the PDF viewer, the drawing board, a terminal in a folder. */
+export type FileLeafKind = 'file' | 'pdf' | 'drawing' | 'terminal'
+export const FILE_LEAF_KINDS: readonly FileLeafKind[] = ['file', 'pdf', 'drawing', 'terminal']
 export type Leaf = { kind: 'primary'; id: 'primary' } | { kind: FileLeafKind; id: string; file: string }
 export interface Split {
   kind: 'split'

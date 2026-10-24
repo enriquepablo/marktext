@@ -32,6 +32,11 @@
   >
     <slot />
   </div>
+  <terminal-pane
+    v-else-if="node.kind === 'terminal'"
+    :id="node.id"
+    :file="node.file"
+  />
   <drawing-pane
     v-else-if="node.kind === 'drawing'"
     :id="node.id"
@@ -53,6 +58,7 @@
 import FilePane from './FilePane.vue'
 import PdfPane from '../pdf/PdfPane.vue'
 import DrawingPane from '../drawings/DrawingPane.vue'
+import TerminalPane from '../terminal/TerminalPane.vue'
 import { usePaneStore } from './store'
 import type { PaneNode, Split } from './tree'
 

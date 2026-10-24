@@ -57,5 +57,6 @@ describe('pane tree', () => {
     expect(isValidTree({ kind: 'file', id: 'x' })).toBe(false)
     expect(isValidTree(splitLeaf(PRIMARY, 'primary', 'vertical', { kind: 'pdf', id: 'p', file: '/v/a.pdf' }))).toBe(true)
     expect(isValidTree({ kind: 'video', id: 'v', file: '/v/a.mp4' })).toBe(false)
+    expect(isValidTree({ kind: 'terminal', id: 't', file: '/v' })).toBe(true)
   })
 })

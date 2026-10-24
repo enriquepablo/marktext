@@ -35,7 +35,7 @@
 <script setup lang="ts">
 import { computed, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Building2, CalendarPlus, ClipboardList, FilePlus, FolderPlus, Globe, Kanban, ListTodo, Newspaper, PanelLeft, PanelRight, PenTool, Receipt, Rocket, UserPlus } from 'lucide-vue-next'
+import { Building2, CalendarPlus, ClipboardList, FilePlus, FolderPlus, GitBranch, Globe, Kanban, ListTodo, Newspaper, PanelLeft, PanelRight, PenTool, Receipt, Rocket, UserPlus } from 'lucide-vue-next'
 import '../core/styles.css'
 import IconTooltip from '@/components/iconTooltip/index.vue'
 import EntityDialog from '../dialogs/EntityDialog.vue'
@@ -58,6 +58,8 @@ import { openDateDialog } from '../dates/dialog'
 import { listenForDoubleBracket } from '../links/linkDialog'
 import { useDocIndexStore } from '../links/docIndex'
 import { useSearchStore } from '../search/store'
+import { useContentFolder } from '../core/contentFolder'
+import notice from '@/services/notification'
 import { usePaneStore } from '../panes/store'
 import { listenForSidebarOpenInSplit } from '../panes/sidebarMenu'
 import en from '../core/locales/en.json'
@@ -85,6 +87,14 @@ interface Entry {
 }
 
 const dailyNotes = useDailyNotesStore()
+const contentFolder = useContentFolder()
+const openTerminal = (): void => {
+  if (!contentFolder.value) {
+    void notice.notify({ title: t('cazalla.terminal.title'), type: 'warning', message: t('cazalla.dialog.noContentFolder') })
+    return
+  }
+  usePaneStore().OPEN_IN_PANE('terminal', contentFolder.value)
+}
 const entries = computed<Entry[]>(() => [
   { key: 'left', label: t('cazalla.activity.toggleLeft'), icon: PanelLeft, run: () => bus.emit('view:toggle-layout-entry', 'showSideBar') },
   { key: 'right', label: t('cazalla.activity.toggleRight'), icon: PanelRight, run: () => dailyNotes.TOGGLE() },
@@ -100,6 +110,7 @@ const entries = computed<Entry[]>(() => [
   { key: 'page', label: t('cazalla.sites.newPage'), icon: Newspaper, run: openPageDialog },
   { key: 'publish', label: t('cazalla.sites.publishTitle'), icon: Rocket, run: openPublishDialog },
   { key: 'date', label: t('cazalla.date.title'), icon: CalendarPlus, run: openDateDialog },
+  { key: 'git', label: t('cazalla.terminal.title'), icon: GitBranch, run: openTerminal },
   { key: 'report', label: t('cazalla.activity.effortReport'), icon: ClipboardList, run: openReportDialog },
   { key: 'invoice', label: t('cazalla.activity.invoice'), icon: Receipt, run: openInvoiceDialog }
 ])

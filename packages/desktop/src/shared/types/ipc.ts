@@ -53,6 +53,7 @@ export interface IpcInvokeChannels {
   'mt::fonts::list': { args: []; ret: string[] }
   'mt::fs-trash-item': { args: [pathname: string]; ret: boolean }
   'mt::cazalla-site-run': { args: [request: { siteSlug: string; step: string; env: Record<string, string> }]; ret: { code: number; dir: string } }
+  'mt::cazalla-term-open': { args: [request: { id: string; cwd: string; cols: number; rows: number; command?: string; args?: string[] }]; ret: { ok: boolean; error?: string } }
   'mt::fs::copy': { args: [src: string, dest: string]; ret: void }
   'mt::fs::copy-with-content-hash': { args: [src: string, outputDir: string]; ret: string }
   'mt::fs::empty-dir': { args: [path: string]; ret: void }
@@ -97,6 +98,9 @@ export interface IpcInvokeChannels {
 
 
 export interface IpcSendChannels {
+  'mt::cazalla-term-input': [id: string, data: string]
+  'mt::cazalla-term-resize': [id: string, cols: number, rows: number]
+  'mt::cazalla-term-close': [id: string]
   'mt::cmd-add-folder': []
   'mt::project-renderer-ready': []
   'mt::forget-document': [tabId: string]
@@ -243,6 +247,8 @@ export interface IpcMainEventChannels {
   'mt::cm-cazalla-pane': [action: string]
   'mt::cm-cazalla-subpage': []
   'mt::cazalla-site-log': [payload: { siteSlug: string; line: string }]
+  'mt::cazalla-term-data': [payload: { id: string; data: string }]
+  'mt::cazalla-term-exit': [payload: { id: string; code: number }]
   'mt::current-language': [language: string]
   'mt::editor-ask-file-save': []
   'mt::editor-ask-file-save-as': []

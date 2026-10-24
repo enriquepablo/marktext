@@ -39,7 +39,7 @@ Second round, added 2026-10-24: 10, 15, 12, 11, 14, then 13. Item 10 is fixes. I
 
 Third round, added 2026-10-24: the second "details" section, then 13, 17, 16, and search last. Item 16 depends on search for its document list, and 17 shares its insertion mechanism.
 
-Fourth round, added 2026-10-24: 19 (details), then 18 (version control pane).
+Fourth round, added 2026-10-24: 19 (details), then 20 (lazygit in an xterm.js pane; 18 superseded).
 
 # 1 calendar and daily notes.
 
@@ -771,3 +771,30 @@ The daily-notes pane hides the frontmatter block (`pre.front-matter`) and shows 
 
 Inline math: Muya renders `.mu-math` as an inline block with `vertical-align: middle`, which lifts the formula above the text baseline. A cazalla global rule sets `vertical-align: baseline` on `.mu-math` and on its inline render. Reading mode uses the same DOM, so both views are covered.
 
+# 20 for git - superseding 18
+
+We use xterm.js,
+an icon in the left tool bar that opens a panel with an term.js interface to lazygit.
+
+## Design
+
+Dependencies: `@xterm/xterm` and `@xterm/addon-fit` in the renderer, `node-pty` in the main process. node-pty is native; `pnpm-workspace.yaml` allows its build and the upstream postinstall rebuilds it for Electron.
+
+`cazalla/main/terminal.ts` keeps one pseudo-terminal per pane: `mt::cazalla-term-open` spawns the program (`lazygit`) in a working directory with the pane's size; output goes to the renderer as `mt::cazalla-term-data`; input, resizes and close come back on three send channels; exit is reported. Registration is one line beside the site handler.
+
+`cazalla/renderer/terminal/TerminalPane.vue` is a pane leaf of kind `terminal` whose path is the working directory. It opens an xterm with the fit addon, relays keystrokes, resizes with its container, and shows the exit code and a Restart button when the program ends. If lazygit cannot be started the error names the fix. The activity-bar git icon opens the pane on the content folder.
+
+Item 18 is superseded by this item.
+
+# 21 bugs
+
+## alignment of math
+
+not it's horribly worse,
+the math symbols much above the normal text
+
+## header in dailies
+
+now we can see the title/date headeer in the dailies
+but still can see the box with the rest of the frontmatter
+which we don't want to se

@@ -12,6 +12,7 @@ import { registerDialogHandlers } from './dialog'
 import { registerDiagramHandlers } from './diagram'
 import { registerLinkHtmlHandler } from './linkHtml'
 import { registerCazallaSiteHandlers } from '@cazalla/main/sites'
+import { registerCazallaTerminalHandlers } from '@cazalla/main/terminal'
 
 export const registerSandboxIpcHandlers = (): void => {
   registerBootInfo()
@@ -28,4 +29,5 @@ export const registerSandboxIpcHandlers = (): void => {
   registerDiagramHandlers()
   registerLinkHtmlHandler()
   registerCazallaSiteHandlers()
+  registerCazallaTerminalHandlers()
 }
