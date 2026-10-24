@@ -4,10 +4,10 @@ import notice from '@/services/notification'
 import { useContentFolder } from '../core/contentFolder'
 import { parse, type Fields } from '../core/frontmatter'
 import { basename, join, listDir, readText } from '../core/fs'
-import type { MetadataKind, Organization, Person, Project } from './types'
+import type { MetadataKind, Organization, Person, Project, Site } from './types'
 
 export const METADATA_DIR = '_metadata'
-const KINDS: MetadataKind[] = ['people', 'organizations', 'projects']
+const KINDS: MetadataKind[] = ['people', 'organizations', 'projects', 'sites']
 
 const str = (v: unknown): string | null => (v === null || v === undefined || v === '' ? null : String(v))
 const num = (v: unknown): number | null => (typeof v === 'number' ? v : v ? Number(v) : null)
@@ -47,6 +47,18 @@ const toProject = (f: Fields, slug: string, file: string): Project => ({
   file
 })
 
+const toSite = (f: Fields, slug: string, file: string): Site => ({
+  name: str(f.name) ?? slug,
+  slug,
+  siteUrl: str(f['site-url']),
+  path: (str(f.path) ?? `sites/${slug}`).replace(/\/+$/, ''),
+  sshHost: str(f['ssh-host']),
+  sshPort: num(f['ssh-port']) ?? 22,
+  sshUser: str(f['ssh-user']),
+  sshTargetDir: str(f['ssh-target-dir']),
+  file
+})
+
 const byName = <T extends { name: string }>(records: Record<string, T>): T[] =>
   Object.values(records).sort((a, b) => a.name.localeCompare(b.name))
 
@@ -57,12 +69,14 @@ export const useMetadataStore = defineStore('cazallaMetadata', () => {
   const people = ref<Record<string, Person>>({})
   const organizations = ref<Record<string, Organization>>({})
   const projects = ref<Record<string, Project>>({})
+  const sites = ref<Record<string, Site>>({})
   const loaded = ref(false)
   const errors = ref<string[]>([])
 
   const peopleList = computed(() => byName(people.value))
   const organizationsList = computed(() => byName(organizations.value))
   const projectsList = computed(() => byName(projects.value))
+  const sitesList = computed(() => byName(sites.value))
 
   async function readKind<T>(
     kind: MetadataKind,
@@ -92,14 +106,16 @@ export const useMetadataStore = defineStore('cazallaMetadata', () => {
 
   async function LOAD(): Promise<void> {
     const problems: string[] = []
-    const [p, o, pr] = await Promise.all([
+    const [p, o, pr, si] = await Promise.all([
       readKind('people', toPerson, problems),
       readKind('organizations', toOrganization, problems),
-      readKind('projects', toProject, problems)
+      readKind('projects', toProject, problems),
+      readKind('sites', toSite, problems)
     ])
     people.value = p
     organizations.value = o
     projects.value = pr
+    sites.value = si
     errors.value = problems
     loaded.value = true
     if (problems.length) {
@@ -130,9 +146,11 @@ export const useMetadataStore = defineStore('cazallaMetadata', () => {
     people,
     organizations,
     projects,
+    sites,
     peopleList,
     organizationsList,
     projectsList,
+    sitesList,
     loaded,
     errors,
     KINDS,

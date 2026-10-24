@@ -145,6 +145,27 @@
       "tomorrow": "Tomorrow",
       "week": "This week",
       "later": "Later"
+    },
+    "sites": {
+      "newSite": "New site",
+      "newPage": "New web page",
+      "newSubpage": "Add sub-webpage",
+      "publishTitle": "Publish site",
+      "site": "Site",
+      "name": "Name",
+      "siteUrl": "Site URL",
+      "path": "Folder (relative to the content folder)",
+      "sshHost": "SSH host",
+      "sshPort": "SSH port",
+      "sshUser": "SSH user",
+      "sshTargetDir": "Target directory on the server",
+      "pageTitle": "Title",
+      "noSites": "Create a site first.",
+      "notAPage": "The current document is not a web page.",
+      "buildDraft": "Build draft",
+      "publish": "Build and publish",
+      "draftReady": "Draft built: {file}",
+      "published": "Published to {url}"
     }
   }
 }

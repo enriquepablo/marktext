@@ -78,13 +78,16 @@ cazalla/
   renderer/pdf/             PdfPane.vue (vue-pdf-embed viewer as a pane leaf), panes/linkRouter.ts routes .pdf and .excalidraw links to panes (item 12)
   renderer/drawings/        DrawingPane.vue (Excalidraw React component in a pane, react + react-dom), create.ts, dialogs.ts (item 11)
   renderer/events/          group.ts (today / tomorrow / this week / later), EventsView.vue (third sidebar column) (item 14)
+  renderer/sites/           pages.ts (web pages and sub-pages), dialogs.ts, subpageMenu.ts, publish.ts, PublishDialog.vue (item 13)
   renderer/core/i18n.ts     registerLocales(): runtime merge of cazalla locale bundles
   renderer/core/layout.ts   reservedWidth = activity bar + daily notes panel
   renderer/dialogs/         EntityDialog.vue, a field-spec driven el-dialog opened by the bus event cazalla:dialog
   renderer/activityBar/     ActivityBar.vue, the 40 px icon strip left of the sidebar (lucide icons)
   scripts/migrate-vault.ts  one-time Obsidian vault migration (tsx cazalla/scripts/migrate-vault.ts <vault> [--apply])
   main/dailyNotes.ts        menu item, command, default shortcut, menu check state
-  main/contextMenu.ts       editor right-click entries (Add subtask, split and close panel), labels from renderer/core/locales
+  main/contextMenu.ts       editor right-click entries (Add subtask, Add sub-webpage, split and close panel), labels from renderer/core/locales
+  main/sites.ts             IPC handler that runs the Pelican venv setup, make draft/publish/rsync_upload per site, streaming the log
+  pelican/                  Pelican project copied from cazalla-net-site.plugin (theme, vault_metadata plugin, Makefile); shipped as an extra resource
   test/unit/                Vitest specs
   test/e2e/                 Playwright specs
 ```
@@ -100,6 +103,7 @@ Upstream files are changed only where a hook is unavoidable, each by one to thre
 - `packages/desktop/src/renderer/src/store/editor.ts`: one line in `FORMAT_LINK_CLICK` routes `.pdf` and `.excalidraw` link targets to a pane.
 - `packages/desktop/src/renderer/src/contextMenu/sideBar/index.ts`: the "Open in split panel" and "Kanban board" entries at the end of the file-tree context menu.
 - `packages/desktop/src/main/contextMenu/editor/index.ts`: cazalla entries spread at the end of the editor context menu; `src/shared/types/ipc.ts` gains their channels.
+- `packages/desktop/src/main/ipc/index.ts`: registers the cazalla site handler; `electron-builder.yml` ships `cazalla/pelican` as an extra resource.
 - `packages/desktop/src/renderer/src/components/editorWithTabs/index.vue`: subtract the panel width.
 - `packages/desktop/src/main/menu/templates/view.ts`, `src/main/menu/actions/view.ts`: menu item, command registration, check-state sync.
 - `packages/desktop/src/main/keyboard/keybindings{Linux,Windows,Darwin}.ts`: default shortcut.
@@ -119,3 +123,7 @@ The sidebar's file view is `Explorer.vue`, an `el-tree` over the open roots. It 
 ## Drawings (item 11)
 
 `DrawingPane.vue` mounts the official `@excalidraw/excalidraw` React component into a pane with `react-dom`'s `createRoot`; React is used nowhere else. Scenes are saved as `.excalidraw` JSON one second after the last change, and PNG or SVG exports are written next to the drawing. Excalidraw loads its fonts from its default CDN; shipping them locally (`window.EXCALIDRAW_ASSET_PATH`) is a follow-up, so custom fonts fall back to system fonts offline.
+
+## Sites (item 13)
+
+Sites are `_metadata/sites/<slug>.md` records with the hyphenated keys of the roadmap. Pages live in `<site path>/pages/`; a sub-page goes into a folder named after its parent, which Pelican maps to a nested URL. Publishing copies `cazalla/pelican` to `<userData>/cazalla/pelican/<site>/`, creates a Python venv there on first use, then runs `make publish` and `make rsync_upload` with `SSH_*`, `SITEURL` and `INPUTDIR` from the site record. Requirements on the machine: `python3` with venv, `make`, `rsync`, `ssh` with keys for the target host. Unix only. Moving a site folder in the explorer does not yet rewrite the site's `path`; that follows the project-path rule as a follow-up.

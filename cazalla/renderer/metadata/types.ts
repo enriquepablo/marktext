@@ -38,7 +38,20 @@ export interface Project {
   file: string
 }
 
-export type MetadataKind = 'people' | 'organizations' | 'projects'
+export interface Site {
+  name: string
+  slug: string
+  siteUrl: string | null
+  // Site folder relative to the content folder; pages live in `<path>/pages`.
+  path: string
+  sshHost: string | null
+  sshPort: number
+  sshUser: string | null
+  sshTargetDir: string | null
+  file: string
+}
+
+export type MetadataKind = 'people' | 'organizations' | 'projects' | 'sites'
 
 export const canInvoice = (org: Organization): boolean => !!org.iban
 export const canBeInvoiced = (org: Organization): boolean => org.billing.length > 0

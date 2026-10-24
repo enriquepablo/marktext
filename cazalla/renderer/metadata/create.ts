@@ -41,6 +41,19 @@ export const ORGANIZATION_SUBDIRS = ['assets', 'notes'] as const
 /** `<content folder>/organizations/<slug>`; derived from the slug, not stored. */
 export const organizationDir = (contentFolder: string, slug: string): string => join(contentFolder, ORGANIZATIONS_DIR, slug)
 
+export interface SiteInput {
+  name: string
+  siteUrl?: string | null
+  // Relative to the content folder; empty means `sites/<slug>`.
+  path?: string | null
+  sshHost?: string | null
+  sshPort?: number
+  sshUser?: string | null
+  sshTargetDir?: string | null
+}
+
+export const SITE_SUBDIRS = ['assets', 'pages'] as const
+
 export class CreateError extends Error {
   constructor(
     public readonly code: 'exists' | 'duplicateSlug',
@@ -134,5 +147,23 @@ export const createProject = async(
     path
   })
   for (const sub of PROJECT_SUBDIRS) await ensureDir(join(contentFolder, path, sub))
+  return file
+}
+
+/** Writes `_metadata/sites/<slug>.md` with the hyphenated keys of the roadmap and scaffolds `assets/` and `pages/`. */
+export const createSite = async(contentFolder: string, knownSlugs: Iterable<string>, input: SiteInput): Promise<string> => {
+  const slug = toSlug(input.name)
+  const path = (input.path ?? '').trim().replace(/\\/g, '/').replace(/^\/+|\/+$/g, '') || `sites/${slug}`
+  const file = await writeRecord(contentFolder, 'sites', knownSlugs, {
+    name: input.name.trim(),
+    slug,
+    'site-url': nullable(input.siteUrl),
+    path,
+    'ssh-host': nullable(input.sshHost),
+    'ssh-port': input.sshPort ?? 22,
+    'ssh-user': nullable(input.sshUser) ?? 'deploy',
+    'ssh-target-dir': nullable(input.sshTargetDir) ?? '/var/www/site'
+  })
+  for (const sub of SITE_SUBDIRS) await ensureDir(join(contentFolder, path, sub))
   return file
 }

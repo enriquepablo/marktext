@@ -5,6 +5,7 @@ import es from '../renderer/core/locales/es.json'
 
 export const SUBTASK_CHANNEL = 'mt::cm-cazalla-subtask'
 export const PANE_CHANNEL = 'mt::cm-cazalla-pane'
+export const SUBPAGE_CHANNEL = 'mt::cm-cazalla-subpage'
 
 const labels: Record<string, typeof en> = { en, es }
 
@@ -39,6 +40,13 @@ export const cazallaEditorContextItems = (): MenuItemConstructorOptions[] => {
   return [
     { type: 'separator' },
     getAddSubtask(),
+    {
+      label: bundle().cazalla.sites.newSubpage,
+      id: 'cazallaAddSubpageMenuItem',
+      click(_item, targetWindow) {
+        ;(targetWindow as BrowserWindow | undefined)?.webContents.send(SUBPAGE_CHANNEL)
+      }
+    },
     { type: 'separator' },
     paneItem(panes.splitHorizontal, 'cazallaSplitHorizontalMenuItem', 'split-horizontal'),
     paneItem(panes.splitVertical, 'cazallaSplitVerticalMenuItem', 'split-vertical'),

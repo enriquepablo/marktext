@@ -28,13 +28,14 @@
       </icon-tooltip>
     </template>
     <entity-dialog />
+    <publish-dialog />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Building2, ClipboardList, FilePlus, FolderPlus, Kanban, ListTodo, PanelLeft, PanelRight, PenTool, Receipt, UserPlus } from 'lucide-vue-next'
+import { Building2, ClipboardList, FilePlus, FolderPlus, Globe, Kanban, ListTodo, Newspaper, PanelLeft, PanelRight, PenTool, Receipt, Rocket, UserPlus } from 'lucide-vue-next'
 import '../core/styles.css'
 import IconTooltip from '@/components/iconTooltip/index.vue'
 import EntityDialog from '../dialogs/EntityDialog.vue'
@@ -50,6 +51,9 @@ import { listenForSidebarKanban } from '../kanban/sidebarMenu'
 import { listenForSubtaskMenu } from '../tasks/subtaskMenu'
 import { openInvoiceDialog, openReportDialog } from '../billing/dialogs'
 import { openDrawingDialog } from '../drawings/dialogs'
+import { openPageDialog, openPublishDialog, openSiteDialog } from '../sites/dialogs'
+import { listenForSubpageMenu } from '../sites/subpageMenu'
+import PublishDialog from '../sites/PublishDialog.vue'
 import { usePaneStore } from '../panes/store'
 import { listenForSidebarOpenInSplit } from '../panes/sidebarMenu'
 import en from '../core/locales/en.json'
@@ -60,6 +64,7 @@ useMetadataStore().LISTEN()
 useTaskStore().LISTEN()
 listenForSidebarKanban()
 listenForSubtaskMenu()
+listenForSubpageMenu()
 usePaneStore().LISTEN()
 listenForSidebarOpenInSplit()
 const layout = useCazallaLayoutStore()
@@ -84,6 +89,9 @@ const entries = computed<Entry[]>(() => [
   { key: 'task', label: t('cazalla.activity.newTask'), icon: ListTodo, run: openTaskDialog },
   { key: 'drawing', label: t('cazalla.activity.newDrawing'), icon: PenTool, run: openDrawingDialog },
   { key: 'kanban', label: t('cazalla.activity.kanban'), icon: Kanban, run: () => layout.TOGGLE_KANBAN() },
+  { key: 'site', label: t('cazalla.sites.newSite'), icon: Globe, run: openSiteDialog },
+  { key: 'page', label: t('cazalla.sites.newPage'), icon: Newspaper, run: openPageDialog },
+  { key: 'publish', label: t('cazalla.sites.publishTitle'), icon: Rocket, run: openPublishDialog },
   { key: 'report', label: t('cazalla.activity.effortReport'), icon: ClipboardList, run: openReportDialog },
   { key: 'invoice', label: t('cazalla.activity.invoice'), icon: Receipt, run: openInvoiceDialog }
 ])

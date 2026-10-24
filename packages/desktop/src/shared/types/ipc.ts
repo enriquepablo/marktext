@@ -52,6 +52,7 @@ export interface IpcInvokeChannels {
   'mt::dialog::show-save': { args: [request: SaveDialogRequest]; ret: string | null }
   'mt::fonts::list': { args: []; ret: string[] }
   'mt::fs-trash-item': { args: [pathname: string]; ret: boolean }
+  'mt::cazalla-site-run': { args: [request: { siteSlug: string; step: string; env: Record<string, string> }]; ret: { code: number; dir: string } }
   'mt::fs::copy': { args: [src: string, dest: string]; ret: void }
   'mt::fs::copy-with-content-hash': { args: [src: string, outputDir: string]; ret: string }
   'mt::fs::empty-dir': { args: [path: string]; ret: void }
@@ -240,6 +241,8 @@ export interface IpcMainEventChannels {
   'mt::cm-paste-as-plain-text': []
   'mt::cm-cazalla-subtask': []
   'mt::cm-cazalla-pane': [action: string]
+  'mt::cm-cazalla-subpage': []
+  'mt::cazalla-site-log': [payload: { siteSlug: string; line: string }]
   'mt::current-language': [language: string]
   'mt::editor-ask-file-save': []
   'mt::editor-ask-file-save-as': []

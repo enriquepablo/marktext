@@ -32,6 +32,8 @@ files:
   - '!jsconfig.json'
   - '!docs/*'
 extraResources:
+  - from: ../../cazalla/pelican
+    to: cazalla/pelican
   - from: build/icons
     to: icons
     filter:
