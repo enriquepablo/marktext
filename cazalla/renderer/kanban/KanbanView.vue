@@ -157,7 +157,7 @@ const openTask = (task: TaskRecord): void => {
 <style scoped>
 .cazalla-kanban {
   position: absolute;
-  inset: 0;
+  inset: var(--titleBarHeight) 0 0 0;
   z-index: 5;
   display: flex;
   flex-direction: column;

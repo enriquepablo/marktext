@@ -35,10 +35,11 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKey))
 </script>
 
 <style scoped>
-/* Fills the editor column (`.editor-middle` is positioned); sidebar and calendar stay visible. */
+/* Fills the editor column (`.editor-middle` is positioned) below the fixed title bar, whose
+   drag region would swallow clicks on anything drawn under it; sidebar and calendar stay visible. */
 .cazalla-viewer-overlay {
   position: absolute;
-  inset: 0;
+  inset: var(--titleBarHeight) 0 0 0;
   z-index: 5;
   display: flex;
   background: var(--editorBgColor);

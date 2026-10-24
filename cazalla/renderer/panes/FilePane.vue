@@ -190,6 +190,7 @@ onBeforeUnmount(() => {
   border-left-color: var(--themeColor);
 }
 .pane-header {
+  -webkit-app-region: no-drag;
   display: flex;
   align-items: center;
   gap: 6px;

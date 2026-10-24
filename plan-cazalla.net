@@ -868,3 +868,13 @@ I close search or events and I get back to "No Data", no file explorer.
 ### Status
 
 Fixed on 2026-10-24. In lazy mode `el-tree` fills its root level from the `load` callback when it is created and from the `data` prop only on later changes. The explorer returned an empty root level from `load`, so a remount with the roots already known showed "No data". The roots are now served from both paths.
+
+## closing the PDF view
+
+I can now see a PDF but then the upper controls
+to close the view or increase or decrease the size are visible but nresponsive
+so I cannot close the pdf view
+
+### Status
+
+Fixed on 2026-10-24. The viewer overlay began at the top of the editor column, under the fixed title bar, whose window-drag region takes the clicks of anything drawn beneath it. The viewer and kanban overlays now start below the title bar, and pane headers are marked as no-drag regions.
