@@ -3,7 +3,9 @@
     <el-tree
       ref="tree"
       lazy
+      :data="roots"
       :load="load"
+      :default-expanded-keys="expanded"
       :props="{ label: 'name', isLeaf: 'leaf' }"
       node-key="path"
       draggable
@@ -14,6 +16,8 @@
       @node-click="onClick"
       @node-contextmenu="onContextMenu"
       @node-drop="onDrop"
+      @node-expand="(d: Entry) => remember(d.path, true)"
+      @node-collapse="(d: Entry) => remember(d.path, false)"
     >
       <template #default="{ data }">
         <span
@@ -35,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, type Component } from 'vue'
+import { computed, onBeforeUnmount, ref, watch, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
 import { BookOpen, File, FileText, Folder, FolderOpen, Image, PenTool } from 'lucide-vue-next'
@@ -103,13 +107,41 @@ const readEntries = async(dir: string): Promise<Entry[]> => {
   return entries.sort((a, b) => Number(b.isDir) - Number(a.isDir) || a.name.localeCompare(b.name))
 }
 
-const roots = (): Entry[] =>
+// Roots arrive over IPC after mount, so they are reactive data; only folders below them load lazily.
+const roots = computed<Entry[]>(() =>
   projectStore.availableRoots.map((r) => ({ path: r.pathname, name: basename(r.pathname), isDir: true, leaf: false, root: true }))
+)
 
 const load = async(node: TreeNode, resolve: (data: Entry[]) => void): Promise<void> => {
-  if (node.level === 0) return resolve(roots())
+  if (node.level === 0) return resolve([])
   resolve(await readEntries(node.data.path))
 }
+
+// Expanded folders survive restarts; roots start open the first time.
+const EXPANDED_KEY = 'cazalla-explorer-expanded'
+const readExpanded = (): string[] => {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(EXPANDED_KEY) ?? '[]')
+    return Array.isArray(parsed) ? parsed.map(String) : []
+  } catch {
+    return []
+  }
+}
+const expanded = ref<string[]>(readExpanded())
+const remember = (path: string, open: boolean): void => {
+  const set = new Set(expanded.value)
+  if (open) set.add(path)
+  else for (const p of set) if (p === path || p.startsWith(path + window.path.sep)) set.delete(p)
+  expanded.value = [...set]
+  try {
+    localStorage.setItem(EXPANDED_KEY, JSON.stringify(expanded.value))
+  } catch {
+    /* storage unavailable */
+  }
+}
+watch(roots, (list) => {
+  for (const r of list) if (expanded.value.length === 0 || !expanded.value.some((p) => p.startsWith(r.path))) remember(r.path, true)
+}, { immediate: true })
 
 const refresh = async(dir: string): Promise<void> => {
   const node = tree.value?.getNode(dir)

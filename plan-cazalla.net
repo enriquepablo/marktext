@@ -802,3 +802,17 @@ which we don't want to se
 ## Status
 
 Fixed on 2026-10-24. The frontmatter selector used the class `front-matter`; Muya's block is `pre.mu-frontmatter`, so the daily-note editor now hides that and the 2 pt rule targets it too. The math rule had set `vertical-align: baseline` on the inline-block wrapper, whose baseline comes from the zero-size source span; the wrapper now flows inline so KaTeX provides the baseline. Checked by reading Muya's inline-math renderer and CSS; not seen on screen here, since this machine has no display.
+
+
+## bug in explorer at startup
+
+when the app starts it shown "No data" in the file explorer panel.
+if I click on either search or events and then hide it,
+i see the root directory with i can then open to star exploring.
+
+ideally i would like to start up with the file tree
+in the state at whichj it was closed
+
+### Status
+
+Fixed on 2026-10-24. The explorer loaded its root level once at mount, before the sidebar roots arrived over IPC. The roots are now reactive data of the tree and only the folders below them load lazily. Expanded folders are remembered in `localStorage['cazalla-explorer-expanded']` and reopened at startup; roots start open the first time.
