@@ -878,3 +878,13 @@ so I cannot close the pdf view
 ### Status
 
 Fixed on 2026-10-24. The viewer overlay began at the top of the editor column, under the fixed title bar, whose window-drag region takes the clicks of anything drawn beneath it. The viewer and kanban overlays now start below the title bar, and pane headers are marked as no-drag regions.
+
+## lazygit unresponsive
+
+I can see the lazygit interface when i click on the icon
+but it is unresponsive
+no key works except esc to close it
+
+### Status
+
+Fixed on 2026-10-24. xterm.js does not take keyboard focus after `open()`, so keystrokes kept going to the editor; Escape reached the overlay's own handler for the same reason. The terminal now takes focus when it opens, when lazygit starts, and on any click in the pane.

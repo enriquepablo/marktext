@@ -2,7 +2,7 @@
   <div
     class="cazalla-terminal-pane"
     :class="{ focused }"
-    @mousedown="panes.FOCUS(id)"
+    @mousedown="onMouseDown"
   >
     <div class="pane-header">
       <span
@@ -85,6 +85,12 @@ let fit: FitAddon | null = null
 let observer: ResizeObserver | null = null
 const ipc = window.electron.ipcRenderer
 
+// xterm does not take the keyboard by itself; the editor keeps it unless the terminal asks.
+const onMouseDown = (): void => {
+  panes.FOCUS(props.id)
+  term?.focus()
+}
+
 const sendResize = (): void => {
   if (!term) return
   fit?.fit()
@@ -101,7 +107,9 @@ const start = async(): Promise<void> => {
   if (!result.ok) {
     error.value = t('cazalla.terminal.failed', { error: result.error ?? '' })
     exited.value = true
+    return
   }
+  term.focus()
 }
 
 const dark = (): boolean => isDarkThemeId(theme.value)
@@ -119,6 +127,7 @@ onMounted(() => {
   fit = new FitAddon()
   term.loadAddon(fit)
   term.open(el)
+  term.focus()
   term.onData((data) => ipc.send(TERM_INPUT, props.id, data))
   observer = new ResizeObserver(sendResize)
   observer.observe(el)
