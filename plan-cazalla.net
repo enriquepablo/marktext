@@ -899,3 +899,20 @@ editable, with a - icon on rightr top to collapse
 ## Design
 
 Done on 2026-10-24. `cazalla/renderer/editor/frontmatterFold.ts` is attached to every registered Muya instance (primary editor and file panes). It watches the editor DOM for `pre.mu-frontmatter`. A block seen for the first time, that is a freshly opened document, gets the class `cz-fm-collapsed`: the block shrinks to one line showing a greyed "+ metadata" label and its content is hidden but still present for Muya. Clicking the block expands it and places the cursor as usual; a +/− button floats over the block's top-right corner, positioned from outside Muya's DOM so the engine's re-rendering is not disturbed, and collapses or expands it. Moving the cursor into a collapsed block with the keyboard expands it, so hidden text is never edited. The daily-notes pane keeps hiding its frontmatter entirely.
+
+# 24 colors in the file explorer
+
+right noe the only color is green for open.
+that's out.
+I want red for the folders corresponding to projects,
+and for files, green if git changed, blue if git untracked
+parent dirs inherit blue green or mix
+on inheriting project folder mixes red with blue or green or both
+
+or something like that,
+mark project folders with color
+and visualize git status witrh color.
+
+## Design
+
+Done on 2026-10-24. The green for open files is gone. Project folders (paths listed in `_metadata/projects`) show a red folder icon. Names are coloured by git state: green for files git reports as changed (modified, added, renamed, deleted), blue for untracked; a folder takes the state of its descendants, teal when both occur below it. A project folder with changes therefore shows a red icon with a green, blue or teal name. The state comes from `git status --porcelain=v1 -z --untracked-files=all` run by the main process in the content folder (`cazalla/main/git.ts`, one registration line) and refreshed after tree events, moves and Refresh. Without git or a repository nothing is coloured.

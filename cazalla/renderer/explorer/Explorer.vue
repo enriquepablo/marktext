@@ -22,7 +22,7 @@
       <template #default="{ data }">
         <span
           class="entry"
-          :class="{ dir: data.isDir, open: openFiles.has(data.path) }"
+          :class="[{ dir: data.isDir, project: isProject(data) }, gitClass(data)]"
           :title="data.path"
         >
           <component
@@ -57,6 +57,7 @@ import { useMetadataStore } from '../metadata/store'
 import { useTaskStore } from '../tasks/store'
 import { getKanbanMenuItem } from '../kanban/sidebarMenu'
 import { getOpenInSplitMenuItem } from '../panes/sidebarMenu'
+import { useGitStatusStore } from '../git/store'
 import { moveEntry, MoveError } from './move'
 import { useCazallaLayoutStore } from '../core/layout'
 import { paneKindFor } from '../panes/linkRouter'
@@ -78,9 +79,19 @@ const metadata = useMetadataStore()
 const taskStore = useTaskStore()
 const contentFolder = useContentFolder()
 const { tabs, currentFile } = storeToRefs(editorStore)
+const git = useGitStatusStore()
+git.LISTEN()
 
 const tree = ref<{ updateKeyChildren: (key: string, data: Entry[]) => void; getNode: (key: string) => Node | null } | null>(null)
-const openFiles = computed(() => new Set(tabs.value.map((f) => f.pathname)))
+// Project folders are red; names take the git state of the file or of the folder's descendants.
+const projectPaths = computed(() => new Set(contentFolder.value ? metadata.projectsList.map((p) => join(contentFolder.value as string, p.path)) : []))
+const isProject = (e: Entry): boolean => e.isDir && projectPaths.value.has(e.path)
+const gitClass = (e: Entry): string => {
+  const states = git.STATE_OF(e.path, e.isDir)
+  if (states.size === 0) return ''
+  if (states.size === 2) return 'git-mixed'
+  return states.has('untracked') ? 'git-untracked' : 'git-modified'
+}
 
 const HIDDEN = new Set(['.git', 'node_modules', '.obsidian', '.trash'])
 const IMAGE = /\.(png|jpe?g|gif|svg|webp|bmp)$/i
@@ -200,6 +211,7 @@ const createIn = (dir: string, kind: 'file' | 'folder'): void =>
 const doMove = async(from: string, to: string): Promise<boolean> => {
   try {
     const result = await moveEntry(from, to, { contentFolder: contentFolder.value, projects: metadata.projectsList })
+    void git.REFRESH()
     void notice.notify({
       title: t('cazalla.explorer.title'),
       type: 'primary',
@@ -253,7 +265,7 @@ const onContextMenu = (event: MouseEvent, e: Entry): void => {
     { ...getOpenInSplitMenuItem(), enabled: !e.isDir && isMarkdown(e.name) },
     getKanbanMenuItem(),
     { type: 'separator' },
-    { label: t('cazalla.explorer.refresh'), click: () => void refresh(dir) }
+    { label: t('cazalla.explorer.refresh'), click: () => void Promise.all([refresh(dir), git.REFRESH()]) }
   ]
   popupContextMenu(items, { x: event.clientX, y: event.clientY })
 }
@@ -311,7 +323,16 @@ onBeforeUnmount(() => {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.entry.open .entry-name {
-  color: var(--themeColor);
+.entry.project .entry-icon {
+  color: #d9534f;
+}
+.entry.git-modified .entry-name {
+  color: #3c9a52;
+}
+.entry.git-untracked .entry-name {
+  color: #3b82d6;
+}
+.entry.git-mixed .entry-name {
+  color: #2a9d8f;
 }
 </style>

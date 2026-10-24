@@ -93,6 +93,8 @@ cazalla/
   main/contextMenu.ts       editor right-click entries (Add subtask, Add sub-webpage, split and close panel), labels from renderer/core/locales
   main/sites.ts             IPC handler that runs the Pelican venv setup, make draft/publish/rsync_upload per site, streaming the log
   main/terminal.ts          node-pty sessions for the terminal pane (lazygit by default)
+  main/git.ts               git status --porcelain of the content folder for the explorer colours
+  renderer/git/             porcelain.ts (parser, folder aggregation), store.ts (refresh with tree events) (item 24)
   pelican/                  Pelican project copied from cazalla-net-site.plugin (theme, vault_metadata plugin, Makefile); shipped as an extra resource
   test/unit/                Vitest specs
   test/e2e/                 Playwright specs
@@ -109,7 +111,7 @@ Upstream files are changed only where a hook is unavoidable, each by one to thre
 - `packages/desktop/src/renderer/src/store/editor.ts`: one line in `FORMAT_LINK_CLICK` routes `.pdf` and `.excalidraw` link targets to a pane.
 - `packages/desktop/src/renderer/src/contextMenu/sideBar/index.ts`: the "Open in split panel" and "Kanban board" entries at the end of the file-tree context menu.
 - `packages/desktop/src/main/contextMenu/editor/index.ts`: cazalla entries spread at the end of the editor context menu; `src/shared/types/ipc.ts` gains their channels.
-- `packages/desktop/src/main/ipc/index.ts`: registers the cazalla site and terminal handlers; `electron-builder.yml` ships `cazalla/pelican` as an extra resource; `pnpm-workspace.yaml` allows node-pty's build.
+- `packages/desktop/src/main/ipc/index.ts`: registers the cazalla site, terminal and git handlers; `electron-builder.yml` ships `cazalla/pelican` as an extra resource; `pnpm-workspace.yaml` allows node-pty's build.
 - `packages/desktop/src/renderer/src/components/editorWithTabs/editor.vue`: `setPrimaryMuya(muya)` after the instance is created and `setPrimaryMuya(null)` before it is destroyed.
 - `packages/desktop/src/renderer/src/components/editorWithTabs/index.vue`: subtract the panel width.
 - `packages/desktop/src/main/menu/templates/view.ts`, `src/main/menu/actions/view.ts`: menu item, command registration, check-state sync.

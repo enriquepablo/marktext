@@ -53,6 +53,7 @@ export interface IpcInvokeChannels {
   'mt::fonts::list': { args: []; ret: string[] }
   'mt::fs-trash-item': { args: [pathname: string]; ret: boolean }
   'mt::cazalla-site-run': { args: [request: { siteSlug: string; step: string; env: Record<string, string> }]; ret: { code: number; dir: string } }
+  'mt::cazalla-git-status': { args: [cwd: string]; ret: { ok: boolean; output: string } }
   'mt::cazalla-term-open': { args: [request: { id: string; cwd: string; cols: number; rows: number; command?: string; args?: string[] }]; ret: { ok: boolean; error?: string } }
   'mt::fs::copy': { args: [src: string, dest: string]; ret: void }
   'mt::fs::copy-with-content-hash': { args: [src: string, outputDir: string]; ret: string }
