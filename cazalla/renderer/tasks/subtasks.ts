@@ -52,6 +52,7 @@ export const createSubtask = async(parent: ParentTask, title: string, now: Date 
       project: parent.project,
       path,
       status: 'new',
+      kanban: true,
       due: dueFrom(null, now),
       effort: [],
       subtasks: []

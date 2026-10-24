@@ -15,6 +15,8 @@ export interface TaskRecord {
   // `/<parent-slug>` for a subtask.
   path: string
   status: TaskStatus
+  // Absent means shown on the board; only an explicit `false` hides a task.
+  kanban: boolean
   due: string | null
   effort: EffortEntry[]
   subtasks: string[]

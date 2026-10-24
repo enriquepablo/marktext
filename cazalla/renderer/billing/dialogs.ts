@@ -37,8 +37,14 @@ const periodFields = (): FieldSpec[] => {
   ]
 }
 
-const writePdf = async(contentFolder: string, period: ReturnType<typeof periodFrom>, name: string, bytes: Uint8Array): Promise<string> => {
-  const dir = join(contentFolder, ...outputSegments(period))
+const writePdf = async(
+  contentFolder: string,
+  organizationSlug: string,
+  period: ReturnType<typeof periodFrom>,
+  name: string,
+  bytes: Uint8Array
+): Promise<string> => {
+  const dir = join(contentFolder, ...outputSegments(organizationSlug, period))
   const file = join(dir, name)
   if (await exists(file)) throw new Error(t('cazalla.dialog.exists', { file }))
   await ensureDir(dir)
@@ -68,10 +74,14 @@ export const openReportDialog = (): void =>
       const project = useMetadataStore().projects[String(v.project)]
       if (!folder || !project) return t('cazalla.dialog.noProjects')
       const period = periodFrom(String(v.start), String(v.end))
+      if (!project.organization) return t('cazalla.billing.noOrganization')
       const report = buildReport(project, useTaskStore().list, period)
       if (report.tasks.length === 0) return t('cazalla.billing.noEffort')
       try {
-        done(t('cazalla.billing.reportTitle'), await writePdf(folder, period, reportFileName(project, period), await renderReportPdf(report)))
+        done(
+          t('cazalla.billing.reportTitle'),
+          await writePdf(folder, project.organization, period, reportFileName(project, period), await renderReportPdf(report))
+        )
       } catch (err) {
         return err instanceof Error ? err.message : String(err)
       }
@@ -127,7 +137,7 @@ export const openInvoiceDialog = (): void => {
       })
       if (invoice.services.length === 0) return t('cazalla.billing.noEffort')
       try {
-        const file = await writePdf(folder, period, invoiceFileName(client, period, sequence), await renderInvoicePdf(invoice))
+        const file = await writePdf(folder, client.slug, period, invoiceFileName(client, period, sequence), await renderInvoicePdf(invoice))
         // The counter advances only once the PDF exists, so a failed write never skips a number.
         await writeText(issuer.file, updateFields(await readText(issuer.file), { invoice_number: sequence }))
         await metadata.LOAD()

@@ -35,7 +35,12 @@ export interface ProjectInput {
   path?: string | null
 }
 
-export const PROJECT_SUBDIRS = ['archived', 'notes', 'tasks'] as const
+export const PROJECT_SUBDIRS = ['archived', 'assets', 'notes', 'tasks'] as const
+export const ORGANIZATIONS_DIR = 'organizations'
+export const ORGANIZATION_SUBDIRS = ['assets', 'notes'] as const
+
+/** `<content folder>/organizations/<slug>`; derived from the slug, not stored. */
+export const organizationDir = (contentFolder: string, slug: string): string => join(contentFolder, ORGANIZATIONS_DIR, slug)
 
 export class CreateError extends Error {
   constructor(
@@ -79,7 +84,7 @@ export const createPerson = (contentFolder: string, knownSlugs: Iterable<string>
   })
 
 /** Writes `_metadata/organizations/<slug>.md` with the field groups the flags enable. */
-export const createOrganization = (
+export const createOrganization = async(
   contentFolder: string,
   knownSlugs: Iterable<string>,
   input: OrganizationInput
@@ -101,7 +106,9 @@ export const createOrganization = (
   }
   if (input.canBeInvoiced) fields.billing = input.billing ?? []
   if (input.canInvoice || input.canBeInvoiced) fields.invoice_details = lines(input.invoice_details)
-  return writeRecord(contentFolder, 'organizations', knownSlugs, fields)
+  const file = await writeRecord(contentFolder, 'organizations', knownSlugs, fields)
+  for (const sub of ORGANIZATION_SUBDIRS) await ensureDir(join(organizationDir(contentFolder, String(fields.slug)), sub))
+  return file
 }
 
 const normalizePath = (p: string | null | undefined, slug: string): string => {

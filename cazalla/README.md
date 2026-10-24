@@ -72,7 +72,7 @@ cazalla/
   renderer/tasks/           types.ts, create.ts (notes and tasks), store.ts (task index), dialogs.ts (item 4), archive.ts (items 5 and 8),
                             subtasks.ts and subtaskMenu.ts (item 8)
   renderer/kanban/          KanbanView.vue (six-column board over the task index, vue-draggable-plus), sidebarMenu.ts (item 5)
-  renderer/billing/         data.ts, reportPdf.ts, invoicePdf.ts (ported from cazalla-net.plugin, pdf-lib), dialogs.ts (item 9); output under _invoices/YYYY/MM
+  renderer/billing/         data.ts, reportPdf.ts, invoicePdf.ts (ported from cazalla-net.plugin, pdf-lib), dialogs.ts (item 9); output under organizations/<slug>/assets/invoices/YYYY/MM
   renderer/panes/           tree.ts (pure layout tree), store.ts, PaneLayout.vue, FilePane.vue (second Muya instance per pane), sidebarMenu.ts (item 7)
   renderer/core/i18n.ts     registerLocales(): runtime merge of cazalla locale bundles
   renderer/core/layout.ts   reservedWidth = activity bar + daily notes panel

@@ -80,7 +80,9 @@ const entries = computed<Entry[]>(() => [
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding-top: 8px;
+  /* The upstream title bar is fixed across the window; leave its row free. */
+  padding-top: calc(var(--titleBarHeight) + 8px);
+  box-sizing: border-box;
   height: 100vh;
   background: var(--sideBarBgColor);
   border-right: 1px solid var(--itemBgColor);

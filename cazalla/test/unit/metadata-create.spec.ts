@@ -39,6 +39,8 @@ describe('metadata creation', () => {
   it('writes only the organization groups that are enabled', async() => {
     const plain = await createOrganization('/vault', [], { name: 'Plain Co', leader: 'ana-lopez' })
     expect(files.get(plain)).toBe('---\nname: Plain Co\nslug: plain-co\nleader: ana-lopez\nphone:\n---\n')
+    expect(dirs.has('/vault/organizations/plain-co/assets')).toBe(true)
+    expect(dirs.has('/vault/organizations/plain-co/notes')).toBe(true)
 
     const us = await createOrganization('/vault', [], {
       name: 'cazalla.net',
@@ -70,7 +72,7 @@ describe('project creation', () => {
     const file = await createProject('/vault', [], { name: 'Web Site', organization: 'acme', leader: 'ana-lopez', service: 'Development' })
     expect(file).toBe('/vault/_metadata/projects/web-site.md')
     expect(files.get(file)).toBe('---\nname: Web Site\nslug: web-site\norganization: acme\nleader: ana-lopez\nservice: Development\npath: projects/web-site\n---\n')
-    expect([...dirs].sort()).toEqual(['/vault/projects/web-site/archived', '/vault/projects/web-site/notes', '/vault/projects/web-site/tasks'])
+    expect([...dirs].sort()).toEqual(['/vault/projects/web-site/archived', '/vault/projects/web-site/assets', '/vault/projects/web-site/notes', '/vault/projects/web-site/tasks'])
   })
 
   it('normalizes an explicit path', async() => {

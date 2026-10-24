@@ -35,7 +35,7 @@ import type { TaskRecord } from '@cazalla/renderer/tasks/types'
 const project: Project = { name: 'Site', slug: 'site', organization: null, leader: null, service: null, path: 'projects/site', file: '' }
 const T = '/vault/projects/site/tasks'
 const record = (file: string, slug: string, path: string, subtasks: string[] = []): TaskRecord => ({
-  file, title: slug, slug, project: 'site', path, status: 'done', due: null, effort: [], subtasks, tags: [], date: null, modified: null, archived: false
+  file, title: slug, slug, project: 'site', path, status: 'done', kanban: true, due: null, effort: [], subtasks, tags: [], date: null, modified: null, archived: false
 })
 
 describe('archiveTask', () => {

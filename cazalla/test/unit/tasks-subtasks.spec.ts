@@ -44,7 +44,7 @@ describe('subtasks', () => {
     expect(file).toBe(`${T}/parent/first-step.md`)
     expect(dirs.has(`${T}/parent`)).toBe(true)
     expect(files.get(file)).toBe(
-      '---\ntitle: First Step\nslug: first-step\ntags: []\ndate: 2026-10-22T15:06:42.215Z\nmodified: 2026-10-22T15:06:42.215Z\ncategory: task\nproject: site\npath: /parent\nstatus: new\ndue: 2026-11-22T15:06:42.215Z\neffort: []\nsubtasks: []\n---\n'
+      '---\ntitle: First Step\nslug: first-step\ntags: []\ndate: 2026-10-22T15:06:42.215Z\nmodified: 2026-10-22T15:06:42.215Z\ncategory: task\nproject: site\npath: /parent\nstatus: new\nkanban: true\ndue: 2026-11-22T15:06:42.215Z\neffort: []\nsubtasks: []\n---\n'
     )
     const updated = files.get(`${T}/parent.md`)!
     expect(updated).toContain('subtasks:\n  - /parent/first-step\n')

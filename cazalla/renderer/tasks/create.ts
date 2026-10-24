@@ -80,6 +80,7 @@ export const createTask = (
       project: project.slug,
       path: '/',
       status: 'new',
+      kanban: true,
       due: dueFrom(input.due, now),
       effort: [],
       subtasks: []

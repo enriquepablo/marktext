@@ -34,6 +34,7 @@ const toRecord = (f: Fields, file: string, archived: boolean): TaskRecord => ({
   project: str(f.project),
   path: str(f.path) ?? '/',
   status: archived ? 'archived' : isTaskStatus(f.status) ? f.status : 'new',
+  kanban: f.kanban !== false,
   due: str(f.due),
   effort: efforts(f.effort),
   subtasks: strings(f.subtasks),

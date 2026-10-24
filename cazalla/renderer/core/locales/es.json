@@ -94,7 +94,8 @@
       "end": "Hasta",
       "noEffort": "No hay horas registradas en ese periodo.",
       "noIssuer": "Ninguna organización con IBAN puede emitir facturas.",
-      "written": "Escrito {file}"
+      "written": "Escrito {file}",
+      "noOrganization": "El proyecto no tiene organización; indíquela en sus metadatos."
     },
     "panes": {
       "title": "Paneles",

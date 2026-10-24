@@ -94,7 +94,8 @@
       "end": "To",
       "noEffort": "No effort recorded in that period.",
       "noIssuer": "No organization with an IBAN can issue invoices.",
-      "written": "Written {file}"
+      "written": "Written {file}",
+      "noOrganization": "The project has no organization; set one in its metadata."
     },
     "panes": {
       "title": "Panels",

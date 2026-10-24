@@ -32,7 +32,7 @@ describe('note and task creation', () => {
     const file = await createTask('/vault', project, { title: 'Some Task' }, now)
     expect(file).toBe('/vault/projects/site/tasks/some-task.md')
     expect(files.get(file)).toBe(
-      '---\ntitle: Some Task\nslug: some-task\ntags: []\ndate: 2026-10-22T15:06:42.215Z\nmodified: 2026-10-22T15:06:42.215Z\ncategory: task\nproject: site\npath: /\nstatus: new\ndue: 2026-11-22T15:06:42.215Z\neffort: []\nsubtasks: []\n---\n'
+      '---\ntitle: Some Task\nslug: some-task\ntags: []\ndate: 2026-10-22T15:06:42.215Z\nmodified: 2026-10-22T15:06:42.215Z\ncategory: task\nproject: site\npath: /\nstatus: new\nkanban: true\ndue: 2026-11-22T15:06:42.215Z\neffort: []\nsubtasks: []\n---\n'
     )
   })
 

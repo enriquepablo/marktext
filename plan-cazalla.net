@@ -33,7 +33,9 @@ Shared module `cazalla/renderer/core/`:
 
 Frontmatter keys are written in the order shown in the samples. Timestamps in notes, tasks and metadata are UTC ISO strings. Daily notes keep their local-offset format; this difference is inherited from the Obsidian vault and is kept so existing files parse unchanged.
 
-Implementation order: 2, 3, 6, 4, 5, 8, 9, then 7. Items 3 to 9 depend on 2. Item 6 depends on 3. Item 4 depends on 6. Items 5 and 8 depend on 4. Item 9 depends on 4. Item 7 is independent and comes last because it is the largest.
+Implementation order: 2, 3, 6, 4, 5, 8, 9, then 7. Items 3 to 9 depend on 2. Item 6 depends on 3. Item 4 depends on 6. Items 5 and 8 depend on 4. Item 9 depends on 4. Item 7 is independent and comes last because it is the largest. Items 1 to 9 were implemented on 2026-10-23 and 2026-10-24.
+
+Second round, added 2026-10-24: 10, 15, 12, 11, 14, then 13. Item 10 is fixes. Item 15 (explorer) comes early because items 11 and 12 open their files from it. Item 13 is the largest and last.
 
 # 1 calendar and daily notes.
 
@@ -455,6 +457,30 @@ add `kanban`key to task frontmatter with value true/false so if false it does no
 When creating projects, the corresponding folders are provided with a further subfolder `assets`.
 invoices and effort repoprts are kept in the corresponding assets/invoices/<year>/<month>/
 
+## Design
+
+### Upper corners
+
+The upstream title bar is `position: fixed` across the whole window (`titleBar/index.vue`, `.title-bar`). The burger menu sits at the top left and the window controls at the top right, above whatever column is there. The upstream sidebar leaves room with `padding-top: 32px`. The activity bar and the daily-notes panel get the same `padding-top: var(--titleBarHeight)`, and their headers stop declaring `-webkit-app-region: drag`, which the fixed title bar already provides.
+
+### Organization metadata
+
+Organizations never carried `service`; the key belongs to projects only. The organization dialog and `Organization` type have no such field. Nothing to change.
+
+### Folders
+
+A project folder gets a fourth subfolder, `assets/`. An organization gets a folder `organizations/<slug>/` with `notes/` and `assets/`. The slug is used, as for projects, because names such as `cazalla.net` make poor path segments. The organization record gains no new key; its folder is derived from the slug. The vault migration script creates the missing folders for existing projects and organizations.
+
+### Invoices and effort reports
+
+Decision of 2026-10-24, superseding the note above: the PDFs go to the organization's assets, not the project's. An invoice is written to `organizations/<client slug>/assets/invoices/<year>/<month>/`. An effort report is written to the same path under the project's organization; a project without `organization` cannot produce a report, and the dialog says so. `_invoices/` at the root is no longer used.
+
+### Kanban key
+
+Tasks and subtasks are created with `kanban: true`. The index reads the key; absent means `true`. The board shows only tasks whose `kanban` is not `false`. A task edited to `kanban: false` disappears from the board on the next index refresh.
+
+Code: `metadata/create.ts` (organization folder, project `assets/`), `tasks/create.ts` and `tasks/subtasks.ts` (`kanban: true`), `tasks/store.ts` and `kanban/KanbanView.vue` (filter), `billing/data.ts` and `billing/dialogs.ts` (output path), `activityBar/ActivityBar.vue` and `dailyNotes/Panel.vue` (padding), `scripts/migrate-vault.ts`.
+
 # 11 excalidraw
 
 We want an integration with excalidraw.
@@ -462,9 +488,31 @@ The left hand side bar will include an icon to add a excalidraw drawing.
 it will show dialog asking for name and project.
 it will be kept in assets/drawings/<year>/<month>/.
 
+## Design
+
+Decision of 2026-10-24: the official React component. `@excalidraw/excalidraw` needs `react` and `react-dom`; both are added to the desktop package and used only by the drawing pane. The team has retired its own Electron wrapper in favour of the web app, so the component is the supported route for embedding.
+
+`cazalla/renderer/drawings/DrawingPane.vue` is a pane leaf like `FilePane`: it mounts a React root into a `div`, renders `<Excalidraw initialData={…} onChange={…}>`, and autosaves the scene as `.excalidraw` JSON (elements, appState subset, files) one second after the last change. It unmounts the React root on close. The pane tree gains a leaf kind `drawing` with a file path; `PaneLayout.vue` renders it.
+
+The activity bar gets a "New drawing" entry. The dialog asks for name and project and writes `<project path>/assets/drawings/<year>/<month>/<slug>.excalidraw` with an empty scene, then opens it in a split pane. Existing drawings open from the explorer (item 15), which shows all files, and from links in documents whose target ends in `.excalidraw`.
+
+Export: the pane header has "Export PNG" and "Export SVG", using the package's `exportToBlob` and `exportToSvg`, written next to the drawing. A markdown document embeds the exported image with a normal image link.
+
+Open: whether a drawing is referenced from its project's notes automatically. Proposed: no; the user links the exported image.
+
 # 12 pdfjs
 
 Use pdfjs to visualize PDFs
+
+## Design
+
+`vue-pdf-embed` wraps pdf.js for Vue 3 with no peer dependencies and is current with pdf.js 5. It is added to the desktop package. `cazalla/renderer/pdf/PdfPane.vue` is a pane leaf (`kind: 'pdf'`) that renders every page in a scrolling column with zoom controls and a page counter; the file is read through the bridge as bytes and handed to the component as binary data.
+
+Entry points: clicking a `.pdf` file in the explorer (item 15), links in documents that end in `.pdf`, and the notice after generating a report or an invoice, which gets an "Open" action that opens the PDF in a split pane.
+
+Link interception: Muya reports link clicks to the editor through `jumpClick`; the upstream editor resolves them with `FORMAT_LINK_CLICK`. A cazalla hook of one line in that store action checks the extension and routes `.pdf` and `.excalidraw` targets to the pane store instead of the system opener. The exact hook is settled when the item starts.
+
+Open: whether the main viewer should also handle images and other binaries. Proposed: later; the explorer opens unknown types with the system handler.
 
 # 13 websites
 
@@ -514,6 +562,30 @@ to have one further icon in the left bar,
 "publish site", that will ask for a site name
 and update the build environemnt if needed and build and publish the site.
 
+## Design
+
+### What the Obsidian plugin does today
+
+`cazalla-net-site.plugin` serves one site. Settings hold `vaultContentDir`, `sshHost`, `sshPort`, `sshUser`, `sshTargetDir` and `siteUrl`. The generator is Pelican, shipped inside the plugin directory under `pelican/` with a theme, a `vault_metadata` plugin, a Makefile and `requirements.txt`. Initialization creates a Python venv and symlinks the content directory as `pelican/content`. Building runs `make draft` or `make publish`; publishing runs `make rsync_upload`, which is `rsync -e "ssh -p $SSH_PORT" -P -rvzc --delete output/ $SSH_USER@$SSH_HOST:$SSH_TARGET_DIR`. Settings reach the Makefile as environment variables. Credentials are the user's ssh keys and `~/.ssh/config`. Page URLs derive from file location; `status: public` gates publication; `order` sorts siblings; the sub-page dialog creates a sibling directory named after the page.
+
+### Site records
+
+`_metadata/sites/<slug>.md` with the frontmatter in the note above. `path` is the site folder relative to the content folder. The metadata store gains a fourth kind, `sites`, and the New site dialog (activity bar) writes the record and creates `<path>/assets/` and `<path>/pages/`. Defaults: `ssh-port` 22, `ssh-user` deploy, `ssh-target-dir` /var/www/site.
+
+### Webpages
+
+New page dialog: title and site (the note says project; the page lives under a site's `pages/`, so the select lists sites, and `project` in the frontmatter is the site slug). The file is `<site path>/pages/<slug>.md` with the frontmatter in the note; `order` is the number of sibling `.md` files in the target folder; `path` is `/`. The context-menu entry "Add sub-webpage" works like "Add subtask" without kanban and archive: a folder named after the parent page, a page inside it with `path` extended by the parent slug and `order` from its siblings. Pelican derives URLs from the file tree, so this layout maps directly to `<parent>/<child>/`.
+
+### Publishing
+
+`cazalla/renderer/sites/publish.ts` reproduces the plugin's shell flow through a main-process helper, because the renderer is sandboxed. `cazalla/main/sites.ts` registers one IPC handler, `mt::cazalla-run-site-command`, which spawns `make <target>` in the Pelican directory with the site's values as environment variables and streams stdout and stderr back to the renderer. The hook is one registration line in the main IPC setup.
+
+The Pelican project (`pelican/` of the site plugin: Makefile, configs, theme, `plugins/vault_metadata`, `requirements.txt`) is copied into `cazalla/pelican/` in this repository and shipped as an extra resource of the app. At runtime it is copied to `<userData>/cazalla/pelican/<site slug>/` on first use. The Makefile's `INPUTDIR` becomes overridable so the content directory is `<site path>/pages` without a symlink.
+
+The "Publish site" dialog asks for the site and shows a log panel. Steps: create the venv and install requirements when `venv/` is missing; `make publish`; `make rsync_upload`. Each step's exit code is checked; the log stays open on failure. Unix only, as the plugin.
+
+Open: whether `make draft` with a local preview belongs in the first version. Proposed: a "Build draft" button that runs `make draft` and opens `output/index.html` in a pane is cheap once the log panel exists.
+
 # 14 events
 
 An event is a task that is due in the future or within the day.
@@ -529,6 +601,14 @@ each task in the event list is shown as a link that
 opens the task in the main panel.
 all lists are ordered from nearer in time up.
 
+## Design
+
+An event is a task with a `due` date. The sidebar gains a third column view, `events`, beside `files` and `search`. Upstream normalizes the column to `files` or `search` in `store/layout.ts`; the hook adds `events` there and one `v-else-if` in `sideBar/index.vue`, plus a calendar-clock icon in the sidebar header next to the magnifier. The view itself is `cazalla/renderer/events/EventsView.vue`.
+
+Four sections, each a list sorted by `due` ascending: today, tomorrow, this week (from the day after tomorrow to the end of the ISO week, Monday-based, following the calendar's week start), and the rest. Overdue tasks are listed first under today, marked. Archived tasks and tasks with `kanban: false` are excluded; the second exclusion is open. Each entry shows the title, the project and the due time; clicking opens the task through `mt::open-file`. Sections with no entries show a dash. The view reads the task index and refreshes with it.
+
+Open: whether done tasks should disappear from the lists. Proposed: yes; only `continuous`, `new`, `pending` and `wip` are events.
+
 # 15 drag and drop to move files
 
 I want to be able to move directories and files
@@ -536,3 +616,44 @@ by dragging and dropping in the left file explorer.
 Any of these moves should keep all metadata
 described above in sync, without corruption,
 and also should update all links to moved content.
+
+## Design
+
+Decision of 2026-10-24: the upstream file tree is replaced by a cazalla explorer, and the explorer shows every file, not only markdown.
+
+### Explorer
+
+`cazalla/renderer/explorer/Explorer.vue` is built on Element Plus `el-tree`, already a dependency: lazy loading of directories through the bridge, every entry shown with a type icon (folder, markdown, pdf, excalidraw, image, other), `draggable` nodes, `allow-drop` restricted to directories (inner) and `node-drop` triggering a move. Hidden entries (`.git`, `node_modules`, the exclude patterns preference) are skipped. Clicking a markdown file opens it as a tab, a PDF or drawing opens in a pane, anything else with the system opener. The existing context-menu entries (new file, folder, rename, trash, copy path, kanban, open in split) keep working through the same bus events, with the active item set by the explorer. The upstream tree component stays in the repository and is no longer rendered; the hook is one `v-if` in `sideBar/index.vue` that renders the explorer instead of `<tree>`.
+
+Refresh: the explorer reloads a directory after its own operations, on upstream `mt::update-object-tree` events for markdown files and folders, and on an explicit refresh button. Non-markdown changes made outside the app appear on refresh or when the folder is reopened; a cazalla watcher for all files is a follow-up.
+
+### Move procedure
+
+A move is one `fileUtils.move`, followed by:
+
+1. Metadata: when a moved folder is or contains a project path, the project's `path` is rewritten; the same for sites. Tasks and notes keep no absolute paths, so moving them within the same project changes nothing in frontmatter. Moving a task between projects rewrites `project`. Moving a subtask out of its parent's folder removes it from the parent's `subtasks`; moving it in appends.
+2. Links: every markdown file under the content folder is scanned for links and images whose target resolves to the moved path or inside it; relative targets are rewritten so they resolve to the new location. Files inside the moved folder have their outgoing relative links rewritten too. The scan is a simple regex over `](…)` targets and `[[…]]` wiki links; the rewrite uses `window.path.relative`.
+3. Indexes: metadata, tasks and the explorer reload.
+
+The procedure lives in `cazalla/renderer/explorer/move.ts` and is unit-tested over the in-memory file system used by the other specs. Moves that would overwrite an existing path are refused. A move is reported in a notice with the number of links rewritten.
+
+Open: whether to offer undo. Proposed: not in the first version; the move is reversible by dragging back, and link rewriting is symmetric.
+
+# 15 details so far
+
+## project frontmatter
+
+remove key services
+
+## kanban board sink
+
+when task cards move to "archived" column,
+after all the file and link moves,
+the card should disappear from the column
+- perhaps with some funny animation.
+
+## moving files warning
+
+the file moves and renames by dragging in file explorer or in kanban or whatever
+must never break anything
+including links in frontmatter ut also links in content.

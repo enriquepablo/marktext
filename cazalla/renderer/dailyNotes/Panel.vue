@@ -145,6 +145,9 @@ const startSplit = (e: MouseEvent): void => {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  box-sizing: border-box;
+  /* The upstream title bar is fixed across the window; its controls sit above this panel. */
+  padding-top: var(--titleBarHeight);
   flex-shrink: 0;
   background: var(--sideBarBgColor);
   color: var(--sideBarColor);
@@ -169,7 +172,6 @@ const startSplit = (e: MouseEvent): void => {
   align-items: center;
   justify-content: space-between;
   padding: 10px 12px 4px;
-  -webkit-app-region: drag;
 }
 .dn-title {
   font-size: 14px;
@@ -177,7 +179,6 @@ const startSplit = (e: MouseEvent): void => {
   color: var(--sideBarTitleColor);
 }
 .dn-today {
-  -webkit-app-region: no-drag;
   background: transparent;
   border: 1px solid var(--itemBgColor);
   border-radius: 4px;

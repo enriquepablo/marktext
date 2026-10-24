@@ -7,8 +7,9 @@
  *   Metadata/projects/*.md   →  _metadata/projects/*.md
  *   plain YAML files         →  markdown with `---` fences
  *   key `company`            →  `organization` (first value when it was a list)
- *   project `path` trailing slash removed; `<path>/Tasks` → `tasks`, `notes/`
- *   and `archived/` created; `Tasks/archived/*` moved to `archived/`
+ *   project `path` trailing slash removed; `<path>/Tasks` → `tasks`, `notes/`,
+ *   `assets/` and `archived/` created; `Tasks/archived/*` moved to `archived/`
+ *   organizations/<slug>/{assets,notes} created for every organization
  *
  * Usage: tsx cazalla/scripts/migrate-vault.ts <vault> [--apply]
  * Without --apply the planned actions are printed and nothing is written.
@@ -52,6 +53,7 @@ export const plan = (root: string): Action[] => {
   const srcRoot = path.join(root, 'Metadata')
   const dstRoot = path.join(root, '_metadata')
   const projectPaths: string[] = []
+  const organizationSlugs: string[] = []
 
   for (const [from, to] of KINDS) {
     const srcDir = path.join(srcRoot, from)
@@ -60,6 +62,7 @@ export const plan = (root: string): Action[] => {
     for (const name of fs.readdirSync(srcDir).filter((n) => n.endsWith('.md'))) {
       const fields = readFields(path.join(srcDir, name))
       if (!fields) continue
+      if (to === 'organizations') organizationSlugs.push(String(fields.slug ?? name.replace(/\.md$/, '')))
       if ('company' in fields) {
         fields.organization = first(fields.company)
         delete fields.company
@@ -78,13 +81,16 @@ export const plan = (root: string): Action[] => {
     const tasksOld = path.join(dir, 'Tasks')
     const tasks = path.join(dir, 'tasks')
     if (fs.existsSync(tasksOld) && !fs.existsSync(tasks)) actions.push({ kind: 'move', from: tasksOld, to: tasks })
-    for (const sub of ['tasks', 'notes', 'archived']) actions.push({ kind: 'mkdir', dir: path.join(dir, sub) })
+    for (const sub of ['tasks', 'notes', 'assets', 'archived']) actions.push({ kind: 'mkdir', dir: path.join(dir, sub) })
     const archivedOld = path.join(fs.existsSync(tasksOld) ? tasksOld : tasks, 'archived')
     if (fs.existsSync(archivedOld)) {
       for (const name of fs.readdirSync(archivedOld)) {
         actions.push({ kind: 'move', from: path.join(tasks, 'archived', name), to: path.join(dir, 'archived', name) })
       }
     }
+  }
+  for (const slug of organizationSlugs) {
+    for (const sub of ['assets', 'notes']) actions.push({ kind: 'mkdir', dir: path.join(root, 'organizations', slug, sub) })
   }
   return actions
 }

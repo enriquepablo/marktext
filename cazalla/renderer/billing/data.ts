@@ -4,7 +4,7 @@ import type { TaskRecord } from '../tasks/types'
 
 export const CURRENCY = 'EUR'
 export const VAT_RATE = 0
-export const INVOICES_DIR = '_invoices'
+export const INVOICES_DIR = 'invoices'
 
 export interface Period {
   // Local calendar days, both inclusive.
@@ -151,8 +151,15 @@ export const buildInvoice = (input: InvoiceInput): InvoiceData => {
   }
 }
 
-/** `_invoices/YYYY/MM` segments for a period. */
-export const outputSegments = (period: Period): string[] => [INVOICES_DIR, String(period.start.getFullYear()), pad(period.start.getMonth() + 1)]
+/** `organizations/<slug>/assets/invoices/YYYY/MM` segments for a period. */
+export const outputSegments = (organizationSlug: string, period: Period): string[] => [
+  'organizations',
+  organizationSlug,
+  'assets',
+  INVOICES_DIR,
+  String(period.start.getFullYear()),
+  pad(period.start.getMonth() + 1)
+]
 
 export const reportFileName = (project: Project, period: Period): string =>
   `report-${project.slug}-${period.start.getFullYear()}-${pad(period.start.getMonth() + 1)}.pdf`

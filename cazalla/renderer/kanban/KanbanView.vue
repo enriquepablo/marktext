@@ -114,7 +114,7 @@ const lists = reactive<Record<TaskStatus, TaskRecord[]>>({
 })
 
 const rebuild = (): void => {
-  const visible = tasks.list.filter((task) => !projectSlug.value || task.project === projectSlug.value)
+  const visible = tasks.list.filter((task) => task.kanban && (!projectSlug.value || task.project === projectSlug.value))
   for (const status of TASK_STATUSES) {
     lists[status] = visible.filter((task) => task.status === status).sort(byDue)
   }

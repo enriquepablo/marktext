@@ -18,7 +18,7 @@ import type { TaskRecord } from '@cazalla/renderer/tasks/types'
 const project: Project = { name: 'Web site', slug: 'site', organization: 'acme', leader: null, service: 'Development', path: 'projects/site', file: '' }
 const other: Project = { ...project, name: 'Ops', slug: 'ops', service: 'Operations' }
 const task = (slug: string, projectSlug: string, effort: Record<string, number>[]): TaskRecord => ({
-  file: `/vault/projects/${projectSlug}/tasks/${slug}.md`, title: slug.toUpperCase(), slug, project: projectSlug, path: '/', status: 'done',
+  file: `/vault/projects/${projectSlug}/tasks/${slug}.md`, title: slug.toUpperCase(), slug, project: projectSlug, path: '/', status: 'done', kanban: true,
   due: null, effort, subtasks: [], tags: [], date: null, modified: null, archived: false
 })
 const tasks = [
@@ -71,7 +71,7 @@ describe('billing data', () => {
   it('numbers and names files', () => {
     expect(nextInvoiceNumber('0026')).toBe('0027')
     expect(nextInvoiceNumber(null)).toBe('0001')
-    expect(outputSegments(period)).toEqual(['_invoices', '2026', '09'])
+    expect(outputSegments('acme', period)).toEqual(['organizations', 'acme', 'assets', 'invoices', '2026', '09'])
     expect(reportFileName(project, period)).toBe('report-site-2026-09.pdf')
     expect(invoiceFileName(client, period, '0027')).toBe('invoice-acme-2026-09-0027.pdf')
   })
