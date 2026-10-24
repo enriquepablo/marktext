@@ -60,6 +60,23 @@
       "title": "New task",
       "name": "Title",
       "due": "Due"
+    },
+    "kanban": {
+      "title": "Kanban",
+      "close": "Close board",
+      "allProjects": "All projects",
+      "openForFolder": "Kanban board",
+      "subtasks": "{n} subtasks",
+      "hasSubtasks": "{slug} still has subtasks. Archive them first.",
+      "noProject": "The task has no known project.",
+      "columns": {
+        "continuous": "Continuous",
+        "new": "New",
+        "pending": "Pending",
+        "wip": "In progress",
+        "done": "Done",
+        "archived": "Archived"
+      }
     }
   }
 }

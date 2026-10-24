@@ -60,6 +60,23 @@
       "title": "Nueva tarea",
       "name": "Título",
       "due": "Vencimiento"
+    },
+    "kanban": {
+      "title": "Kanban",
+      "close": "Cerrar tablero",
+      "allProjects": "Todos los proyectos",
+      "openForFolder": "Tablero kanban",
+      "subtasks": "{n} subtareas",
+      "hasSubtasks": "{slug} aún tiene subtareas. Archívelas primero.",
+      "noProject": "La tarea no tiene un proyecto conocido.",
+      "columns": {
+        "continuous": "Continuo",
+        "new": "Nuevo",
+        "pending": "Pendiente",
+        "wip": "En curso",
+        "done": "Hecho",
+        "archived": "Archivado"
+      }
     }
   }
 }

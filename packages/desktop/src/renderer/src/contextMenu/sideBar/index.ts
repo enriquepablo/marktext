@@ -12,6 +12,7 @@ import {
 } from './menuItems'
 import { t } from '../../i18n'
 import { popupContextMenu, type ContextMenuItem } from '../popupMenu'
+import { getKanbanMenuItem } from '@cazalla/renderer/kanban/sidebarMenu'
 
 export const showContextMenu = (
   event: { clientX: number; clientY: number },
@@ -29,7 +30,9 @@ export const showContextMenu = (
     getDELETE(),
     SEPARATOR,
     getCopyPath(),
-    getShowInFolder()
+    getShowInFolder(),
+    SEPARATOR,
+    getKanbanMenuItem()
   ]
 
   contextItems[5].enabled = hasPathCache

@@ -26,7 +26,7 @@
 <script setup lang="ts">
 import { computed, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Building2, FilePlus, FolderPlus, ListTodo, UserPlus } from 'lucide-vue-next'
+import { Building2, FilePlus, FolderPlus, Kanban, ListTodo, UserPlus } from 'lucide-vue-next'
 import IconTooltip from '@/components/iconTooltip/index.vue'
 import EntityDialog from '../dialogs/EntityDialog.vue'
 import { registerLocales } from '../core/i18n'
@@ -34,12 +34,16 @@ import { useMetadataStore } from '../metadata/store'
 import { openOrganizationDialog, openPersonDialog, openProjectDialog } from '../metadata/dialogs'
 import { useTaskStore } from '../tasks/store'
 import { openNoteDialog, openTaskDialog } from '../tasks/dialogs'
+import { useCazallaLayoutStore } from '../core/layout'
+import { listenForSidebarKanban } from '../kanban/sidebarMenu'
 import en from '../core/locales/en.json'
 import es from '../core/locales/es.json'
 
 registerLocales({ en, es })
 useMetadataStore().LISTEN()
 useTaskStore().LISTEN()
+listenForSidebarKanban()
+const layout = useCazallaLayoutStore()
 const { t } = useI18n()
 
 interface Entry {
@@ -49,13 +53,14 @@ interface Entry {
   run: () => void
 }
 
-// Later roadmap items append entries here: kanban, report, invoice.
+// Later roadmap items append entries here: report, invoice.
 const entries = computed<Entry[]>(() => [
   { key: 'person', label: t('cazalla.activity.newPerson'), icon: UserPlus, run: openPersonDialog },
   { key: 'organization', label: t('cazalla.activity.newOrganization'), icon: Building2, run: openOrganizationDialog },
   { key: 'project', label: t('cazalla.activity.newProject'), icon: FolderPlus, run: openProjectDialog },
   { key: 'note', label: t('cazalla.activity.newNote'), icon: FilePlus, run: openNoteDialog },
-  { key: 'task', label: t('cazalla.activity.newTask'), icon: ListTodo, run: openTaskDialog }
+  { key: 'task', label: t('cazalla.activity.newTask'), icon: ListTodo, run: openTaskDialog },
+  { key: 'kanban', label: t('cazalla.activity.kanban'), icon: Kanban, run: () => layout.TOGGLE_KANBAN() }
 ])
 </script>
 

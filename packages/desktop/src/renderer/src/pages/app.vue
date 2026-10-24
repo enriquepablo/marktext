@@ -35,6 +35,7 @@
       <export-setting-dialog />
       <rename />
       <import-modal />
+      <kanban-view v-if="init && cazallaLayout.mainView === 'kanban'" />
     </div>
     <daily-notes-panel v-if="init" />
   </div>
@@ -56,6 +57,8 @@ import Rename from '@/components/rename/index.vue'
 import ImportModal from '@/components/import/index.vue'
 import DailyNotesPanel from '@cazalla/renderer/dailyNotes/Panel.vue'
 import ActivityBar from '@cazalla/renderer/activityBar/ActivityBar.vue'
+import KanbanView from '@cazalla/renderer/kanban/KanbanView.vue'
+import { useCazallaLayoutStore } from '@cazalla/renderer/core/layout'
 import bus from '@/bus'
 import { DEFAULT_STYLE } from '@/config'
 import { useLayoutStore } from '@/store/layout'
@@ -71,6 +74,7 @@ const mainStore = useMainStore()
 const editorStore = useEditorStore()
 const preferencesStore = usePreferencesStore()
 const layoutStore = useLayoutStore()
+const cazallaLayout = useCazallaLayoutStore()
 const projectStore = useProjectStore()
 const listenForMainStore = useListenForMainStore()
 const autoUpdateStore = useAutoUpdatesStore()
