@@ -18,7 +18,8 @@
       "exists": "A file already exists at {file}.",
       "duplicateSlug": "The slug {slug} is already used.",
       "noContentFolder": "Set a content folder first (Preferences › General › Startup › Open default directory).",
-      "created": "Created {file}"
+      "created": "Created {file}",
+      "noProjects": "Create a project first."
     },
     "person": {
       "title": "New person",
@@ -49,6 +50,16 @@
       "leader": "Leader",
       "service": "Service",
       "path": "Folder (relative to the content folder)"
+    },
+    "note": {
+      "title": "New note",
+      "name": "Title",
+      "project": "Project"
+    },
+    "task": {
+      "title": "New task",
+      "name": "Title",
+      "due": "Due"
     }
   }
 }

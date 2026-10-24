@@ -69,6 +69,7 @@ cazalla/
   renderer/dailyNotes/      util.ts, store.ts, i18n.ts, commands.ts, locales/, Panel.vue, Calendar.vue, NoteEditor.vue
   renderer/core/            frontmatter.ts, slug.ts, time.ts, fs.ts, contentFolder.ts (shared by every item)
   renderer/metadata/        types.ts, store.ts, create.ts, dialogs.ts (items 2, 3 and 6)
+  renderer/tasks/           types.ts, create.ts (notes and tasks), store.ts (task index), dialogs.ts (item 4)
   renderer/core/i18n.ts     registerLocales(): runtime merge of cazalla locale bundles
   renderer/core/layout.ts   reservedWidth = activity bar + daily notes panel
   renderer/dialogs/         EntityDialog.vue, a field-spec driven el-dialog opened by the bus event cazalla:dialog

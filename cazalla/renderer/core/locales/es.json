@@ -18,7 +18,8 @@
       "exists": "Ya existe un archivo en {file}.",
       "duplicateSlug": "El slug {slug} ya está en uso.",
       "noContentFolder": "Primero elija una carpeta de contenido (Preferencias › General › Inicio › Abrir directorio predeterminado).",
-      "created": "Creado {file}"
+      "created": "Creado {file}",
+      "noProjects": "Cree primero un proyecto."
     },
     "person": {
       "title": "Nueva persona",
@@ -49,6 +50,16 @@
       "leader": "Responsable",
       "service": "Servicio",
       "path": "Carpeta (relativa a la carpeta de contenido)"
+    },
+    "note": {
+      "title": "Nueva nota",
+      "name": "Título",
+      "project": "Proyecto"
+    },
+    "task": {
+      "title": "Nueva tarea",
+      "name": "Título",
+      "due": "Vencimiento"
     }
   }
 }
