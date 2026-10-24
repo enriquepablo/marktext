@@ -76,6 +76,7 @@ cazalla/
   renderer/panes/           tree.ts (pure layout tree), store.ts, PaneLayout.vue, FilePane.vue (second Muya instance per pane), sidebarMenu.ts (item 7)
   renderer/explorer/        Explorer.vue (el-tree file explorer, all files, drag and drop), move.ts (move with metadata sync), links.ts (link rewriting) (item 15)
   renderer/pdf/             PdfPane.vue (vue-pdf-embed viewer as a pane leaf), panes/linkRouter.ts routes .pdf and .excalidraw links to panes (item 12)
+  renderer/drawings/        DrawingPane.vue (Excalidraw React component in a pane, react + react-dom), create.ts, dialogs.ts (item 11)
   renderer/core/i18n.ts     registerLocales(): runtime merge of cazalla locale bundles
   renderer/core/layout.ts   reservedWidth = activity bar + daily notes panel
   renderer/dialogs/         EntityDialog.vue, a field-spec driven el-dialog opened by the bus event cazalla:dialog
@@ -112,3 +113,7 @@ The upstream editor stays the primary pane. Secondary panes are `FilePane` compo
 ## Explorer (item 15)
 
 The sidebar's file view is `Explorer.vue`, an `el-tree` over the open roots. It lists every file (hidden entries and `node_modules` excluded), opens markdown as tabs and other files with the system opener, and moves entries by drag and drop or rename. A move rewrites project `path`s, task `project` and `path`, the parent's `subtasks` for single task files, and every relative markdown link under the content folder (`move.ts`, `links.ts`). Wiki links are not rewritten. The upstream watcher reports only markdown and folders, so non-markdown changes made outside the app appear after Refresh or on re-expanding the folder. The upstream inline new/rename inputs are replaced by dialogs.
+
+## Drawings (item 11)
+
+`DrawingPane.vue` mounts the official `@excalidraw/excalidraw` React component into a pane with `react-dom`'s `createRoot`; React is used nowhere else. Scenes are saved as `.excalidraw` JSON one second after the last change, and PNG or SVG exports are written next to the drawing. Excalidraw loads its fonts from its default CDN; shipping them locally (`window.EXCALIDRAW_ASSET_PATH`) is a follow-up, so custom fonts fall back to system fonts offline.

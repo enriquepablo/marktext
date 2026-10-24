@@ -8,7 +8,8 @@
       "newTask": "New task",
       "kanban": "Kanban board",
       "effortReport": "Effort report",
-      "invoice": "Invoice"
+      "invoice": "Invoice",
+      "newDrawing": "New drawing"
     },
     "dialog": {
       "cancel": "Cancel",
@@ -127,6 +128,14 @@
       "zoomOut": "Zoom out",
       "missing": "File not found: {file}",
       "loadError": "The PDF could not be read."
+    },
+    "drawing": {
+      "title": "New drawing",
+      "name": "Name",
+      "exportPng": "Export as PNG next to the drawing",
+      "exportSvg": "Export as SVG next to the drawing",
+      "missing": "File not found: {file}",
+      "loadError": "The drawing could not be read."
     }
   }
 }

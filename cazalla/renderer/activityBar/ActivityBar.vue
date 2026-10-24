@@ -26,7 +26,7 @@
 <script setup lang="ts">
 import { computed, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Building2, ClipboardList, FilePlus, FolderPlus, Kanban, ListTodo, Receipt, UserPlus } from 'lucide-vue-next'
+import { Building2, ClipboardList, FilePlus, FolderPlus, Kanban, ListTodo, PenTool, Receipt, UserPlus } from 'lucide-vue-next'
 import IconTooltip from '@/components/iconTooltip/index.vue'
 import EntityDialog from '../dialogs/EntityDialog.vue'
 import { registerLocales } from '../core/i18n'
@@ -38,6 +38,7 @@ import { useCazallaLayoutStore } from '../core/layout'
 import { listenForSidebarKanban } from '../kanban/sidebarMenu'
 import { listenForSubtaskMenu } from '../tasks/subtaskMenu'
 import { openInvoiceDialog, openReportDialog } from '../billing/dialogs'
+import { openDrawingDialog } from '../drawings/dialogs'
 import { usePaneStore } from '../panes/store'
 import { listenForSidebarOpenInSplit } from '../panes/sidebarMenu'
 import en from '../core/locales/en.json'
@@ -66,6 +67,7 @@ const entries = computed<Entry[]>(() => [
   { key: 'project', label: t('cazalla.activity.newProject'), icon: FolderPlus, run: openProjectDialog },
   { key: 'note', label: t('cazalla.activity.newNote'), icon: FilePlus, run: openNoteDialog },
   { key: 'task', label: t('cazalla.activity.newTask'), icon: ListTodo, run: openTaskDialog },
+  { key: 'drawing', label: t('cazalla.activity.newDrawing'), icon: PenTool, run: openDrawingDialog },
   { key: 'kanban', label: t('cazalla.activity.kanban'), icon: Kanban, run: () => layout.TOGGLE_KANBAN() },
   { key: 'report', label: t('cazalla.activity.effortReport'), icon: ClipboardList, run: openReportDialog },
   { key: 'invoice', label: t('cazalla.activity.invoice'), icon: Receipt, run: openInvoiceDialog }

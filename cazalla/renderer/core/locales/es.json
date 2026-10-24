@@ -8,7 +8,8 @@
       "newTask": "Nueva tarea",
       "kanban": "Tablero kanban",
       "effortReport": "Informe de horas",
-      "invoice": "Factura"
+      "invoice": "Factura",
+      "newDrawing": "Nuevo dibujo"
     },
     "dialog": {
       "cancel": "Cancelar",
@@ -127,6 +128,14 @@
       "zoomOut": "Alejar",
       "missing": "Archivo no encontrado: {file}",
       "loadError": "No se pudo leer el PDF."
+    },
+    "drawing": {
+      "title": "Nuevo dibujo",
+      "name": "Nombre",
+      "exportPng": "Exportar como PNG junto al dibujo",
+      "exportSvg": "Exportar como SVG junto al dibujo",
+      "missing": "Archivo no encontrado: {file}",
+      "loadError": "No se pudo leer el dibujo."
     }
   }
 }
