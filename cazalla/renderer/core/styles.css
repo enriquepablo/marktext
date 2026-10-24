@@ -1,12 +1,19 @@
 /* Global rules for cazalla features; loaded once from the activity bar. */
 
 /* Frontmatter blocks read as metadata: 2 pt below the body size. */
-.mu-container pre.front-matter {
+.mu-container pre.mu-frontmatter {
   font-size: calc(1em - 2pt);
 }
 
-/* Inline math sits on the text baseline instead of floating at middle height. */
-.mu-container .mu-math,
-.mu-container .mu-math > .mu-math-render:not(.mu-math-error) {
+/* Inline math on the text baseline. Muya wraps a hidden formula in an
+   inline-block whose first child is a zero-size span holding the source; the
+   wrapper's baseline then comes from that span, not from KaTeX. Letting the
+   wrapper flow inline hands the baseline to the KaTeX output. Block display
+   math (a paragraph that is only formulas) keeps Muya's centred block. */
+.mu-container .mu-hide.mu-math:not(.mu-display-math) {
+  display: inline;
+  vertical-align: baseline;
+}
+.mu-container .mu-hide.mu-math:not(.mu-display-math) > .mu-math-render {
   vertical-align: baseline;
 }

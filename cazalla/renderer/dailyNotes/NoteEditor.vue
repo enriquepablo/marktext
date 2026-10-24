@@ -120,7 +120,7 @@ onBeforeUnmount(() => {
   overflow-y: auto;
 }
 /* The frontmatter never changes by hand here; the heading above carries the date. */
-.dn-note-editor :deep(pre.front-matter) {
+.dn-note-editor :deep(pre.mu-frontmatter) {
   display: none;
 }
 /* The engine's default page width and margins are sized for the main editor. */

@@ -798,3 +798,7 @@ the math symbols much above the normal text
 now we can see the title/date headeer in the dailies
 but still can see the box with the rest of the frontmatter
 which we don't want to se
+
+## Status
+
+Fixed on 2026-10-24. The frontmatter selector used the class `front-matter`; Muya's block is `pre.mu-frontmatter`, so the daily-note editor now hides that and the 2 pt rule targets it too. The math rule had set `vertical-align: baseline` on the inline-block wrapper, whose baseline comes from the zero-size source span; the wrapper now flows inline so KaTeX provides the baseline. Checked by reading Muya's inline-math renderer and CSS; not seen on screen here, since this machine has no display.
