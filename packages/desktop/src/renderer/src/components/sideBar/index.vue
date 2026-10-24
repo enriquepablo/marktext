@@ -22,10 +22,7 @@
       </icon-tooltip>
     </div>
     <div class="sidebar-content">
-      <tree
-        v-if="rightColumn === 'files'"
-        :tabs="tabs"
-      />
+      <cazalla-explorer v-if="rightColumn === 'files'" />
       <side-bar-search
         v-else-if="rightColumn === 'search'"
         @back="returnToFiles"
@@ -68,7 +65,7 @@ import { useEditorStore } from '@/store/editor'
 
 import { Search, Setting, Plus } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n'
-import Tree from './tree.vue'
+import CazallaExplorer from '@cazalla/renderer/explorer/Explorer.vue'
 import SideBarSearch from './search.vue'
 import IconTooltip from '@/components/iconTooltip/index.vue'
 import { storeToRefs } from 'pinia'

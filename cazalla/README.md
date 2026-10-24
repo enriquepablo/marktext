@@ -74,6 +74,7 @@ cazalla/
   renderer/kanban/          KanbanView.vue (six-column board over the task index, vue-draggable-plus), sidebarMenu.ts (item 5)
   renderer/billing/         data.ts, reportPdf.ts, invoicePdf.ts (ported from cazalla-net.plugin, pdf-lib), dialogs.ts (item 9); output under organizations/<slug>/assets/invoices/YYYY/MM
   renderer/panes/           tree.ts (pure layout tree), store.ts, PaneLayout.vue, FilePane.vue (second Muya instance per pane), sidebarMenu.ts (item 7)
+  renderer/explorer/        Explorer.vue (el-tree file explorer, all files, drag and drop), move.ts (move with metadata sync), links.ts (link rewriting) (item 15)
   renderer/core/i18n.ts     registerLocales(): runtime merge of cazalla locale bundles
   renderer/core/layout.ts   reservedWidth = activity bar + daily notes panel
   renderer/dialogs/         EntityDialog.vue, a field-spec driven el-dialog opened by the bus event cazalla:dialog
@@ -91,6 +92,7 @@ Upstream files are changed only where a hook is unavoidable, each by one to thre
 
 - `packages/desktop/electron.vite.config.ts`, `vitest.config.ts`, `tsconfig.base.json`, `tsconfig.json`, `eslint.config.js`: the `@cazalla` alias and include paths.
 - `packages/desktop/src/renderer/src/pages/app.vue`: mount the activity bar, the kanban overlay and the panel; wrap the recent view and the editor in the pane layout.
+- `packages/desktop/src/renderer/src/components/sideBar/index.vue`: render the cazalla explorer in place of the upstream `<tree>` (the upstream tree components stay, unused).
 - `packages/desktop/src/renderer/src/contextMenu/sideBar/index.ts`: the "Open in split panel" and "Kanban board" entries at the end of the file-tree context menu.
 - `packages/desktop/src/main/contextMenu/editor/index.ts`: cazalla entries spread at the end of the editor context menu; `src/shared/types/ipc.ts` gains their channels.
 - `packages/desktop/src/renderer/src/components/editorWithTabs/index.vue`: subtract the panel width.
@@ -104,3 +106,7 @@ Panel visibility and width are stored in `localStorage`, not in the preferences 
 ## Split panels (item 7)
 
 The upstream editor stays the primary pane. Secondary panes are `FilePane` components, each with its own Muya instance bound to a file path, autosaving one second after the last change and reloading on external change when nothing is pending. The layout tree is kept in `localStorage['cazalla-panes']`. Secondary panes have no tabs, no source-code mode, and menu shortcuts (formatting, find) act on the primary pane. The daily-notes editor is still its own component; folding it into `FilePane` is a follow-up.
+
+## Explorer (item 15)
+
+The sidebar's file view is `Explorer.vue`, an `el-tree` over the open roots. It lists every file (hidden entries and `node_modules` excluded), opens markdown as tabs and other files with the system opener, and moves entries by drag and drop or rename. A move rewrites project `path`s, task `project` and `path`, the parent's `subtasks` for single task files, and every relative markdown link under the content folder (`move.ts`, `links.ts`). Wiki links are not rewritten. The upstream watcher reports only markdown and folders, so non-markdown changes made outside the app appear after Refresh or on re-expanding the folder. The upstream inline new/rename inputs are replaced by dialogs.

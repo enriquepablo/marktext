@@ -105,6 +105,21 @@
       "openInSplit": "Open in split panel",
       "noFile": "Open a file first.",
       "missing": "File not found: {file}"
+    },
+    "explorer": {
+      "title": "Explorer",
+      "name": "Name",
+      "newFile": "New file",
+      "newFolder": "New folder",
+      "rename": "Rename",
+      "trash": "Move to trash",
+      "copyPath": "Copy path",
+      "showInFolder": "Show in folder",
+      "refresh": "Refresh",
+      "moved": "Moved {name}; {links} links updated",
+      "exists": "Already exists: {path}",
+      "into-self": "Cannot move a folder into itself: {path}",
+      "missing": "Not found: {path}"
     }
   }
 }

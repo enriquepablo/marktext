@@ -105,6 +105,21 @@
       "openInSplit": "Abrir en panel dividido",
       "noFile": "Abra primero un archivo.",
       "missing": "Archivo no encontrado: {file}"
+    },
+    "explorer": {
+      "title": "Explorador",
+      "name": "Nombre",
+      "newFile": "Nuevo archivo",
+      "newFolder": "Nueva carpeta",
+      "rename": "Renombrar",
+      "trash": "Mover a la papelera",
+      "copyPath": "Copiar ruta",
+      "showInFolder": "Mostrar en la carpeta",
+      "refresh": "Actualizar",
+      "moved": "Movido {name}; {links} enlaces actualizados",
+      "exists": "Ya existe: {path}",
+      "into-self": "No se puede mover una carpeta dentro de sí misma: {path}",
+      "missing": "No encontrado: {path}"
     }
   }
 }
