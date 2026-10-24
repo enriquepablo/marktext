@@ -1,5 +1,5 @@
 import { serialize } from '../core/frontmatter'
-import { exists, join, writeText } from '../core/fs'
+import { ensureDir, exists, join, writeText } from '../core/fs'
 import { slug as toSlug } from '../core/slug'
 import { METADATA_DIR } from './store'
 import type { MetadataKind } from './types'
@@ -25,6 +25,17 @@ export interface OrganizationInput {
   canBeInvoiced?: boolean
   billing?: string[] | null
 }
+
+export interface ProjectInput {
+  name: string
+  organization?: string | null
+  leader?: string | null
+  service?: string | null
+  // Relative to the content folder; empty means `projects/<slug>`.
+  path?: string | null
+}
+
+export const PROJECT_SUBDIRS = ['archived', 'notes', 'tasks'] as const
 
 export class CreateError extends Error {
   constructor(
@@ -91,4 +102,32 @@ export const createOrganization = (
   if (input.canBeInvoiced) fields.billing = input.billing ?? []
   if (input.canInvoice || input.canBeInvoiced) fields.invoice_details = lines(input.invoice_details)
   return writeRecord(contentFolder, 'organizations', knownSlugs, fields)
+}
+
+const normalizePath = (p: string | null | undefined, slug: string): string => {
+  const trimmed = (p ?? '').trim().replace(/\\/g, '/').replace(/^\/+|\/+$/g, '')
+  return trimmed || `projects/${slug}`
+}
+
+/**
+ * Writes `_metadata/projects/<slug>.md` and creates the project folder with
+ * `archived/`, `notes/` and `tasks/`. Returns the metadata file path.
+ */
+export const createProject = async(
+  contentFolder: string,
+  knownSlugs: Iterable<string>,
+  input: ProjectInput
+): Promise<string> => {
+  const slug = toSlug(input.name)
+  const path = normalizePath(input.path, slug)
+  const file = await writeRecord(contentFolder, 'projects', knownSlugs, {
+    name: input.name.trim(),
+    slug,
+    organization: nullable(input.organization),
+    leader: nullable(input.leader),
+    service: nullable(input.service),
+    path
+  })
+  for (const sub of PROJECT_SUBDIRS) await ensureDir(join(contentFolder, path, sub))
+  return file
 }

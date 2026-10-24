@@ -26,12 +26,12 @@
 <script setup lang="ts">
 import { computed, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Building2, UserPlus } from 'lucide-vue-next'
+import { Building2, FolderPlus, UserPlus } from 'lucide-vue-next'
 import IconTooltip from '@/components/iconTooltip/index.vue'
 import EntityDialog from '../dialogs/EntityDialog.vue'
 import { registerLocales } from '../core/i18n'
 import { useMetadataStore } from '../metadata/store'
-import { openOrganizationDialog, openPersonDialog } from '../metadata/dialogs'
+import { openOrganizationDialog, openPersonDialog, openProjectDialog } from '../metadata/dialogs'
 import en from '../core/locales/en.json'
 import es from '../core/locales/es.json'
 
@@ -49,7 +49,8 @@ interface Entry {
 // Later roadmap items append entries here: project, note, task, kanban, report, invoice.
 const entries = computed<Entry[]>(() => [
   { key: 'person', label: t('cazalla.activity.newPerson'), icon: UserPlus, run: openPersonDialog },
-  { key: 'organization', label: t('cazalla.activity.newOrganization'), icon: Building2, run: openOrganizationDialog }
+  { key: 'organization', label: t('cazalla.activity.newOrganization'), icon: Building2, run: openOrganizationDialog },
+  { key: 'project', label: t('cazalla.activity.newProject'), icon: FolderPlus, run: openProjectDialog }
 ])
 </script>
 

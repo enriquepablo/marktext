@@ -41,6 +41,14 @@
       "invoiceDetails": "Líneas de dirección en factura",
       "canBeInvoiced": "Puede ser facturada",
       "billing": "Proyectos facturados"
+    },
+    "project": {
+      "title": "Nuevo proyecto",
+      "name": "Nombre",
+      "organization": "Organización",
+      "leader": "Responsable",
+      "service": "Servicio",
+      "path": "Carpeta (relativa a la carpeta de contenido)"
     }
   }
 }

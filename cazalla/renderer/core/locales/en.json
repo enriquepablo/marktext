@@ -41,6 +41,14 @@
       "invoiceDetails": "Invoice address lines",
       "canBeInvoiced": "Can be invoiced",
       "billing": "Projects billed"
+    },
+    "project": {
+      "title": "New project",
+      "name": "Name",
+      "organization": "Organization",
+      "leader": "Leader",
+      "service": "Service",
+      "path": "Folder (relative to the content folder)"
     }
   }
 }

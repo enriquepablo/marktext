@@ -3,7 +3,7 @@ import { t } from '@/i18n'
 import notice from '@/services/notification'
 import { DIALOG_EVENT, type DialogSpec, type Option, type Values } from '../dialogs/types'
 import { useContentFolder } from '../core/contentFolder'
-import { CreateError, createOrganization, createPerson } from './create'
+import { CreateError, createOrganization, createPerson, createProject } from './create'
 import { useMetadataStore } from './store'
 
 const str = (v: unknown): string | null => (v === null || v === undefined ? null : String(v))
@@ -103,6 +103,34 @@ export const openOrganizationDialog = (): void =>
           canBeInvoiced: !!v.canBeInvoiced,
           billing: Array.isArray(v.billing) ? v.billing.map(String) : [],
           invoice_details: str(v.invoice_details)
+        })
+        await afterCreate(file)
+      } catch (err) {
+        return failure(err)
+      }
+    }
+  })
+
+export const openProjectDialog = (): void =>
+  open({
+    title: t('cazalla.project.title'),
+    fields: [
+      { key: 'name', label: t('cazalla.project.name'), type: 'text', required: true },
+      { key: 'organization', label: t('cazalla.project.organization'), type: 'select', options: organizationOptions },
+      { key: 'leader', label: t('cazalla.project.leader'), type: 'select', options: personOptions },
+      { key: 'service', label: t('cazalla.project.service'), type: 'text' },
+      { key: 'path', label: t('cazalla.project.path'), type: 'text', placeholder: 'projects/<slug>' }
+    ],
+    submit: async(v: Values) => {
+      const folder = useContentFolder().value
+      if (!folder) return t('cazalla.dialog.noContentFolder')
+      try {
+        const file = await createProject(folder, Object.keys(useMetadataStore().projects), {
+          name: String(v.name),
+          organization: str(v.organization),
+          leader: str(v.leader),
+          service: str(v.service),
+          path: str(v.path)
         })
         await afterCreate(file)
       } catch (err) {

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const files = vi.hoisted(() => new Map<string, string>())
+const dirs = vi.hoisted(() => new Set<string>())
 
 vi.hoisted(() => {
   const w = globalThis as unknown as Record<string, unknown>
@@ -8,14 +9,18 @@ vi.hoisted(() => {
   win.path = { join: (...p: string[]) => p.join('/'), sep: '/' }
   win.fileUtils = {
     pathExists: async(p: string) => files.has(p),
-    outputFile: async(p: string, d: string) => void files.set(p, d)
+    outputFile: async(p: string, d: string) => void files.set(p, d),
+    ensureDir: async(p: string) => void dirs.add(p)
   }
 })
 
-import { CreateError, createOrganization, createPerson, metadataFile } from '@cazalla/renderer/metadata/create'
+import { CreateError, createOrganization, createPerson, createProject, metadataFile } from '@cazalla/renderer/metadata/create'
 
 describe('metadata creation', () => {
-  beforeEach(() => files.clear())
+  beforeEach(() => {
+    files.clear()
+    dirs.clear()
+  })
 
   it('writes a person with the sample key order and bare nulls', async() => {
     const file = await createPerson('/vault', [], { name: ' Ana López ', organization: 'acme', email: '' })
@@ -52,5 +57,25 @@ describe('metadata creation', () => {
 
     const client = await createOrganization('/vault', [], { name: 'Acme', canBeInvoiced: true, billing: ['site'] })
     expect(files.get(client)).toBe('---\nname: Acme\nslug: acme\nleader:\nphone:\nbilling:\n  - site\ninvoice_details: []\n---\n')
+  })
+})
+
+describe('project creation', () => {
+  beforeEach(() => {
+    files.clear()
+    dirs.clear()
+  })
+
+  it('writes the record and scaffolds the folder with a default path', async() => {
+    const file = await createProject('/vault', [], { name: 'Web Site', organization: 'acme', leader: 'ana-lopez', service: 'Development' })
+    expect(file).toBe('/vault/_metadata/projects/web-site.md')
+    expect(files.get(file)).toBe('---\nname: Web Site\nslug: web-site\norganization: acme\nleader: ana-lopez\nservice: Development\npath: projects/web-site\n---\n')
+    expect([...dirs].sort()).toEqual(['/vault/projects/web-site/archived', '/vault/projects/web-site/notes', '/vault/projects/web-site/tasks'])
+  })
+
+  it('normalizes an explicit path', async() => {
+    const file = await createProject('/vault', [], { name: 'Ops', path: ' /work/ops/ ' })
+    expect(files.get(file)).toContain('path: work/ops\n')
+    expect(dirs.has('/vault/work/ops/tasks')).toBe(true)
   })
 })
