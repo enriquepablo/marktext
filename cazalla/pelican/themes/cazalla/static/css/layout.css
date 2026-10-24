@@ -1,0 +1,25 @@
+body {
+    max-width: 40rem;
+    margin: 0 auto;
+    padding: 0 1rem;
+    font-family: serif;
+    line-height: 1.6;
+    color: #222;
+    background: #fff;
+}
+
+h1 {
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+}
+
+
+main {
+    min-height: calc(100vh);
+    display: flex;
+    flex-direction: column;
+}
+
+article {
+    flex: 1;
+}

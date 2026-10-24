@@ -36,7 +36,7 @@ import { moveEntry, MoveError } from '@cazalla/renderer/explorer/move'
 import type { Project } from '@cazalla/renderer/metadata/types'
 
 const V = '/vault'
-const site: Project = { name: 'Site', slug: 'site', organization: 'acme', leader: null, service: null, path: 'projects/site', file: `${V}/_metadata/projects/site.md` }
+const site: Project = { name: 'Site', slug: 'site', organization: 'acme', leader: null, path: 'projects/site', file: `${V}/_metadata/projects/site.md` }
 const ops: Project = { ...site, name: 'Ops', slug: 'ops', path: 'projects/ops', file: `${V}/_metadata/projects/ops.md` }
 const ctx = { contentFolder: V, projects: [site, ops] }
 

@@ -30,7 +30,6 @@ export interface ProjectInput {
   name: string
   organization?: string | null
   leader?: string | null
-  service?: string | null
   // Relative to the content folder; empty means `projects/<slug>`.
   path?: string | null
 }
@@ -132,7 +131,6 @@ export const createProject = async(
     slug,
     organization: nullable(input.organization),
     leader: nullable(input.leader),
-    service: nullable(input.service),
     path
   })
   for (const sub of PROJECT_SUBDIRS) await ensureDir(join(contentFolder, path, sub))

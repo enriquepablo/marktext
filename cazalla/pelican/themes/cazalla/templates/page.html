@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} — {{ SITENAME }}{% endblock %}
+
+{% block content %}
+{% macro nav_links() %}
+        <div class="nav-row nav-row-top">
+            {% if page.nav_parent %}<a class="nav-up" href="{{ SITEURL }}/{{ page.nav_parent.url }}" title="{{ page.nav_parent.title }}">&#x2191;</a>{% endif %}
+        </div>
+        <div class="nav-row nav-row-mid">
+            {% if page.nav_prev %}<a class="nav-left" href="{{ SITEURL }}/{{ page.nav_prev.url }}" title="{{ page.nav_prev.title }}">&#x2190;</a>{% endif %}
+            {% if page.nav_next %}<a class="nav-right" href="{{ SITEURL }}/{{ page.nav_next.url }}" title="{{ page.nav_next.title }}">&#x2192;</a>{% endif %}
+        </div>
+        <div class="nav-row nav-row-bot">
+            {% if page.nav_child %}<a class="nav-down" href="{{ SITEURL }}/{{ page.nav_child.url }}" title="{{ page.nav_child.title }}">&#x2193;</a>{% endif %}
+        </div>
+{% endmacro %}
+
+<header class="site-header">
+    <div class="header-col header-left">
+        {% set segments = page.slug.strip('/').split('/') %}
+        {% for seg in segments %}
+        {% if seg %}<a href="{{ SITEURL }}/{{ segments[:loop.index] | join('/') }}">{{ seg }}</a>{% endif %}
+        {% endfor %}
+    </div>
+    <div class="header-col header-title">
+        <h1>{{ page.title }}</h1>
+    </div>
+</header>
+
+<article>
+    {{ page.content }}
+</article>
+
+<footer class="site-footer">
+    <div class="footer-meta">&copy; {{ (page.modified or page.date).year }} Enrique Pérez Arnaud &lt;enrique at cazalla dot net&gt;{% if page.date or page.modified %}<br>{% endif %}{% if page.date %}created: {{ page.date | strftime('%d %B %Y, %H:%M') }}{% endif %}{% if page.date and page.modified %}, {% endif %}{% if page.modified %}modified: {{ page.modified | strftime('%d %B %Y, %H:%M') }}{% endif %}</div>
+    <nav class="arrow-nav nav-bottom">{{ nav_links() }}</nav>
+</footer>
+
+<script>
+(function () {
+    var bottom = document.querySelector('.arrow-nav.nav-bottom');
+    function sync() {
+        bottom.hidden = document.documentElement.scrollHeight <= window.innerHeight;
+    }
+    sync();
+    window.addEventListener('resize', sync, { passive: true });
+}());
+</script>
+{% endblock %}

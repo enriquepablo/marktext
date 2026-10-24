@@ -9,7 +9,9 @@
       "kanban": "Kanban board",
       "effortReport": "Effort report",
       "invoice": "Invoice",
-      "newDrawing": "New drawing"
+      "newDrawing": "New drawing",
+      "toggleLeft": "Toggle left panel",
+      "toggleRight": "Toggle right panel"
     },
     "dialog": {
       "cancel": "Cancel",
@@ -49,7 +51,6 @@
       "name": "Name",
       "organization": "Organization",
       "leader": "Leader",
-      "service": "Service",
       "path": "Folder (relative to the content folder)"
     },
     "note": {

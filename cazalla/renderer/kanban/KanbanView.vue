@@ -47,6 +47,7 @@
         <VueDraggable
           v-model="lists[status]"
           class="kanban-cards"
+          :class="{ sink: status === 'archived' }"
           group="cazalla-kanban"
           :animation="150"
           ghost-class="ghost"
@@ -56,6 +57,7 @@
             v-for="card in lists[status]"
             :key="card.file"
             class="kanban-card"
+            :class="{ sinking: sinking === card.file }"
             :data-file="card.file"
             :title="card.file"
             @dblclick="openTask(card)"
@@ -77,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Kanban, X } from 'lucide-vue-next'
 import { VueDraggable } from 'vue-draggable-plus'
@@ -113,12 +115,15 @@ const lists = reactive<Record<TaskStatus, TaskRecord[]>>({
   archived: []
 })
 
+// The archived column is a sink: it never lists cards, a dropped card fades out while the archive runs.
+const sinking = ref<string | null>(null)
 const rebuild = (): void => {
   const visible = tasks.list.filter((task) => task.kanban && (!projectSlug.value || task.project === projectSlug.value))
   for (const status of TASK_STATUSES) {
-    lists[status] = visible.filter((task) => task.status === status).sort(byDue)
+    lists[status] = status === 'archived' ? [] : visible.filter((task) => task.status === status).sort(byDue)
   }
 }
+const wait = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 watch([() => tasks.tasks, projectSlug], rebuild, { immediate: true, deep: true })
 
 const onAdd = async(event: { item: HTMLElement }, status: TaskStatus): Promise<void> => {
@@ -129,7 +134,8 @@ const onAdd = async(event: { item: HTMLElement }, status: TaskStatus): Promise<v
     if (status === 'archived') {
       const project = task.project ? metadata.projects[task.project] : undefined
       if (!contentFolder.value || !project) throw new Error(t('cazalla.kanban.noProject'))
-      await archiveTask(contentFolder.value, project, task)
+      sinking.value = task.file
+      await Promise.all([archiveTask(contentFolder.value, project, task), wait(300)])
       await tasks.LOAD()
     } else {
       await tasks.UPDATE(task.file, { status })
@@ -138,6 +144,7 @@ const onAdd = async(event: { item: HTMLElement }, status: TaskStatus): Promise<v
     const message = err instanceof HasSubtasksError ? t('cazalla.kanban.hasSubtasks', { slug: err.slug }) : String(err)
     notice.notify({ title: t('cazalla.kanban.title'), type: 'warning', message })
   }
+  sinking.value = null
   rebuild()
 }
 
@@ -233,6 +240,20 @@ const openTask = (task: TaskRecord): void => {
 }
 .kanban-card.ghost {
   opacity: 0.4;
+}
+.kanban-cards.sink {
+  min-height: 120px;
+  border: 1px dashed var(--itemBgColor);
+  border-radius: 4px;
+}
+.kanban-card.sinking {
+  animation: sink 300ms ease-in forwards;
+}
+@keyframes sink {
+  to {
+    opacity: 0;
+    transform: scale(0.6) rotate(-6deg);
+  }
 }
 .card-title {
   font-size: 13px;

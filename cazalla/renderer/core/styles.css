@@ -1,0 +1,6 @@
+/* Global rules for cazalla features; loaded once from the activity bar. */
+
+/* Frontmatter blocks read as metadata: 2 pt below the body size. */
+.mu-container pre.front-matter {
+  font-size: calc(1em - 2pt);
+}

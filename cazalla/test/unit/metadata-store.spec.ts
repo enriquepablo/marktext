@@ -61,7 +61,7 @@ const seed = (): void => {
   files.set(`${M}/people/bob.md`, '---\nname: Bob\n---\n')
   files.set(`${M}/organizations/acme.md`, '---\nname: Acme\nslug: acme\nleader: ana-lopez\nbilling:\n  - site\ninvoice_details:\n  - Acme Inc\n  - Main St 1\n---\n')
   files.set(`${M}/organizations/us.md`, '---\nname: cazalla.net\nslug: cazalla-net\nprice_hour: 55\ninvoice_number: "0026"\niban: ES62\nswift: INGDESMMXXX\npayment_details: 30 days\n---\n')
-  files.set(`${M}/projects/site.md`, '---\nname: Web site\nslug: site\norganization: acme\nleader: ana-lopez\nservice: Development\npath: projects/site/\n---\n')
+  files.set(`${M}/projects/site.md`, '---\nname: Web site\nslug: site\norganization: acme\nleader: ana-lopez\npath: projects/site/\n---\n')
   files.set(`${M}/projects/dup.md`, '---\nname: Duplicate\nslug: site\n---\n')
   files.set(`${M}/projects/broken.md`, '# not metadata\n')
 }

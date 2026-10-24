@@ -118,7 +118,6 @@ export const openProjectDialog = (): void =>
       { key: 'name', label: t('cazalla.project.name'), type: 'text', required: true },
       { key: 'organization', label: t('cazalla.project.organization'), type: 'select', options: organizationOptions },
       { key: 'leader', label: t('cazalla.project.leader'), type: 'select', options: personOptions },
-      { key: 'service', label: t('cazalla.project.service'), type: 'text' },
       { key: 'path', label: t('cazalla.project.path'), type: 'text', placeholder: 'projects/<slug>' }
     ],
     submit: async(v: Values) => {
@@ -129,7 +128,6 @@ export const openProjectDialog = (): void =>
           name: String(v.name),
           organization: str(v.organization),
           leader: str(v.leader),
-          service: str(v.service),
           path: str(v.path)
         })
         await afterCreate(file)

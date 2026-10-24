@@ -69,9 +69,9 @@ describe('project creation', () => {
   })
 
   it('writes the record and scaffolds the folder with a default path', async() => {
-    const file = await createProject('/vault', [], { name: 'Web Site', organization: 'acme', leader: 'ana-lopez', service: 'Development' })
+    const file = await createProject('/vault', [], { name: 'Web Site', organization: 'acme', leader: 'ana-lopez' })
     expect(file).toBe('/vault/_metadata/projects/web-site.md')
-    expect(files.get(file)).toBe('---\nname: Web Site\nslug: web-site\norganization: acme\nleader: ana-lopez\nservice: Development\npath: projects/web-site\n---\n')
+    expect(files.get(file)).toBe('---\nname: Web Site\nslug: web-site\norganization: acme\nleader: ana-lopez\npath: projects/web-site\n---\n')
     expect([...dirs].sort()).toEqual(['/vault/projects/web-site/archived', '/vault/projects/web-site/assets', '/vault/projects/web-site/notes', '/vault/projects/web-site/tasks'])
   })
 

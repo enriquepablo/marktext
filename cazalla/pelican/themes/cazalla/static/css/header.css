@@ -1,0 +1,40 @@
+.site-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 0.5rem 0 0.75rem;
+    border-bottom: 1px solid #ccc;
+}
+
+.header-col {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Left: slug segments stacked as breadcrumb links */
+.header-left {
+    align-items: flex-start;
+    font-size: 0.8rem;
+}
+
+.header-left a {
+    color: #666;
+    text-decoration: none;
+}
+
+.header-left a:hover {
+    text-decoration: underline;
+}
+
+/* Title fills the space to the right of the breadcrumbs, centered */
+.header-title {
+    flex: 1;
+    align-items: center;
+    text-align: center;
+}
+
+.header-title h1 {
+    margin: 0;
+    font-size: 1.4rem;
+}

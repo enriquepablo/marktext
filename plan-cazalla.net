@@ -37,6 +37,8 @@ Implementation order: 2, 3, 6, 4, 5, 8, 9, then 7. Items 3 to 9 depend on 2. Ite
 
 Second round, added 2026-10-24: 10, 15, 12, 11, 14, then 13. Item 10 is fixes. Item 15 (explorer) comes early because items 11 and 12 open their files from it. Item 13 is the largest and last.
 
+Third round, added 2026-10-24: the second "details" section, then 13, 17, 16, and search last. Item 16 depends on search for its document list, and 17 shares its insertion mechanism.
+
 # 1 calendar and daily notes.
 
 Once a base dir is selected
@@ -657,3 +659,72 @@ the card should disappear from the column
 the file moves and renames by dragging in file explorer or in kanban or whatever
 must never break anything
 including links in frontmatter ut also links in content.
+
+## two iconss in left tool bar
+
+one for "Toggle left panel" another for "Toggle right panel".
+both the top most.
+
+## smaller frontmatter
+
+2 pts smaller than content
+
+## Design
+
+Project records lose `service`; the invoice line description becomes the project name followed by the month. Existing files may keep the key; the loader ignores it.
+
+The kanban `archived` column is a sink. It shows no cards. A card dropped there fades and shrinks for 300 ms while the archive procedure runs, then disappears; on failure it snaps back to its column.
+
+Moves and renames go through one procedure (`explorer/move.ts`). It rewrites project `path`, task `project`, `path` and the parent's `subtasks`, and every relative link in content. Frontmatter values are not links except those listed, so no other frontmatter changes.
+
+The activity bar gets two entries at the top: "Toggle left panel" (the sidebar, through the upstream layout toggle) and "Toggle right panel" (the daily notes panel). A separator follows them.
+
+Frontmatter blocks render 2 pt smaller than the body: a global rule on `.mu-container pre.front-matter` in `cazalla/renderer/core/styles.css`, loaded once from the activity bar.
+
+# 15 search
+
+I want decent search.
+not sure what marktext uses.
+if needed, replace with full text indexing engine
+that can deal with PDFs and other assets
+can do fuzzy search
+
+## Design
+
+Upstream search is ripgrep over the sidebar roots: literal or regex, no ranking, no PDFs. It is replaced by a MiniSearch index, chosen for its size, fuzzy and prefix matching, and JSON serialization.
+
+`cazalla/renderer/search/index.ts` builds one index per content folder with the fields `title`, `body`, `tags`, `category`, `project` and `path`. Documents: markdown files (frontmatter fields plus body text), PDFs (text extracted with pdf.js page by page) and drawings (text elements of the scene). Hidden folders are skipped. The index and a map of file mtimes are stored in `<content folder>/.cazalla/search-index.json`; on start the index loads and files whose mtime changed are re-indexed; the explorer's move procedure and the upstream tree events trigger incremental updates. A full rebuild is available from the view.
+
+`cazalla/renderer/search/SearchView.vue` replaces the upstream sidebar search in the `search` column (one hook: the `v-else-if` branch in `sideBar/index.vue`). It has one input, fuzzy and prefix on by default, filters by category, and a result list with title, path and a highlighted snippet. Clicking opens the file in the editor or in a pane by type. Results are ranked by MiniSearch's score with a boost on title.
+
+Open: whether to keep ripgrep as a "regex" mode. Proposed: no; regex users can still use the upstream search from the command palette if it stays reachable.
+
+# 16 link dialog
+
+when editing a document I double type "[" ("[[") i want a dialog box
+with an optional label
+and an href, that can either be typed in
+or chosen from a list of recently created docs
+that can be filtered in a text input,
+searching in all docs by title.
+
+## Design
+
+Trigger: a keystroke listener on the editor container detects `[` typed right after `[` in the same text position. It is installed by a cazalla module from the activity bar and works for the primary editor and file panes.
+
+Dialog: label (optional) and href. The href field is a filterable select over an index of documents by title, most recently created first, with free text allowed; a typed value is kept as written. The list comes from the search index of item 15 (titles and paths), so this item depends on it.
+
+On accept the two `[` characters are removed and `[label](href)` is inserted at the cursor, with the href relative to the current document's folder when a vault document was chosen; the label defaults to the chosen title. The insertion API is settled by the exploration of Muya's cursor and text methods.
+
+# 17 dates
+
+an icon in left tool bar "insert date",
+opens a dialog with
+a checkbox date/datetime, default date,
+and a date/datetime chooser, default now,
+on accept inserts the date/time wherever the cursor is
+
+## Design
+
+An activity-bar entry "Insert date" opens a dialog with a checkbox "include time", a date picker (default today) and, when the checkbox is on, a time picker (default now). On accept the value is inserted at the cursor of the focused editor: `YYYY-MM-DD` or `YYYY-MM-DD HH:mm`. The insertion uses the same mechanism as item 16.
+

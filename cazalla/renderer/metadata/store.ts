@@ -43,7 +43,6 @@ const toProject = (f: Fields, slug: string, file: string): Project => ({
   slug,
   organization: str(f.organization),
   leader: str(f.leader),
-  service: str(f.service),
   path: (str(f.path) ?? `projects/${slug}`).replace(/\/+$/, ''),
   file
 })

@@ -9,7 +9,9 @@
       "kanban": "Tablero kanban",
       "effortReport": "Informe de horas",
       "invoice": "Factura",
-      "newDrawing": "Nuevo dibujo"
+      "newDrawing": "Nuevo dibujo",
+      "toggleLeft": "Mostrar u ocultar panel izquierdo",
+      "toggleRight": "Mostrar u ocultar panel derecho"
     },
     "dialog": {
       "cancel": "Cancelar",
@@ -49,7 +51,6 @@
       "name": "Nombre",
       "organization": "Organización",
       "leader": "Responsable",
-      "service": "Servicio",
       "path": "Carpeta (relativa a la carpeta de contenido)"
     },
     "note": {

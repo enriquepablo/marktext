@@ -14,7 +14,7 @@ vi.hoisted(() => {
 import { createNote, createTask, dueFrom, ExistsError } from '@cazalla/renderer/tasks/create'
 import type { Project } from '@cazalla/renderer/metadata/types'
 
-const project: Project = { name: 'Site', slug: 'site', organization: 'acme', leader: null, service: null, path: 'projects/site', file: '' }
+const project: Project = { name: 'Site', slug: 'site', organization: 'acme', leader: null, path: 'projects/site', file: '' }
 const now = new Date(Date.UTC(2026, 9, 22, 15, 6, 42, 215))
 
 describe('note and task creation', () => {

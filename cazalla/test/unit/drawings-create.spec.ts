@@ -12,7 +12,7 @@ import { createDrawing, drawingSegments, emptyScene } from '@cazalla/renderer/dr
 import { ExistsError } from '@cazalla/renderer/tasks/create'
 import type { Project } from '@cazalla/renderer/metadata/types'
 
-const project: Project = { name: 'Site', slug: 'site', organization: null, leader: null, service: null, path: 'projects/site', file: '' }
+const project: Project = { name: 'Site', slug: 'site', organization: null, leader: null, path: 'projects/site', file: '' }
 const now = new Date(2026, 9, 24)
 
 describe('drawings', () => {

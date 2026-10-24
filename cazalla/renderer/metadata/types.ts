@@ -33,7 +33,6 @@ export interface Project {
   slug: string
   organization: string | null
   leader: string | null
-  service: string | null
   // Project folder relative to the content folder, no trailing slash.
   path: string
   file: string

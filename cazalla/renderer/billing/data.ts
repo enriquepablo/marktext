@@ -131,7 +131,7 @@ export const buildInvoice = (input: InvoiceInput): InvoiceData => {
       .flatMap((t) => effortInPeriod(t, period))
       .reduce((sum, e) => sum + e.hours, 0)
     if (hours > 0) {
-      services.push({ description: `${project.service ?? project.name} ${label}`, quantity: hours, price: issuer.price_hour ?? 0, vat: VAT_RATE })
+      services.push({ description: `${project.name} ${label}`, quantity: hours, price: issuer.price_hour ?? 0, vat: VAT_RATE })
     }
   }
   const total = services.reduce((sum, s) => sum + s.quantity * s.price * (1 + s.vat / 100), 0)

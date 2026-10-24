@@ -15,8 +15,8 @@ import { renderInvoicePdf } from '@cazalla/renderer/billing/invoicePdf'
 import type { Organization, Project } from '@cazalla/renderer/metadata/types'
 import type { TaskRecord } from '@cazalla/renderer/tasks/types'
 
-const project: Project = { name: 'Web site', slug: 'site', organization: 'acme', leader: null, service: 'Development', path: 'projects/site', file: '' }
-const other: Project = { ...project, name: 'Ops', slug: 'ops', service: 'Operations' }
+const project: Project = { name: 'Web site', slug: 'site', organization: 'acme', leader: null, path: 'projects/site', file: '' }
+const other: Project = { ...project, name: 'Ops', slug: 'ops' }
 const task = (slug: string, projectSlug: string, effort: Record<string, number>[]): TaskRecord => ({
   file: `/vault/projects/${projectSlug}/tasks/${slug}.md`, title: slug.toUpperCase(), slug, project: projectSlug, path: '/', status: 'done', kanban: true,
   due: null, effort, subtasks: [], tags: [], date: null, modified: null, archived: false
@@ -60,8 +60,8 @@ describe('billing data', () => {
     expect(invoice.invoiceNumber).toBe('20260027')
     expect(invoice.date).toBe('2026-10-24')
     expect(invoice.services).toEqual([
-      { description: 'Development September 2026', quantity: 9.5, price: 55, vat: 0 },
-      { description: 'Operations September 2026', quantity: 8, price: 55, vat: 0 }
+      { description: 'Web site September 2026', quantity: 9.5, price: 55, vat: 0 },
+      { description: 'Ops September 2026', quantity: 8, price: 55, vat: 0 }
     ])
     expect(invoice.total).toBe(17.5 * 55)
     expect(invoice.bankAccount).toBe('ES62 0000')

@@ -1,24 +1,32 @@
 <template>
   <div class="cazalla-activity-bar">
-    <icon-tooltip
+    <template
       v-for="entry in entries"
       :key="entry.key"
-      :content="entry.label"
-      placement="right"
     >
-      <button
-        type="button"
-        class="plain-button activity-button"
-        :aria-label="entry.label"
-        @click="entry.run"
+      <hr
+        v-if="entry.key === 'sep'"
+        class="activity-separator"
       >
-        <component
-          :is="entry.icon"
-          :size="20"
-          aria-hidden="true"
-        />
-      </button>
-    </icon-tooltip>
+      <icon-tooltip
+        v-else
+        :content="entry.label"
+        placement="right"
+      >
+        <button
+          type="button"
+          class="plain-button activity-button"
+          :aria-label="entry.label"
+          @click="entry.run"
+        >
+          <component
+            :is="entry.icon"
+            :size="20"
+            aria-hidden="true"
+          />
+        </button>
+      </icon-tooltip>
+    </template>
     <entity-dialog />
   </div>
 </template>
@@ -26,7 +34,8 @@
 <script setup lang="ts">
 import { computed, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Building2, ClipboardList, FilePlus, FolderPlus, Kanban, ListTodo, PenTool, Receipt, UserPlus } from 'lucide-vue-next'
+import { Building2, ClipboardList, FilePlus, FolderPlus, Kanban, ListTodo, PanelLeft, PanelRight, PenTool, Receipt, UserPlus } from 'lucide-vue-next'
+import '../core/styles.css'
 import IconTooltip from '@/components/iconTooltip/index.vue'
 import EntityDialog from '../dialogs/EntityDialog.vue'
 import { registerLocales } from '../core/i18n'
@@ -35,6 +44,8 @@ import { openOrganizationDialog, openPersonDialog, openProjectDialog } from '../
 import { useTaskStore } from '../tasks/store'
 import { openNoteDialog, openTaskDialog } from '../tasks/dialogs'
 import { useCazallaLayoutStore } from '../core/layout'
+import bus from '@/bus'
+import { useDailyNotesStore } from '../dailyNotes/store'
 import { listenForSidebarKanban } from '../kanban/sidebarMenu'
 import { listenForSubtaskMenu } from '../tasks/subtaskMenu'
 import { openInvoiceDialog, openReportDialog } from '../billing/dialogs'
@@ -61,7 +72,11 @@ interface Entry {
   run: () => void
 }
 
+const dailyNotes = useDailyNotesStore()
 const entries = computed<Entry[]>(() => [
+  { key: 'left', label: t('cazalla.activity.toggleLeft'), icon: PanelLeft, run: () => bus.emit('view:toggle-layout-entry', 'showSideBar') },
+  { key: 'right', label: t('cazalla.activity.toggleRight'), icon: PanelRight, run: () => dailyNotes.TOGGLE() },
+  { key: 'sep', label: '', icon: PanelLeft, run: () => {} },
   { key: 'person', label: t('cazalla.activity.newPerson'), icon: UserPlus, run: openPersonDialog },
   { key: 'organization', label: t('cazalla.activity.newOrganization'), icon: Building2, run: openOrganizationDialog },
   { key: 'project', label: t('cazalla.activity.newProject'), icon: FolderPlus, run: openProjectDialog },
@@ -101,5 +116,11 @@ const entries = computed<Entry[]>(() => [
 }
 .activity-button:hover {
   background: var(--sideBarItemHoverBgColor);
+}
+.activity-separator {
+  width: 24px;
+  border: none;
+  border-top: 1px solid var(--itemBgColor);
+  margin: 4px 0;
 }
 </style>
