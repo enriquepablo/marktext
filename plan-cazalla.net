@@ -813,6 +813,15 @@ i see the root directory with i can then open to star exploring.
 ideally i would like to start up with the file tree
 in the state at whichj it was closed
 
+## lazygit detail
+
+when i open lazygit i want it to accupy all space
+i don't need calendar explorer or editing pane at the same time
+
 ### Status
 
 Fixed on 2026-10-24. The explorer loaded its root level once at mount, before the sidebar roots arrived over IPC. The roots are now reactive data of the tree and only the folders below them load lazily. Expanded folders are remembered in `localStorage['cazalla-explorer-expanded']` and reopened at startup; roots start open the first time.
+
+### Status
+
+Done on 2026-10-24. The git icon toggles a full-window overlay below the title bar (`TerminalOverlay.vue`, main view `terminal`), covering explorer, calendar and editor. Escape outside the terminal or the close button returns to the editor. The pane form of the terminal remains available to the pane tree.

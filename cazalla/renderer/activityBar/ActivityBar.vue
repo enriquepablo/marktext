@@ -93,7 +93,7 @@ const openTerminal = (): void => {
     void notice.notify({ title: t('cazalla.terminal.title'), type: 'warning', message: t('cazalla.dialog.noContentFolder') })
     return
   }
-  usePaneStore().OPEN_IN_PANE('terminal', contentFolder.value)
+  layout.TOGGLE_TERMINAL()
 }
 const entries = computed<Entry[]>(() => [
   { key: 'left', label: t('cazalla.activity.toggleLeft'), icon: PanelLeft, run: () => bus.emit('view:toggle-layout-entry', 'showSideBar') },

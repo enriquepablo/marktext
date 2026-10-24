@@ -21,7 +21,7 @@
         type="button"
         class="plain-button pane-button"
         :aria-label="t('cazalla.panes.close')"
-        @click.stop="panes.CLOSE(id)"
+        @click.stop="close"
       >
         <X
           :size="14"
@@ -63,8 +63,13 @@ const TERM_CLOSE = 'mt::cazalla-term-close'
 const TERM_DATA = 'mt::cazalla-term-data'
 const TERM_EXIT = 'mt::cazalla-term-exit'
 
-// `file` is the working directory the program runs in.
-const props = defineProps<{ id: string; file: string }>()
+// `file` is the working directory the program runs in. With `overlay`, closing is the host's business.
+const props = defineProps<{ id: string; file: string; overlay?: boolean }>()
+const emit = defineEmits<{ close: [] }>()
+const close = (): void => {
+  if (props.overlay) emit('close')
+  else panes.CLOSE(props.id)
+}
 const { t } = useI18n()
 const panes = usePaneStore()
 const { theme, codeFontFamily, codeFontSize } = storeToRefs(usePreferencesStore())

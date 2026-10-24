@@ -6,7 +6,7 @@ import { parse } from './frontmatter'
 
 export const ACTIVITY_BAR_WIDTH = 40
 
-export type MainView = 'editor' | 'kanban'
+export type MainView = 'editor' | 'kanban' | 'terminal'
 
 /** Horizontal space the cazalla panels take, and which view fills the main area. */
 export const useCazallaLayoutStore = defineStore('cazallaLayout', () => {
@@ -37,5 +37,10 @@ export const useCazallaLayoutStore = defineStore('cazallaLayout', () => {
     else OPEN_KANBAN()
   }
 
-  return { reservedWidth, mainView, kanbanProject, OPEN_KANBAN, CLOSE_KANBAN, TOGGLE_KANBAN }
+  /** The terminal covers the whole window below the title bar; closing returns to the editor. */
+  function TOGGLE_TERMINAL(): void {
+    mainView.value = mainView.value === 'terminal' ? 'editor' : 'terminal'
+  }
+
+  return { reservedWidth, mainView, kanbanProject, OPEN_KANBAN, CLOSE_KANBAN, TOGGLE_KANBAN, TOGGLE_TERMINAL }
 })

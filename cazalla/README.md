@@ -141,4 +141,4 @@ The sidebar search is a MiniSearch index over markdown (frontmatter and body), P
 
 ## Terminal (item 20)
 
-The git icon opens a pane running `lazygit` in the content folder: xterm.js in the renderer, a node-pty pseudo-terminal in the main process, with data, input and resize relayed over IPC. node-pty is a native module; the upstream postinstall rebuilds it for Electron along with the other native modules. If lazygit is not on PATH the pane shows the error and a restart button.
+The git icon opens a full-window overlay (below the title bar) running `lazygit` in the content folder; Escape or the close button returns to the editor. The same component also works as a pane leaf of kind `terminal`. It is xterm.js in the renderer, a node-pty pseudo-terminal in the main process, with data, input and resize relayed over IPC. node-pty is a native module; the upstream postinstall rebuilds it for Electron along with the other native modules. If lazygit is not on PATH the pane shows the error and a restart button.
