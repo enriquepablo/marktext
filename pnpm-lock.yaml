@@ -165,6 +165,9 @@ importers:
       lodash:
         specifier: ^4.18.1
         version: 4.18.1
+      lucide-vue-next:
+        specifier: ^1.0.0
+        version: 1.0.0(vue@3.5.43(typescript@6.0.3))
       mermaid:
         specifier: ^12.1.0
         version: 12.1.0
@@ -5896,8 +5899,8 @@ packages:
   file-entry-cache@11.1.5:
     resolution: {integrity: sha512-+PFTHITI08JIGhnNpGNI8T8inUpgZfk3GNEqfT9R2zZV2iFXg3CvqzSl/uEhs7TSGujYRELEANyDvS8Fj7+S7Q==}
 
-  file-icons@https://codeload.github.com/file-icons/atom/tar.gz/fa78a1b05fa4b5741d5141f33abdc272aba954bf:
-    resolution: {gitHosted: true, integrity: sha512-xYjrjGgTlk0yvrb18rz+jvRL3H9gOWMcJOepY5NFErCNu5DOWQYALjFGwqBT9Zpj5wDXhlIyIoe54BYZpZPkRg==, tarball: https://codeload.github.com/file-icons/atom/tar.gz/fa78a1b05fa4b5741d5141f33abdc272aba954bf}
+  file-icons@https://codeload.github.com/file-icons/atom/tar.gz/fa4bc4850eb5bbc0d192c127fb4be10af3f049b2:
+    resolution: {gitHosted: true, integrity: sha512-vLHNMPsBeKOZzpXzDstjEmOiZwLbCuOOatyc27i++KkV3Gy8zBQVediQx5i1lwLOOsdTi/oZJ3MktNMATgGK9w==, tarball: https://codeload.github.com/file-icons/atom/tar.gz/fa4bc4850eb5bbc0d192c127fb4be10af3f049b2}
     version: 2.1.47
     engines: {atom: '>=1.25.0'}
 
@@ -7054,6 +7057,12 @@ packages:
   lru-cache@6.0.0:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
     engines: {node: '>=10'}
+
+  lucide-vue-next@1.0.0:
+    resolution: {integrity: sha512-V6SPvx1IHTj/UY+FrIYWV5faISsPSb8BnWSFDxAtezWKvWc9ZZ40PDrdu1/Qb5vg4lHWr1hs1BAMGVGm6V1Xdg==}
+    deprecated: Package deprecated. Please use @lucide/vue instead.
+    peerDependencies:
+      vue: '>=3.0.1'
 
   madge@8.0.0:
     resolution: {integrity: sha512-9sSsi3TBPhmkTCIpVQF0SPiChj1L7Rq9kU2KDG1o6v2XH9cCw086MopjVCD+vuoL5v8S77DTbVopTO8OUiQpIw==}
@@ -11917,7 +11926,7 @@ snapshots:
 
   '@marktext/file-icons@1.0.6':
     dependencies:
-      file-icons: https://codeload.github.com/file-icons/atom/tar.gz/fa78a1b05fa4b5741d5141f33abdc272aba954bf
+      file-icons: https://codeload.github.com/file-icons/atom/tar.gz/fa4bc4850eb5bbc0d192c127fb4be10af3f049b2
 
   '@mermaid-js/parser@2.0.1':
     dependencies:
@@ -15686,7 +15695,7 @@ snapshots:
     dependencies:
       flat-cache: 6.1.23
 
-  file-icons@https://codeload.github.com/file-icons/atom/tar.gz/fa78a1b05fa4b5741d5141f33abdc272aba954bf:
+  file-icons@https://codeload.github.com/file-icons/atom/tar.gz/fa4bc4850eb5bbc0d192c127fb4be10af3f049b2:
     dependencies:
       atom-fs: 0.2.1
       lru-cache: 5.1.1
@@ -16872,6 +16881,10 @@ snapshots:
   lru-cache@6.0.0:
     dependencies:
       yallist: 4.0.0
+
+  lucide-vue-next@1.0.0(vue@3.5.43(typescript@6.0.3)):
+    dependencies:
+      vue: 3.5.43(typescript@6.0.3)
 
   madge@8.0.0(typescript@6.0.3):
     dependencies:

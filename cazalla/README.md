@@ -68,7 +68,11 @@ cazalla/
   README.md                 this document
   renderer/dailyNotes/      util.ts, store.ts, i18n.ts, commands.ts, locales/, Panel.vue, Calendar.vue, NoteEditor.vue
   renderer/core/            frontmatter.ts, slug.ts, time.ts, fs.ts, contentFolder.ts (shared by every item)
-  renderer/metadata/        types.ts, store.ts (item 2 of plan-cazalla.net)
+  renderer/metadata/        types.ts, store.ts, create.ts, dialogs.ts (items 2 and 3)
+  renderer/core/i18n.ts     registerLocales(): runtime merge of cazalla locale bundles
+  renderer/core/layout.ts   reservedWidth = activity bar + daily notes panel
+  renderer/dialogs/         EntityDialog.vue, a field-spec driven el-dialog opened by the bus event cazalla:dialog
+  renderer/activityBar/     ActivityBar.vue, the 40 px icon strip left of the sidebar (lucide icons)
   scripts/migrate-vault.ts  one-time Obsidian vault migration (tsx cazalla/scripts/migrate-vault.ts <vault> [--apply])
   main/dailyNotes.ts        menu item, command, default shortcut, menu check state
   test/unit/                Vitest specs
@@ -80,7 +84,7 @@ Translations for this feature are kept in `cazalla/renderer/dailyNotes/locales/`
 Upstream files are changed only where a hook is unavoidable, each by one to three lines:
 
 - `packages/desktop/electron.vite.config.ts`, `vitest.config.ts`, `tsconfig.base.json`, `tsconfig.json`, `eslint.config.js`: the `@cazalla` alias and include paths.
-- `packages/desktop/src/renderer/src/pages/app.vue`: mount the panel.
+- `packages/desktop/src/renderer/src/pages/app.vue`: mount the activity bar and the panel.
 - `packages/desktop/src/renderer/src/components/editorWithTabs/index.vue`: subtract the panel width.
 - `packages/desktop/src/main/menu/templates/view.ts`, `src/main/menu/actions/view.ts`: menu item, command registration, check-state sync.
 - `packages/desktop/src/main/keyboard/keybindings{Linux,Windows,Darwin}.ts`: default shortcut.

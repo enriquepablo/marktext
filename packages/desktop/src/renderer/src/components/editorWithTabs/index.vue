@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import { useLayoutStore } from '@/store/layout'
-import { useDailyNotesStore } from '@cazalla/renderer/dailyNotes/store'
+import { useCazallaLayoutStore } from '@cazalla/renderer/core/layout'
 import { storeToRefs } from 'pinia'
 import DocumentOutline from './outline.vue'
 import Tabs from './tabs.vue'
@@ -47,7 +47,7 @@ defineProps<{
 }>()
 
 const { effectiveSideBarWidth } = storeToRefs(useLayoutStore())
-const { effectiveWidth: dailyNotesWidth } = storeToRefs(useDailyNotesStore())
+const { reservedWidth: dailyNotesWidth } = storeToRefs(useCazallaLayoutStore())
 </script>
 
 <style scoped>

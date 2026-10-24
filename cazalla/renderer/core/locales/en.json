@@ -1,0 +1,46 @@
+{
+  "cazalla": {
+    "activity": {
+      "newPerson": "New person",
+      "newOrganization": "New organization",
+      "newProject": "New project",
+      "newNote": "New note",
+      "newTask": "New task",
+      "kanban": "Kanban board",
+      "effortReport": "Effort report",
+      "invoice": "Invoice"
+    },
+    "dialog": {
+      "cancel": "Cancel",
+      "save": "Save",
+      "slug": "Slug",
+      "required": "This field is required.",
+      "exists": "A file already exists at {file}.",
+      "duplicateSlug": "The slug {slug} is already used.",
+      "noContentFolder": "Set a content folder first (Preferences › General › Startup › Open default directory).",
+      "created": "Created {file}"
+    },
+    "person": {
+      "title": "New person",
+      "name": "Name",
+      "organization": "Organization",
+      "email": "Email",
+      "phone": "Phone"
+    },
+    "organization": {
+      "title": "New organization",
+      "name": "Name",
+      "leader": "Leader",
+      "phone": "Phone",
+      "canInvoice": "Can invoice",
+      "priceHour": "Price per hour",
+      "invoiceNumber": "Last invoice number",
+      "iban": "IBAN",
+      "swift": "SWIFT",
+      "paymentDetails": "Payment details",
+      "invoiceDetails": "Invoice address lines",
+      "canBeInvoiced": "Can be invoiced",
+      "billing": "Projects billed"
+    }
+  }
+}

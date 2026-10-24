@@ -1,5 +1,6 @@
 <template>
   <div class="editor-container">
+    <activity-bar v-if="init" />
     <side-bar v-if="init" />
 
     <div class="editor-middle">
@@ -54,6 +55,7 @@ import ExportSettingDialog from '@/components/exportSettings/index.vue'
 import Rename from '@/components/rename/index.vue'
 import ImportModal from '@/components/import/index.vue'
 import DailyNotesPanel from '@cazalla/renderer/dailyNotes/Panel.vue'
+import ActivityBar from '@cazalla/renderer/activityBar/ActivityBar.vue'
 import bus from '@/bus'
 import { DEFAULT_STYLE } from '@/config'
 import { useLayoutStore } from '@/store/layout'

@@ -1,0 +1,46 @@
+{
+  "cazalla": {
+    "activity": {
+      "newPerson": "Nueva persona",
+      "newOrganization": "Nueva organización",
+      "newProject": "Nuevo proyecto",
+      "newNote": "Nueva nota",
+      "newTask": "Nueva tarea",
+      "kanban": "Tablero kanban",
+      "effortReport": "Informe de horas",
+      "invoice": "Factura"
+    },
+    "dialog": {
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "slug": "Slug",
+      "required": "Este campo es obligatorio.",
+      "exists": "Ya existe un archivo en {file}.",
+      "duplicateSlug": "El slug {slug} ya está en uso.",
+      "noContentFolder": "Primero elija una carpeta de contenido (Preferencias › General › Inicio › Abrir directorio predeterminado).",
+      "created": "Creado {file}"
+    },
+    "person": {
+      "title": "Nueva persona",
+      "name": "Nombre",
+      "organization": "Organización",
+      "email": "Correo",
+      "phone": "Teléfono"
+    },
+    "organization": {
+      "title": "Nueva organización",
+      "name": "Nombre",
+      "leader": "Responsable",
+      "phone": "Teléfono",
+      "canInvoice": "Puede facturar",
+      "priceHour": "Precio por hora",
+      "invoiceNumber": "Último número de factura",
+      "iban": "IBAN",
+      "swift": "SWIFT",
+      "paymentDetails": "Condiciones de pago",
+      "invoiceDetails": "Líneas de dirección en factura",
+      "canBeInvoiced": "Puede ser facturada",
+      "billing": "Proyectos facturados"
+    }
+  }
+}
