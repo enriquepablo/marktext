@@ -65,6 +65,27 @@
               :label="o.label"
             />
           </el-select>
+          <el-time-picker
+            v-else-if="field.type === 'time'"
+            v-model="values[field.key]"
+            format="HH:mm"
+            value-format="HH:mm"
+          />
+          <el-select
+            v-else-if="field.type === 'combo'"
+            v-model="values[field.key]"
+            filterable
+            allow-create
+            default-first-option
+            :placeholder="field.placeholder"
+          >
+            <el-option
+              v-for="o in options[field.key]"
+              :key="o.value"
+              :value="o.value"
+              :label="o.label"
+            />
+          </el-select>
           <el-select
             v-else-if="field.type === 'multiselect'"
             v-model="values[field.key]"

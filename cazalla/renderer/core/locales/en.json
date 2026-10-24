@@ -166,6 +166,18 @@
       "publish": "Build and publish",
       "draftReady": "Draft built: {file}",
       "published": "Published to {url}"
+    },
+    "link": {
+      "title": "Insert link",
+      "label": "Label (optional)",
+      "href": "Target: pick a document or type a URL"
+    },
+    "date": {
+      "title": "Insert date",
+      "includeTime": "Include time",
+      "date": "Date",
+      "time": "Time",
+      "noCursor": "Place the cursor in an editor first."
     }
   }
 }

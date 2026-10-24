@@ -166,6 +166,18 @@
       "publish": "Construir y publicar",
       "draftReady": "Borrador construido: {file}",
       "published": "Publicado en {url}"
+    },
+    "link": {
+      "title": "Insertar enlace",
+      "label": "Texto (opcional)",
+      "href": "Destino: elija un documento o escriba una URL"
+    },
+    "date": {
+      "title": "Insertar fecha",
+      "includeTime": "Incluir hora",
+      "date": "Fecha",
+      "time": "Hora",
+      "noCursor": "Sitúe primero el cursor en un editor."
     }
   }
 }

@@ -1,4 +1,5 @@
-export type FieldType = 'text' | 'textarea' | 'number' | 'date' | 'select' | 'multiselect' | 'checkbox'
+// `combo` is a select that also accepts a typed value; `time` is `HH:mm`.
+export type FieldType = 'text' | 'textarea' | 'number' | 'date' | 'time' | 'select' | 'combo' | 'multiselect' | 'checkbox'
 
 export interface Option {
   value: string

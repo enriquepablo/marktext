@@ -111,6 +111,7 @@ import {
   type ISerializedHistory
 } from '@muyajs/core'
 import { getMuyaLocale } from '@/util/muyaLocale'
+import { setPrimaryMuya } from '@cazalla/renderer/editor/registry'
 import { exportStyledHTML, type HeaderFooterPart } from '@/util/exportHtml'
 import { applyCursor, isIndexCursor } from '@/util/cursor'
 import EditorSearch from '../search/index.vue'
@@ -1770,6 +1771,7 @@ onMounted(() => {
   const muya = markRaw(new Muya(ele, options))
   muya.init({ focus: editorStore.TAKE_OPEN_INTENT(currentFile.value?.pathname) !== false })
   editor.value = muya
+  setPrimaryMuya(muya)
   muya.on(
     'reading-context-menu',
     ({ event, href, image }: { event: MouseEvent; href?: string; image?: string }) => {
@@ -2053,6 +2055,7 @@ onBeforeUnmount(() => {
   resizeObserverForEditor.disconnect()
 
   if (editor.value) {
+    setPrimaryMuya(null)
     editor.value.destroy()
     editor.value = null
   }

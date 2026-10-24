@@ -50,6 +50,7 @@ import { DEFAULT_CODE_FONT_FAMILY, DEFAULT_EDITOR_FONT_FAMILY } from '@/config'
 import { isDarkThemeId } from 'common/theme'
 import { basename, exists, readText, writeText } from '../core/fs'
 import { usePaneStore } from './store'
+import { registerPaneMuya, unregisterPaneMuya } from '../editor/registry'
 
 const props = defineProps<{ id: string; file: string }>()
 const { t } = useI18n()
@@ -128,6 +129,7 @@ onMounted(async() => {
   muya.on('focus', () => panes.FOCUS(props.id))
   muya.on('blur', () => void flush())
   editor.value = muya
+  registerPaneMuya(props.id, muya, () => window.path.dirname(props.file))
 })
 
 // Another file assigned to this pane: save the old one, show the new one.
@@ -167,6 +169,7 @@ watch(language, (value) => editor.value?.locale(getMuyaLocale(value)))
 
 onBeforeUnmount(() => {
   stopTreeEvents()
+  unregisterPaneMuya(props.id)
   void flush()
   editor.value?.destroy()
   editor.value = null

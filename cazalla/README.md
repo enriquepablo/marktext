@@ -79,6 +79,9 @@ cazalla/
   renderer/drawings/        DrawingPane.vue (Excalidraw React component in a pane, react + react-dom), create.ts, dialogs.ts (item 11)
   renderer/events/          group.ts (today / tomorrow / this week / later), EventsView.vue (third sidebar column) (item 14)
   renderer/sites/           pages.ts (web pages and sub-pages), dialogs.ts, subpageMenu.ts, publish.ts, PublishDialog.vue (item 13)
+  renderer/editor/          registry.ts: live Muya instances (primary + panes), insertion at the caret, typed-input listeners
+  renderer/links/           docIndex.ts (document titles, newest first), linkDialog.ts (`[[` opens the link dialog) (item 16)
+  renderer/dates/           dialog.ts (Insert date) (item 17)
   renderer/core/i18n.ts     registerLocales(): runtime merge of cazalla locale bundles
   renderer/core/layout.ts   reservedWidth = activity bar + daily notes panel
   renderer/dialogs/         EntityDialog.vue, a field-spec driven el-dialog opened by the bus event cazalla:dialog
@@ -104,6 +107,7 @@ Upstream files are changed only where a hook is unavoidable, each by one to thre
 - `packages/desktop/src/renderer/src/contextMenu/sideBar/index.ts`: the "Open in split panel" and "Kanban board" entries at the end of the file-tree context menu.
 - `packages/desktop/src/main/contextMenu/editor/index.ts`: cazalla entries spread at the end of the editor context menu; `src/shared/types/ipc.ts` gains their channels.
 - `packages/desktop/src/main/ipc/index.ts`: registers the cazalla site handler; `electron-builder.yml` ships `cazalla/pelican` as an extra resource.
+- `packages/desktop/src/renderer/src/components/editorWithTabs/editor.vue`: `setPrimaryMuya(muya)` after the instance is created and `setPrimaryMuya(null)` before it is destroyed.
 - `packages/desktop/src/renderer/src/components/editorWithTabs/index.vue`: subtract the panel width.
 - `packages/desktop/src/main/menu/templates/view.ts`, `src/main/menu/actions/view.ts`: menu item, command registration, check-state sync.
 - `packages/desktop/src/main/keyboard/keybindings{Linux,Windows,Darwin}.ts`: default shortcut.
