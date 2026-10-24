@@ -516,15 +516,23 @@ and update the build environemnt if needed and build and publish the site.
 
 # 14 events
 
-An event is a task that is due.
+An event is a task that is due in the future or within the day.
 in the left panel with the file explorer,
 in the same way that there is a magnifier icon that opens up a search interface,
 we want a further icon that opens an event interface.
 4 section from top to bottom, each with a list:
-- today: tasks due for today
+- today: tasks due for today - even if for a past time
 - tomorrow
 - this week
 - the rest
 each task in the event list is shown as a link that
 opens the task in the main panel.
 all lists are ordered from nearer in time up.
+
+# 15 drag and drop to move files
+
+I want to be able to move directories and files
+by dragging and dropping in the left file explorer.
+Any of these moves should keep all metadata
+described above in sync, without corruption,
+and also should update all links to moved content.
