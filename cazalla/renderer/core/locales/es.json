@@ -204,6 +204,11 @@
       "restart": "Reiniciar",
       "exited": "[proceso terminado con código {code}]",
       "failed": "No se pudo iniciar lazygit: {error}. Instale lazygit y asegúrese de que esté en el PATH."
+    },
+    "frontmatter": {
+      "collapsed": "+ metadatos",
+      "expand": "Mostrar metadatos",
+      "collapse": "Ocultar metadatos"
     }
   }
 }

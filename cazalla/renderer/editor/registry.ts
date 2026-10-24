@@ -3,6 +3,7 @@
 // is typing and to watch typed input, without each feature knowing the panes.
 
 import type { Muya } from '@muyajs/core'
+import { attachFrontmatterFold } from './frontmatterFold'
 
 /** The subset of a Muya content block the helpers rely on. */
 export interface TextBlock {
@@ -33,6 +34,7 @@ const typedListeners: TypedListener[] = []
 
 const attach = (registered: Registered): void => {
   instances.set(registered.id, registered)
+  attachFrontmatterFold(registered)
   registered.muya.on('focus', () => {
     focusedId = registered.id
   })

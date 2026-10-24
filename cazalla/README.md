@@ -79,7 +79,7 @@ cazalla/
   renderer/drawings/        DrawingPane.vue (Excalidraw React component in a pane, react + react-dom), create.ts, dialogs.ts (item 11)
   renderer/events/          group.ts (today / tomorrow / this week / later), EventsView.vue (third sidebar column) (item 14)
   renderer/sites/           pages.ts (web pages and sub-pages), dialogs.ts, subpageMenu.ts, publish.ts, PublishDialog.vue (item 13)
-  renderer/editor/          registry.ts: live Muya instances (primary + panes), insertion at the caret, typed-input listeners
+  renderer/editor/          registry.ts: live Muya instances (primary + panes), insertion at the caret, typed-input listeners; frontmatterFold.ts collapses frontmatter blocks (item 23)
   renderer/links/           docIndex.ts (document titles, newest first), linkDialog.ts (`[[` opens the link dialog) (item 16)
   renderer/dates/           dialog.ts (Insert date) (item 17)
   renderer/search/          extract.ts, pdfText.ts, store.ts (MiniSearch index persisted in <content>/.cazalla/search-index.json), SearchView.vue (item 15 search)

@@ -888,3 +888,14 @@ no key works except esc to close it
 ### Status
 
 Fixed on 2026-10-24. xterm.js does not take keyboard focus after `open()`, so keystrokes kept going to the editor; Escape reached the overlay's own handler for the same reason. The terminal now takes focus when it opens, when lazygit starts, and on any click in the pane.
+
+# 23 feat: frontmatter blocks collapsible
+
+when a md doc open, the block is collapsed,
+a greyed "metadata" with a + icon,
+on click it opens,
+editable, with a - icon on rightr top to collapse
+
+## Design
+
+Done on 2026-10-24. `cazalla/renderer/editor/frontmatterFold.ts` is attached to every registered Muya instance (primary editor and file panes). It watches the editor DOM for `pre.mu-frontmatter`. A block seen for the first time, that is a freshly opened document, gets the class `cz-fm-collapsed`: the block shrinks to one line showing a greyed "+ metadata" label and its content is hidden but still present for Muya. Clicking the block expands it and places the cursor as usual; a +/− button floats over the block's top-right corner, positioned from outside Muya's DOM so the engine's re-rendering is not disturbed, and collapses or expands it. Moving the cursor into a collapsed block with the keyboard expands it, so hidden text is never edited. The daily-notes pane keeps hiding its frontmatter entirely.
