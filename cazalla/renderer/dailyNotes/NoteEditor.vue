@@ -1,0 +1,110 @@
+<template>
+  <div
+    ref="container"
+    class="dn-note-editor"
+  />
+</template>
+
+<script setup lang="ts">
+import { markRaw, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { Muya, type IMuyaOptions } from '@muyajs/core'
+import { usePreferencesStore } from '@/store/preferences'
+import { getMuyaLocale } from '@/util/muyaLocale'
+import { DEFAULT_CODE_FONT_FAMILY, DEFAULT_EDITOR_FONT_FAMILY } from '@/config'
+import { isDarkThemeId } from 'common/theme'
+import { useDailyNotesStore } from './store'
+
+const store = useDailyNotesStore()
+const preferencesStore = usePreferencesStore()
+const {
+  language,
+  fontSize,
+  lineHeight,
+  editorFontFamily,
+  codeFontSize,
+  codeFontFamily,
+  tabSize,
+  theme,
+  spellcheckerEnabled
+} = storeToRefs(preferencesStore)
+
+const container = ref<HTMLElement | null>(null)
+const editor = shallowRef<Muya | null>(null)
+
+const resolveEditorFont = (family: string): string =>
+  family ? `${family}, ${DEFAULT_EDITOR_FONT_FAMILY}` : DEFAULT_EDITOR_FONT_FAMILY
+const resolveCodeFont = (family: string): string => `${family}, ${DEFAULT_CODE_FONT_FAMILY}`
+
+const themeOptions = (): Partial<IMuyaOptions> =>
+  isDarkThemeId(theme.value)
+    ? { mermaidTheme: 'dark', vegaTheme: 'dark' }
+    : { mermaidTheme: 'default', vegaTheme: 'latimes' }
+
+onMounted(() => {
+  const el = container.value
+  if (!el) return
+  const options: Partial<IMuyaOptions> = {
+    markdown: store.markdown,
+    // Daily notes always carry YAML frontmatter, whatever the user's default style.
+    frontmatterType: '-',
+    locale: getMuyaLocale(language.value),
+    fontSize: fontSize.value,
+    lineHeight: lineHeight.value,
+    editorFontFamily: resolveEditorFont(editorFontFamily.value),
+    codeFontSize: codeFontSize.value,
+    codeFontFamily: resolveCodeFont(codeFontFamily.value),
+    tabSize: tabSize.value,
+    spellcheckEnabled: spellcheckerEnabled.value,
+    clipboardText: () => window.electron.clipboard.readText(),
+    clipboardWriteText: window.electron.clipboard.writeText,
+    ...themeOptions()
+  }
+  const muya = markRaw(new Muya(el, options))
+  muya.init({ focus: false })
+  muya.on('json-change', () => store.SAVE_NOTE(muya.getMarkdown()))
+  muya.on('blur', () => void store.FLUSH_SAVE())
+  editor.value = muya
+})
+
+// Reload only when another file is selected; `markdown` itself is not watched so saves do not re-render.
+watch(
+  () => store.notePath,
+  () => {
+    editor.value?.setContent(store.markdown)
+  }
+)
+
+watch([fontSize, lineHeight, editorFontFamily, codeFontSize, codeFontFamily], () => {
+  editor.value?.setOptions({
+    fontSize: fontSize.value,
+    lineHeight: lineHeight.value,
+    editorFontFamily: resolveEditorFont(editorFontFamily.value),
+    codeFontSize: codeFontSize.value,
+    codeFontFamily: resolveCodeFont(codeFontFamily.value)
+  })
+})
+watch(theme, () => editor.value?.setOptions(themeOptions(), true))
+watch(language, (value) => editor.value?.locale(getMuyaLocale(value)))
+watch(spellcheckerEnabled, (value) => editor.value?.setOptions({ spellcheckEnabled: value }))
+
+onBeforeUnmount(() => {
+  void store.FLUSH_SAVE()
+  editor.value?.destroy()
+  editor.value = null
+})
+</script>
+
+<style scoped>
+.dn-note-editor {
+  height: 100%;
+  overflow-y: auto;
+  background: var(--editorBgColor);
+}
+/* The engine's default page width and margins are sized for the main editor. */
+.dn-note-editor :deep(.mu-container) {
+  --editor-area-width: 100%;
+  max-width: 100%;
+  padding: 8px 16px 48px;
+}
+</style>

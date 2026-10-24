@@ -1,6 +1,7 @@
 import { ipcMain, type BrowserWindow, type Menu, type MenuItem } from 'electron'
 import { COMMANDS } from '../../commands'
 import type { CommandManager } from '../../commands'
+import { registerDailyNotesCommand, syncDailyNotesMenu, DAILY_NOTES_LAYOUT_ENTRY } from '@cazalla/main/dailyNotes'
 
 type Win = BrowserWindow | null | undefined
 
@@ -88,6 +89,7 @@ export const loadViewCommands = (commandManager: CommandManager): void => {
   commandManager.add(COMMANDS.VIEW_SOURCE_CODE_MODE, toggleSourceCodeMode)
   commandManager.add(COMMANDS.VIEW_TOGGLE_SIDEBAR, toggleSidebar)
   commandManager.add(COMMANDS.VIEW_TOGGLE_TABBAR, toggleTabBar)
+  registerDailyNotesCommand(commandManager)
   commandManager.add(COMMANDS.VIEW_TOGGLE_TOC, showTableOfContents)
   commandManager.add(COMMANDS.VIEW_TYPEWRITER_MODE, toggleTypewriterMode)
 
@@ -123,6 +125,9 @@ export const viewLayoutChanged = (
         break
       case 'showTabBar':
         changeMenuByName('tabBarMenuItem', value)
+        break
+      case DAILY_NOTES_LAYOUT_ENTRY:
+        syncDailyNotesMenu(applicationMenu, value)
         break
       case 'sourceCode':
         changeMenuByName('sourceCodeModeMenuItem', !!value)

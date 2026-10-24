@@ -1,0 +1,12 @@
+{
+  "dailyNotes": {
+    "title": "Daily Notes",
+    "toggle": "Toggle Daily Notes",
+    "today": "Today",
+    "noContentFolder": "No content folder is set. Choose one under Preferences › General › Startup › Open default directory. Daily notes are stored in its _daily folder.",
+    "openPreferences": "Open Preferences",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "selectDay": "Select a day in the calendar."
+  }
+}

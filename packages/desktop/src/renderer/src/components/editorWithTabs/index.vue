@@ -1,7 +1,7 @@
 <template>
   <div
     class="editor-with-tabs"
-    :style="{ 'max-width': `calc(100vw - ${effectiveSideBarWidth}px)` }"
+    :style="{ 'max-width': `calc(100vw - ${effectiveSideBarWidth + dailyNotesWidth}px)` }"
   >
     <tabs v-show="showTabBar" />
     <div class="container">
@@ -27,6 +27,7 @@
 
 <script setup lang="ts">
 import { useLayoutStore } from '@/store/layout'
+import { useDailyNotesStore } from '@cazalla/renderer/dailyNotes/store'
 import { storeToRefs } from 'pinia'
 import DocumentOutline from './outline.vue'
 import Tabs from './tabs.vue'
@@ -46,6 +47,7 @@ defineProps<{
 }>()
 
 const { effectiveSideBarWidth } = storeToRefs(useLayoutStore())
+const { effectiveWidth: dailyNotesWidth } = storeToRefs(useDailyNotesStore())
 </script>
 
 <style scoped>

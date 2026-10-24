@@ -2,6 +2,7 @@ import bus from '../bus'
 import { delay, isMac } from '@/util'
 import { isUpdatable } from './utils'
 import getCommandDescriptionById from './descriptions'
+import { dailyNotesCommands } from '@cazalla/renderer/dailyNotes/commands'
 import { t } from '../i18n'
 
 export { default as FileEncodingCommand } from './fileEncoding'
@@ -57,6 +58,7 @@ const focusEditorAndExecute = (fn: () => void): void => {
 }
 
 const commands: CommandDescriptor[] = [
+  ...dailyNotesCommands,
   {
     id: 'view.read-only-mode',
     execute: () => {

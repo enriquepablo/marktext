@@ -2,6 +2,7 @@ import { type BrowserWindow, type MenuItemConstructorOptions } from 'electron'
 import * as actions from '../actions/view'
 import { t } from '../../i18n'
 import type Keybindings from '../../keyboard/shortcutHandler'
+import { dailyNotesMenuItem } from '@cazalla/main/dailyNotes'
 
 export default function(keybindings: Keybindings): MenuItemConstructorOptions {
   const submenu: MenuItemConstructorOptions[] = [
@@ -67,6 +68,7 @@ export default function(keybindings: Keybindings): MenuItemConstructorOptions {
         actions.toggleSidebar(focusedWindow as BrowserWindow | undefined)
       }
     },
+    dailyNotesMenuItem(keybindings),
     {
       label: t('menu.view.toggleTabbar'),
       id: 'tabBarMenuItem',

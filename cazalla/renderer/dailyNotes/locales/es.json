@@ -1,0 +1,12 @@
+{
+  "dailyNotes": {
+    "title": "Notas diarias",
+    "toggle": "Mostrar u ocultar notas diarias",
+    "today": "Hoy",
+    "noContentFolder": "No hay carpeta de contenido. Elija una en Preferencias › General › Inicio › Abrir directorio predeterminado. Las notas diarias se guardan en su carpeta _daily.",
+    "openPreferences": "Abrir preferencias",
+    "previousMonth": "Mes anterior",
+    "nextMonth": "Mes siguiente",
+    "selectDay": "Seleccione un día en el calendario."
+  }
+}

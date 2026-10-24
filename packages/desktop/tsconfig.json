@@ -16,6 +16,8 @@
     "src/preload/**/*.ts",
     "src/renderer/**/*.ts",
     "test/**/*.ts",
+    "../../cazalla/**/*.ts",
+    "../../cazalla/**/*.vue",
     "electron.vite.config.ts",
     "vitest.config.ts",
     "playwright.config.ts"

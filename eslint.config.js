@@ -16,6 +16,7 @@ export default [
     ignores: [
       '.claude/**',
       '**/out/**',
+      '.pnpm-store/**',
       '**/dist/**',
       // The website ships with its own ESLint v8 config (React conventions).
       // The root config here is desktop-focused; mixing the two surfaces
@@ -193,7 +194,7 @@ export default [
 
   // 7. Test files: add Vitest globals (covers both .js and .ts specs)
   {
-    files: ['packages/desktop/test/**/*.js', 'packages/desktop/test/**/*.ts'],
+    files: ['packages/desktop/test/**/*.js', 'packages/desktop/test/**/*.ts', 'cazalla/test/**/*.ts'],
     languageOptions: {
       globals: { ...globals.vitest }
     }

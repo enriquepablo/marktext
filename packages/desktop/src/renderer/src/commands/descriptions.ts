@@ -117,6 +117,7 @@ const COMMAND_KEY_MAP: Record<string, string> = {
   'window.change-theme': 'commands.window.changeTheme',
 
   'view.toggle-sidebar': 'commands.view.toggleSidebar',
+  'view.toggle-daily-notes': 'dailyNotes.toggle',
   'view.toggle-tabbar': 'commands.view.toggleTabbar',
   'view.toggle-toc': 'commands.view.toggleToc',
 

@@ -27,6 +27,7 @@ export default defineConfig({
       alias: {
         '@': resolve(__dirname, 'src/renderer/src'),
         common: resolve(__dirname, 'src/common'),
+        '@cazalla': resolve(__dirname, '../../cazalla'),
         '@shared': resolve(__dirname, 'src/shared')
       },
       extensions: ['.mjs', '.ts', '.js', '.json']
@@ -43,6 +44,7 @@ export default defineConfig({
       alias: {
         '@': resolve(__dirname, 'src/renderer/src'),
         common: resolve(__dirname, 'src/common'),
+        '@cazalla': resolve(__dirname, '../../cazalla'),
         '@shared': resolve(__dirname, 'src/shared')
       },
       extensions: ['.mjs', '.ts', '.js', '.json']
@@ -59,6 +61,7 @@ export default defineConfig({
       alias: {
         '@': resolve(__dirname, 'src/renderer/src'),
         common: resolve(__dirname, 'src/common'),
+        '@cazalla': resolve(__dirname, '../../cazalla'),
         '@shared': resolve(__dirname, 'src/shared'),
         // Shared `common/*` helpers import the bare `path` specifier; route it to
         // a platform-correct module so the renderer never builds mixed-separator

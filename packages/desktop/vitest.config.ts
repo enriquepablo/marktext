@@ -16,7 +16,7 @@ const nodeWebStorageOff = process.allowedNodeEnvironmentFlags.has('--experimenta
 export default defineConfig({
   test: {
     environment: 'jsdom',
-    include: ['test/unit/specs/**/*.spec.ts'],
+    include: ['test/unit/specs/**/*.spec.ts', resolve(__dirname, '../../cazalla/test/unit/**/*.spec.ts')],
     globals: true,
     execArgv: nodeWebStorageOff
   },
@@ -24,6 +24,7 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'src/renderer/src'),
       common: resolve(__dirname, 'src/common'),
+      '@cazalla': resolve(__dirname, '../../cazalla'),
       '@shared': resolve(__dirname, 'src/shared'),
       main_renderer: resolve(__dirname, 'src/main')
     },
