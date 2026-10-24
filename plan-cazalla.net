@@ -434,3 +434,97 @@ Both dialogs refuse to overwrite an existing output file. On success a notice sh
 
 - Whether the invoice layout should move from hardcoded coordinates to a template. Proposed: port as is; a template is a later item.
 - Currency and VAT rate are constants in the plugin. Proposed: keep constants in `cazalla/renderer/billing/config.ts` until a second client needs different ones.
+
+
+# 10 details so far
+
+## upper corners
+
+Both the calendar and the left hand toolbar overlap with the window controls at the top - burger menu and window controls.
+
+## org md
+
+remove services from organization metadata
+
+## tasks and kanban
+
+add `kanban`key to task frontmatter with value true/false so if false it does not show in kanban board
+
+## project structure
+
+When creating projects, the corresponding folders are provided with a further subfolder `assets`.
+invoices and effort repoprts are kept in the corresponding assets/invoices/<year>/<month>/
+
+# 11 excalidraw
+
+We want an integration with excalidraw.
+The left hand side bar will include an icon to add a excalidraw drawing.
+it will show dialog asking for name and project.
+it will be kept in assets/drawings/<year>/<month>/.
+
+# 12 pdfjs
+
+Use pdfjs to visualize PDFs
+
+# 13 websites
+
+New dir `sites/` under _metadata/.
+New entry in the left tool bar, "New Site",
+that will add a new file to sites/, with frontmatter:
+
+name: Some Name
+slug: some-name
+site-url: https://some.url
+path: <path to site files relative to root dir>
+ssh-host: <Hetzner server hostname or IP>
+ssh-port: <default 22>
+ssh-user: <default deploy>
+ssh-target-dir: <default /var/www/site>
+
+this will also create a folder in path,
+with subdirs assets/ and pages/
+
+then we have a further entry in the left tool bar,
+"New page" to add pages to websites.
+
+a webpage is a md doc with frontmatter:
+
+title: Some Webpage
+slug: some-webpage
+tags:
+date: 2026-09-06T15:37:24.357Z
+modified: 2026-10-24T10:04:57.261Z
+category: webpage
+status: draft
+project: <some-project-slug>
+order: <number of sibling pages>
+path: /
+
+So the dialog asks for title and project
+and creates doc in the path of the project /pages/
+
+Then when editing a webpage, the contextual menu
+has an entry "add sub-webpage"
+that will ask for title,
+and behave like "add subtask"
+minus the kanban and archive stuff.
+
+finally adapt cazalla/cazalla-net-site.plugin/
+to have one further icon in the left bar,
+"publish site", that will ask for a site name
+and update the build environemnt if needed and build and publish the site.
+
+# 14 events
+
+An event is a task that is due.
+in the left panel with the file explorer,
+in the same way that there is a magnifier icon that opens up a search interface,
+we want a further icon that opens an event interface.
+4 section from top to bottom, each with a list:
+- today: tasks due for today
+- tomorrow
+- this week
+- the rest
+each task in the event list is shown as a link that
+opens the task in the main panel.
+all lists are ordered from nearer in time up.
