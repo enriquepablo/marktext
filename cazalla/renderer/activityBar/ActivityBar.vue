@@ -57,6 +57,7 @@ import PublishDialog from '../sites/PublishDialog.vue'
 import { openDateDialog } from '../dates/dialog'
 import { listenForDoubleBracket } from '../links/linkDialog'
 import { useDocIndexStore } from '../links/docIndex'
+import { useSearchStore } from '../search/store'
 import { usePaneStore } from '../panes/store'
 import { listenForSidebarOpenInSplit } from '../panes/sidebarMenu'
 import en from '../core/locales/en.json'
@@ -70,6 +71,7 @@ listenForSubtaskMenu()
 listenForSubpageMenu()
 listenForDoubleBracket()
 useDocIndexStore().LISTEN()
+useSearchStore().LISTEN()
 usePaneStore().LISTEN()
 listenForSidebarOpenInSplit()
 const layout = useCazallaLayoutStore()

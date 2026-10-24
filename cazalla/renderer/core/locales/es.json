@@ -178,6 +178,22 @@
       "date": "Fecha",
       "time": "Hora",
       "noCursor": "Sitúe primero el cursor en un editor."
+    },
+    "search": {
+      "placeholder": "Buscar (aproximado, por prefijo)",
+      "rebuild": "Reconstruir índice",
+      "allTypes": "Todos los tipos",
+      "indexed": "{n} indexados",
+      "noResults": "Sin resultados.",
+      "types": {
+        "note": "Notas",
+        "task": "Tareas",
+        "webpage": "Páginas web",
+        "daily": "Notas diarias",
+        "markdown": "Otro markdown",
+        "pdf": "PDF",
+        "drawing": "Dibujos"
+      }
     }
   }
 }

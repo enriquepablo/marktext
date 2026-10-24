@@ -82,6 +82,7 @@ cazalla/
   renderer/editor/          registry.ts: live Muya instances (primary + panes), insertion at the caret, typed-input listeners
   renderer/links/           docIndex.ts (document titles, newest first), linkDialog.ts (`[[` opens the link dialog) (item 16)
   renderer/dates/           dialog.ts (Insert date) (item 17)
+  renderer/search/          extract.ts, pdfText.ts, store.ts (MiniSearch index persisted in <content>/.cazalla/search-index.json), SearchView.vue (item 15 search)
   renderer/core/i18n.ts     registerLocales(): runtime merge of cazalla locale bundles
   renderer/core/layout.ts   reservedWidth = activity bar + daily notes panel
   renderer/dialogs/         EntityDialog.vue, a field-spec driven el-dialog opened by the bus event cazalla:dialog
@@ -101,7 +102,7 @@ Upstream files are changed only where a hook is unavoidable, each by one to thre
 
 - `packages/desktop/electron.vite.config.ts`, `vitest.config.ts`, `tsconfig.base.json`, `tsconfig.json`, `eslint.config.js`: the `@cazalla` alias and include paths.
 - `packages/desktop/src/renderer/src/pages/app.vue`: mount the activity bar, the kanban overlay and the panel; wrap the recent view and the editor in the pane layout.
-- `packages/desktop/src/renderer/src/components/sideBar/index.vue`: render the cazalla explorer in place of the upstream `<tree>` (the upstream tree components stay, unused); an events button in the header and the `events` column branch.
+- `packages/desktop/src/renderer/src/components/sideBar/index.vue`: render the cazalla explorer in place of the upstream `<tree>` and the cazalla search view in place of the upstream search (both upstream components stay, unused); an events button in the header and the `events` column branch.
 - `packages/desktop/src/shared/types/preferences.ts` and `src/renderer/src/store/layout.ts`: `events` accepted as a sidebar column.
 - `packages/desktop/src/renderer/src/store/editor.ts`: one line in `FORMAT_LINK_CLICK` routes `.pdf` and `.excalidraw` link targets to a pane.
 - `packages/desktop/src/renderer/src/contextMenu/sideBar/index.ts`: the "Open in split panel" and "Kanban board" entries at the end of the file-tree context menu.
@@ -131,3 +132,7 @@ The sidebar's file view is `Explorer.vue`, an `el-tree` over the open roots. It 
 ## Sites (item 13)
 
 Sites are `_metadata/sites/<slug>.md` records with the hyphenated keys of the roadmap. Pages live in `<site path>/pages/`; a sub-page goes into a folder named after its parent, which Pelican maps to a nested URL. Publishing copies `cazalla/pelican` to `<userData>/cazalla/pelican/<site>/`, creates a Python venv there on first use, then runs `make publish` and `make rsync_upload` with `SSH_*`, `SITEURL` and `INPUTDIR` from the site record. Requirements on the machine: `python3` with venv, `make`, `rsync`, `ssh` with keys for the target host. Unix only. Moving a site folder in the explorer does not yet rewrite the site's `path`; that follows the project-path rule as a follow-up.
+
+## Search (item 15)
+
+The sidebar search is a MiniSearch index over markdown (frontmatter and body), PDFs (text through pdf.js) and drawings (text elements), with fuzzy and prefix matching and a title boost. The index and the file mtimes are stored in `<content folder>/.cazalla/search-index.json`; on start the saved index loads and changed files are re-indexed. Watcher events trigger incremental refreshes, and the view has a rebuild button. The upstream ripgrep search is no longer reachable from the sidebar.

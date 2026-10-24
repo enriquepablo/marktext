@@ -28,15 +28,21 @@ export const listDir = async(dir: string): Promise<string[]> => {
   }
 }
 
-/** Absolute paths of `.md` files under `dir`, descending into subdirectories. */
-export const listMarkdownFiles = async(dir: string): Promise<string[]> => {
+const SKIP = new Set(['node_modules', '.git', '.cazalla', '.trash', '.obsidian'])
+
+/** Absolute paths of the files under `dir` accepted by `accept`, skipping hidden and tool folders. */
+export const listFiles = async(dir: string, accept: (file: string) => boolean): Promise<string[]> => {
   const out: string[] = []
   for (const name of await listDir(dir)) {
+    if (SKIP.has(name)) continue
     const p = join(dir, name)
     const stat = await window.fileUtils.stat(p).catch(() => null)
     if (!stat) continue
-    if (stat.isDirectory) out.push(...(await listMarkdownFiles(p)))
-    else if (stat.isFile && name.endsWith('.md')) out.push(p)
+    if (stat.isDirectory) out.push(...(await listFiles(p, accept)))
+    else if (stat.isFile && accept(p)) out.push(p)
   }
   return out
 }
+
+/** Absolute paths of `.md` files under `dir`, descending into subdirectories. */
+export const listMarkdownFiles = (dir: string): Promise<string[]> => listFiles(dir, (f) => f.endsWith('.md'))

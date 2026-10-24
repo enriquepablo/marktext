@@ -178,6 +178,22 @@
       "date": "Date",
       "time": "Time",
       "noCursor": "Place the cursor in an editor first."
+    },
+    "search": {
+      "placeholder": "Search (fuzzy, prefix)",
+      "rebuild": "Rebuild index",
+      "allTypes": "All types",
+      "indexed": "{n} indexed",
+      "noResults": "No results.",
+      "types": {
+        "note": "Notes",
+        "task": "Tasks",
+        "webpage": "Web pages",
+        "daily": "Daily notes",
+        "markdown": "Other markdown",
+        "pdf": "PDF",
+        "drawing": "Drawings"
+      }
     }
   }
 }

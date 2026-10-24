@@ -82,7 +82,7 @@ import { useI18n } from 'vue-i18n'
 import CazallaExplorer from '@cazalla/renderer/explorer/Explorer.vue'
 import CazallaEvents from '@cazalla/renderer/events/EventsView.vue'
 import { CalendarClock } from 'lucide-vue-next'
-import SideBarSearch from './search.vue'
+import SideBarSearch from '@cazalla/renderer/search/SearchView.vue'
 import IconTooltip from '@/components/iconTooltip/index.vue'
 import { storeToRefs } from 'pinia'
 
