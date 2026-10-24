@@ -132,7 +132,7 @@ const renderPages = async(): Promise<void> => {
     if (!ctx) continue
     ctx.setTransform(1, 0, 0, 1, 0, 0)
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    await page.render({ canvasContext: ctx, viewport }).promise
+    await page.render({ canvas, viewport }).promise
   }
 }
 
