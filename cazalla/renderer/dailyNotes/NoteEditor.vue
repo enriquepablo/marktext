@@ -1,8 +1,13 @@
 <template>
-  <div
-    ref="container"
-    class="dn-note-editor"
-  />
+  <div class="dn-note">
+    <h2 class="dn-note-title">
+      {{ store.selectedKey }}
+    </h2>
+    <div
+      ref="container"
+      class="dn-note-editor"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -96,10 +101,27 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.dn-note-editor {
+.dn-note {
+  display: flex;
+  flex-direction: column;
   height: 100%;
-  overflow-y: auto;
   background: var(--editorBgColor);
+}
+.dn-note-title {
+  margin: 0;
+  padding: 8px 16px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--editorColor);
+}
+.dn-note-editor {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+/* The frontmatter never changes by hand here; the heading above carries the date. */
+.dn-note-editor :deep(pre.front-matter) {
+  display: none;
 }
 /* The engine's default page width and margins are sized for the main editor. */
 .dn-note-editor :deep(.mu-container) {

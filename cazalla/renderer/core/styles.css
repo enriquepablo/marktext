@@ -4,3 +4,9 @@
 .mu-container pre.front-matter {
   font-size: calc(1em - 2pt);
 }
+
+/* Inline math sits on the text baseline instead of floating at middle height. */
+.mu-container .mu-math,
+.mu-container .mu-math > .mu-math-render:not(.mu-math-error) {
+  vertical-align: baseline;
+}

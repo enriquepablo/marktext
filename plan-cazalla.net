@@ -39,6 +39,8 @@ Second round, added 2026-10-24: 10, 15, 12, 11, 14, then 13. Item 10 is fixes. I
 
 Third round, added 2026-10-24: the second "details" section, then 13, 17, 16, and search last. Item 16 depends on search for its document list, and 17 shares its insertion mechanism.
 
+Fourth round, added 2026-10-24: 19 (details), then 18 (version control pane).
+
 # 1 calendar and daily notes.
 
 Once a base dir is selected
@@ -727,4 +729,45 @@ on accept inserts the date/time wherever the cursor is
 ## Design
 
 An activity-bar entry "Insert date" opens a dialog with a checkbox "include time", a date picker (default today) and, when the checkbox is on, a time picker (default now). On accept the value is inserted at the cursor of the focused editor: `YYYY-MM-DD` or `YYYY-MM-DD HH:mm`. The insertion uses the same mechanism as item 16.
+
+
+# 18 lazygit
+
+I want version control on the root directory.
+one icon in the left toolbar will open a view
+into a lazygit interface
+or if not easy in js/ts then some alternative
+even if jj instead of git
+
+## Status
+
+Deferred on 2026-10-24: the user will decide between lazygit in a terminal and a git pane. The design below is a proposal, not implemented.
+
+## Design
+
+lazygit is a terminal program. Embedding it means a terminal emulator in the renderer (xterm.js) driven by a pseudo-terminal in the main process (node-pty, a native module that must be rebuilt for Electron and allowed in the pnpm build list). That is possible but fragile across the three platforms, and the roadmap allows an alternative.
+
+Decision: a cazalla version-control pane over the `git` command line, in `cazalla/renderer/vcs/`. The main process gets one IPC handler, `mt::cazalla-git`, that runs `git` with given arguments in the content folder and returns stdout, stderr and the exit code (`cazalla/main/git.ts`; registration is one line next to the site handler). The pane shows three parts: the working-tree status (`git status --porcelain=v1`) as a list with checkboxes to stage or unstage files (`git add`, `git restore --staged`), a commit message box with a Commit button (`git commit -m`), and the recent log (`git log --oneline -n 50`). Selecting a status entry shows its diff (`git diff` or `git diff --cached`) as text below. The pane opens from an activity-bar icon as a pane leaf kind `vcs`, and refreshes on the upstream tree events. Commits use the repository's own identity; when none is configured the pane says so. No push or pull in the first version; `jj` is not used.
+
+If the content folder is not a repository, the pane offers "Initialize repository" (`git init`).
+
+# 19 details
+
+## calendar frontmatter
+
+below the calendar
+we can hide the frontmatter
+since it is not going to change
+just keep a heading with the title / date
+
+## alignmentr of math expressions
+
+with $$, they float a bit over the baseline of the normal text
+in both reader and editor views of md docs
+
+## Design
+
+The daily-notes pane hides the frontmatter block (`pre.front-matter`) and shows the selected date as a heading above the editor. The frontmatter stays in the file and keeps being rewritten on save.
+
+Inline math: Muya renders `.mu-math` as an inline block with `vertical-align: middle`, which lifts the formula above the text baseline. A cazalla global rule sets `vertical-align: baseline` on `.mu-math` and on its inline render. Reading mode uses the same DOM, so both views are covered.
 
