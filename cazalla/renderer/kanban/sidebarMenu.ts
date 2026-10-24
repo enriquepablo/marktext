@@ -1,10 +1,5 @@
 import bus from '@/bus'
 import { t } from '@/i18n'
-import { useProjectStore } from '@/store/project'
-import { useContentFolder } from '../core/contentFolder'
-import { join } from '../core/fs'
-import { useCazallaLayoutStore } from '../core/layout'
-import { useMetadataStore } from '../metadata/store'
 
 const EVENT = 'cazalla:sidebar-kanban'
 
@@ -15,8 +10,16 @@ export const getKanbanMenuItem = (): { label: string; id: string; click: () => v
   click: () => bus.emit(EVENT)
 })
 
-// Resolves the project whose folder contains the right-clicked item, then opens the board on it.
-const openForActiveItem = (): void => {
+// Stores are imported on use: this module is loaded by the upstream sidebar
+// menu, whose unit specs run without the preload globals the stores read.
+const openForActiveItem = async(): Promise<void> => {
+  const [{ useProjectStore }, { useContentFolder }, { join }, { useCazallaLayoutStore }, { useMetadataStore }] = await Promise.all([
+    import('@/store/project'),
+    import('../core/contentFolder'),
+    import('../core/fs'),
+    import('../core/layout'),
+    import('../metadata/store')
+  ])
   const pathname = useProjectStore().activeItem?.pathname
   const folder = useContentFolder().value
   const layout = useCazallaLayoutStore()
@@ -33,5 +36,5 @@ let listening = false
 export const listenForSidebarKanban = (): void => {
   if (listening) return
   listening = true
-  bus.on(EVENT, openForActiveItem)
+  bus.on(EVENT, () => void openForActiveItem())
 }

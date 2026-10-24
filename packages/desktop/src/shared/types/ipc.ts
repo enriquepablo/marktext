@@ -239,6 +239,7 @@ export interface IpcMainEventChannels {
   'mt::cm-insert-paragraph': [direction: 'before' | 'after']
   'mt::cm-paste-as-plain-text': []
   'mt::cm-cazalla-subtask': []
+  'mt::cm-cazalla-pane': [action: string]
   'mt::current-language': [language: string]
   'mt::editor-ask-file-save': []
   'mt::editor-ask-file-save-as': []

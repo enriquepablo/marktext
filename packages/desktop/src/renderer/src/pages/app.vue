@@ -19,17 +19,22 @@
         v-if="!init"
         class="editor-placeholder"
       />
-      <recent v-if="!hasCurrentFile && init" />
-      <editor-with-tabs
-        v-if="hasCurrentFile && init"
-        :markdown="markdown"
-        :cursor="cursor"
-        :muya-index-cursor="muyaIndexCursor"
-        :source-code="sourceCode && !currentFile?.readOnly"
-        :show-tab-bar="showTabBar"
-        :text-direction="textDirection"
-        :platform="platform"
-      />
+      <pane-layout
+        v-if="init"
+        :node="paneStore.tree"
+      >
+        <recent v-if="!hasCurrentFile" />
+        <editor-with-tabs
+          v-if="hasCurrentFile"
+          :markdown="markdown"
+          :cursor="cursor"
+          :muya-index-cursor="muyaIndexCursor"
+          :source-code="sourceCode && !currentFile?.readOnly"
+          :show-tab-bar="showTabBar"
+          :text-direction="textDirection"
+          :platform="platform"
+        />
+      </pane-layout>
       <command-palette />
       <about-dialog />
       <export-setting-dialog />
@@ -58,6 +63,8 @@ import ImportModal from '@/components/import/index.vue'
 import DailyNotesPanel from '@cazalla/renderer/dailyNotes/Panel.vue'
 import ActivityBar from '@cazalla/renderer/activityBar/ActivityBar.vue'
 import KanbanView from '@cazalla/renderer/kanban/KanbanView.vue'
+import PaneLayout from '@cazalla/renderer/panes/PaneLayout.vue'
+import { usePaneStore } from '@cazalla/renderer/panes/store'
 import { useCazallaLayoutStore } from '@cazalla/renderer/core/layout'
 import bus from '@/bus'
 import { DEFAULT_STYLE } from '@/config'
@@ -75,6 +82,7 @@ const editorStore = useEditorStore()
 const preferencesStore = usePreferencesStore()
 const layoutStore = useLayoutStore()
 const cazallaLayout = useCazallaLayoutStore()
+const paneStore = usePaneStore()
 const projectStore = useProjectStore()
 const listenForMainStore = useListenForMainStore()
 const autoUpdateStore = useAutoUpdatesStore()

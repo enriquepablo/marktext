@@ -95,6 +95,15 @@
       "noEffort": "No hay horas registradas en ese periodo.",
       "noIssuer": "Ninguna organización con IBAN puede emitir facturas.",
       "written": "Escrito {file}"
+    },
+    "panes": {
+      "title": "Paneles",
+      "splitHorizontal": "Dividir en horizontal (arriba / abajo)",
+      "splitVertical": "Dividir en vertical (izquierda / derecha)",
+      "close": "Cerrar panel",
+      "openInSplit": "Abrir en panel dividido",
+      "noFile": "Abra primero un archivo.",
+      "missing": "Archivo no encontrado: {file}"
     }
   }
 }

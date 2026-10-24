@@ -13,6 +13,7 @@ import {
 import { t } from '../../i18n'
 import { popupContextMenu, type ContextMenuItem } from '../popupMenu'
 import { getKanbanMenuItem } from '@cazalla/renderer/kanban/sidebarMenu'
+import { getOpenInSplitMenuItem } from '@cazalla/renderer/panes/sidebarMenu'
 
 export const showContextMenu = (
   event: { clientX: number; clientY: number },
@@ -32,6 +33,7 @@ export const showContextMenu = (
     getCopyPath(),
     getShowInFolder(),
     SEPARATOR,
+    getOpenInSplitMenuItem(),
     getKanbanMenuItem()
   ]
 

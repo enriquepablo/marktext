@@ -95,6 +95,15 @@
       "noEffort": "No effort recorded in that period.",
       "noIssuer": "No organization with an IBAN can issue invoices.",
       "written": "Written {file}"
+    },
+    "panes": {
+      "title": "Panels",
+      "splitHorizontal": "Split horizontally (top / bottom)",
+      "splitVertical": "Split vertically (left / right)",
+      "close": "Close panel",
+      "openInSplit": "Open in split panel",
+      "noFile": "Open a file first.",
+      "missing": "File not found: {file}"
     }
   }
 }

@@ -38,6 +38,8 @@ import { useCazallaLayoutStore } from '../core/layout'
 import { listenForSidebarKanban } from '../kanban/sidebarMenu'
 import { listenForSubtaskMenu } from '../tasks/subtaskMenu'
 import { openInvoiceDialog, openReportDialog } from '../billing/dialogs'
+import { usePaneStore } from '../panes/store'
+import { listenForSidebarOpenInSplit } from '../panes/sidebarMenu'
 import en from '../core/locales/en.json'
 import es from '../core/locales/es.json'
 
@@ -46,6 +48,8 @@ useMetadataStore().LISTEN()
 useTaskStore().LISTEN()
 listenForSidebarKanban()
 listenForSubtaskMenu()
+usePaneStore().LISTEN()
+listenForSidebarOpenInSplit()
 const layout = useCazallaLayoutStore()
 const { t } = useI18n()
 
