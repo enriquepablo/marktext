@@ -8,6 +8,7 @@ import { ensureDir, exists, join, readText, writeBytes, writeText } from '../cor
 import { useMetadataStore } from '../metadata/store'
 import { canBeInvoiced, canInvoice } from '../metadata/types'
 import { useTaskStore } from '../tasks/store'
+import { useEditorStore } from '@/store/editor'
 import {
   buildInvoice,
   buildReport,
@@ -28,6 +29,14 @@ const open = (spec: DialogSpec): void => {
     return
   }
   bus.emit(DIALOG_EVENT, spec)
+}
+
+// The index reads disk; a task edited in a tab but not saved would be reported stale.
+const unsavedUnder = (contentFolder: string, relPaths: string[]): string[] => {
+  const dirs = relPaths.map((p) => join(contentFolder, p) + window.path.sep)
+  return useEditorStore()
+    .tabs.filter((tab) => tab.pathname && !tab.isSaved && dirs.some((d) => tab.pathname!.startsWith(d)))
+    .map((tab) => tab.pathname as string)
 }
 
 const periodFields = (): FieldSpec[] => {
@@ -77,6 +86,8 @@ export const openReportDialog = (): void =>
       if (!folder || !project) return t('cazalla.dialog.noProjects')
       const period = periodFrom(String(v.start), String(v.end))
       if (!project.organization) return t('cazalla.billing.noOrganization')
+      const unsaved = unsavedUnder(folder, [project.path])
+      if (unsaved.length) return t('cazalla.billing.unsaved', { files: unsaved.join('\n') })
       const taskStore = useTaskStore()
       await taskStore.LOAD()
       if (taskStore.byProject(project.slug).length === 0) return t('cazalla.billing.noTasks', { path: project.path })
@@ -129,6 +140,8 @@ export const openInvoiceDialog = (): void => {
       const issuer = issuers.length === 1 ? issuers[0] : metadata.organizations[String(v.issuer)]
       if (!folder || !client || !issuer) return t('cazalla.billing.noIssuer')
       const period = periodFrom(String(v.start), String(v.end))
+      const unsaved = unsavedUnder(folder, client.billing.map((slug) => metadata.projects[slug]?.path).filter((p): p is string => !!p))
+      if (unsaved.length) return t('cazalla.billing.unsaved', { files: unsaved.join('\n') })
       await useTaskStore().LOAD()
       const sequence = nextInvoiceNumber(issuer.invoice_number)
       const invoice = buildInvoice({

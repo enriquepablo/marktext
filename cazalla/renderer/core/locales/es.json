@@ -100,7 +100,8 @@
       "noIssuer": "Ninguna organización con IBAN puede emitir facturas.",
       "written": "Escrito {file}",
       "noOrganization": "El proyecto no tiene organización; indíquela en sus metadatos.",
-      "noTasks": "No hay tareas indexadas para este proyecto. Compruebe que su carpeta es {path} y que los archivos de tarea tienen un frontmatter válido."
+      "noTasks": "No hay tareas indexadas para este proyecto. Compruebe que su carpeta es {path} y que los archivos de tarea tienen un frontmatter válido.",
+      "unsaved": "Guarde primero estos archivos abiertos; el informe lee del disco:\n{files}"
     },
     "panes": {
       "title": "Paneles",

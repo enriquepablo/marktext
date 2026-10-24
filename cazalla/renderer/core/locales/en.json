@@ -100,7 +100,8 @@
       "noIssuer": "No organization with an IBAN can issue invoices.",
       "written": "Written {file}",
       "noOrganization": "The project has no organization; set one in its metadata.",
-      "noTasks": "No tasks are indexed for this project. Check that its folder is {path} and that the task files have valid frontmatter."
+      "noTasks": "No tasks are indexed for this project. Check that its folder is {path} and that the task files have valid frontmatter.",
+      "unsaved": "Save these open files first; the report reads from disk:\n{files}"
     },
     "panes": {
       "title": "Panels",

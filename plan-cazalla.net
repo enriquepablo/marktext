@@ -841,3 +841,5 @@ Done on 2026-10-24. The git icon toggles a full-window overlay below the title b
 ### Status
 
 Addressed on 2026-10-24. Two causes fit the steps. First: the task template writes `effort: []`; adding `  - 2026-10-24: 3` under it without removing `[]` is invalid YAML, and the index dropped the file without a word. The parser now repairs that pattern, and task files whose frontmatter still fails are reported in a notice and listed in the store. Second: the move procedure compared paths literally, so a root path with a trailing slash would have left the project `path` unchanged; paths are normalized now. The report dialog reloads the index first and says when a project has no indexed tasks at all, naming the folder it looked in.
+
+The `[]` had been removed, so the YAML was valid. The remaining suspects are an unsaved editor buffer (the index reads disk; MarkText saves on demand unless autosave is on) and the moved folder. The report and invoice dialogs now refuse while a tab under the project has unsaved changes, naming the files, and say when a project has no indexed tasks, naming the folder they looked in.
