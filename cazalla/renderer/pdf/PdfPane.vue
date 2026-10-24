@@ -120,15 +120,19 @@ const renderPages = async(): Promise<void> => {
     if (!canvas) continue
     const page = await doc.getPage(n)
     const base = page.getViewport({ scale: 1 })
-    const viewport = page.getViewport({ scale: width / base.width })
-    canvas.width = Math.floor(viewport.width * ratio)
-    canvas.height = Math.floor(viewport.height * ratio)
-    canvas.style.width = `${Math.floor(viewport.width)}px`
-    canvas.style.height = `${Math.floor(viewport.height)}px`
+    // The pixel ratio goes into the viewport scale; pdf.js owns the context's
+    // transform, so setting one here would compound with its own and flip the page.
+    const cssScale = width / base.width
+    const viewport = page.getViewport({ scale: cssScale * ratio })
+    canvas.width = Math.floor(viewport.width)
+    canvas.height = Math.floor(viewport.height)
+    canvas.style.width = `${Math.floor(viewport.width / ratio)}px`
+    canvas.style.height = `${Math.floor(viewport.height / ratio)}px`
     const ctx = canvas.getContext('2d')
     if (!ctx) continue
-    ctx.setTransform(ratio, 0, 0, ratio, 0, 0)
-    await page.render({ canvas, canvasContext: ctx, viewport }).promise
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    await page.render({ canvasContext: ctx, viewport }).promise
   }
 }
 

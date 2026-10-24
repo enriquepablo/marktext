@@ -916,3 +916,12 @@ and visualize git status witrh color.
 ## Design
 
 Done on 2026-10-24. The green for open files is gone. Project folders (paths listed in `_metadata/projects`) show a red folder icon. Names are coloured by git state: green for files git reports as changed (modified, added, renamed, deleted), blue for untracked; a folder takes the state of its descendants, teal when both occur below it. A project folder with changes therefore shows a red icon with a green, blue or teal name. The state comes from `git status --porcelain=v1 -z --untracked-files=all` run by the main process in the content folder (`cazalla/main/git.ts`, one registration line) and refreshed after tree events, moves and Refresh. Without git or a repository nothing is coloured.
+
+# 25 bug the PDFs are rendered wrong
+
+like twice reflected,
+upside down and left right
+
+## Status
+
+Fixed on 2026-10-24. The pane set a device-pixel transform on the canvas context and also handed the canvas to pdf.js, which applies its own viewport transform; the two compounded into a 180° turn. The pixel ratio now goes into the viewport scale and pdf.js alone draws into a reset context.
