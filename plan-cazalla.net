@@ -822,6 +822,22 @@ i don't need calendar explorer or editing pane at the same time
 
 Fixed on 2026-10-24. The explorer loaded its root level once at mount, before the sidebar roots arrived over IPC. The roots are now reactive data of the tree and only the folders below them load lazily. Expanded folders are remembered in `localStorage['cazalla-explorer-expanded']` and reopened at startup; roots start open the first time.
 
+## bug creating effort report
+
+i have created a project book.
+a task in that project.
+and a subtask.
+then i have created a folder within projects, and moved the book folder to that new folder.
+
+then i have added an effort line `  - 2026-10-24: 3` to ther effort frontmatter key,
+asked for a effort report with dates covering the date of the effort,
+and the dialog shows me an error:
+no effort recorded in that period
+
 ### Status
 
 Done on 2026-10-24. The git icon toggles a full-window overlay below the title bar (`TerminalOverlay.vue`, main view `terminal`), covering explorer, calendar and editor. Escape outside the terminal or the close button returns to the editor. The pane form of the terminal remains available to the pane tree.
+
+### Status
+
+Addressed on 2026-10-24. Two causes fit the steps. First: the task template writes `effort: []`; adding `  - 2026-10-24: 3` under it without removing `[]` is invalid YAML, and the index dropped the file without a word. The parser now repairs that pattern, and task files whose frontmatter still fails are reported in a notice and listed in the store. Second: the move procedure compared paths literally, so a root path with a trailing slash would have left the project `path` unchanged; paths are normalized now. The report dialog reloads the index first and says when a project has no indexed tasks at all, naming the folder it looked in.

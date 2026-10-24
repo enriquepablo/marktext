@@ -61,7 +61,9 @@
     "task": {
       "title": "New task",
       "name": "Title",
-      "due": "Due"
+      "due": "Due",
+      "invalidTitle": "Tasks with invalid frontmatter",
+      "invalid": "These task files could not be read and are left out of the board, events and reports:\n{files}"
     },
     "kanban": {
       "title": "Kanban",
@@ -97,7 +99,8 @@
       "noEffort": "No effort recorded in that period.",
       "noIssuer": "No organization with an IBAN can issue invoices.",
       "written": "Written {file}",
-      "noOrganization": "The project has no organization; set one in its metadata."
+      "noOrganization": "The project has no organization; set one in its metadata.",
+      "noTasks": "No tasks are indexed for this project. Check that its folder is {path} and that the task files have valid frontmatter."
     },
     "panes": {
       "title": "Panels",

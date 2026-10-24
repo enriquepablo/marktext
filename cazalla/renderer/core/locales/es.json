@@ -61,7 +61,9 @@
     "task": {
       "title": "Nueva tarea",
       "name": "Título",
-      "due": "Vencimiento"
+      "due": "Vencimiento",
+      "invalidTitle": "Tareas con frontmatter inválido",
+      "invalid": "Estos archivos de tarea no se pudieron leer y quedan fuera del tablero, los eventos y los informes:\n{files}"
     },
     "kanban": {
       "title": "Kanban",
@@ -97,7 +99,8 @@
       "noEffort": "No hay horas registradas en ese periodo.",
       "noIssuer": "Ninguna organización con IBAN puede emitir facturas.",
       "written": "Escrito {file}",
-      "noOrganization": "El proyecto no tiene organización; indíquela en sus metadatos."
+      "noOrganization": "El proyecto no tiene organización; indíquela en sus metadatos.",
+      "noTasks": "No hay tareas indexadas para este proyecto. Compruebe que su carpeta es {path} y que los archivos de tarea tienen un frontmatter válido."
     },
     "panes": {
       "title": "Paneles",

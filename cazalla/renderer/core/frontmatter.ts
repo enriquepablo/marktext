@@ -15,12 +15,17 @@ export const split = (markdown: string): { yaml: string | null; body: string } =
   return { yaml: m[1], body: markdown.slice(m[0].length) }
 }
 
+// `effort: []` followed by hand-added `  - 2026-10-24: 3` lines is invalid YAML;
+// the empty list marker is dropped so the items parse. The write path keeps `[]`.
+const EMPTY_LIST_THEN_ITEMS = /^([^\s:#][^:\n]*):[ \t]*\[\][ \t]*\n(?=[ \t]+-[ \t])/gm
+export const repair = (yaml: string): string => yaml.replace(EMPTY_LIST_THEN_ITEMS, '$1:\n')
+
 /** Frontmatter as an object, or null when there is no block or it is not a YAML map. */
 export const parse = (markdown: string): Fields | null => {
   const { yaml } = split(markdown)
   if (yaml === null) return null
   try {
-    const value = YAML.parse(yaml)
+    const value = YAML.parse(repair(yaml))
     return value && typeof value === 'object' && !Array.isArray(value) ? (value as Fields) : null
   } catch {
     return null
@@ -39,7 +44,7 @@ export const serialize = (fields: Fields, body = ''): string =>
 export const updateFields = (markdown: string, patch: Fields): string => {
   const { yaml, body } = split(markdown)
   if (yaml === null) return serialize(patch, markdown)
-  const doc = YAML.parseDocument(yaml)
+  const doc = YAML.parseDocument(repair(yaml))
   if (!isMap(doc.contents)) return markdown
   for (const [key, value] of Object.entries(patch)) {
     if (value === undefined) doc.delete(key)

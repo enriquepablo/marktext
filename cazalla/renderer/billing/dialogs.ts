@@ -77,7 +77,10 @@ export const openReportDialog = (): void =>
       if (!folder || !project) return t('cazalla.dialog.noProjects')
       const period = periodFrom(String(v.start), String(v.end))
       if (!project.organization) return t('cazalla.billing.noOrganization')
-      const report = buildReport(project, useTaskStore().list, period)
+      const taskStore = useTaskStore()
+      await taskStore.LOAD()
+      if (taskStore.byProject(project.slug).length === 0) return t('cazalla.billing.noTasks', { path: project.path })
+      const report = buildReport(project, taskStore.list, period)
       if (report.tasks.length === 0) return t('cazalla.billing.noEffort')
       try {
         done(
@@ -126,6 +129,7 @@ export const openInvoiceDialog = (): void => {
       const issuer = issuers.length === 1 ? issuers[0] : metadata.organizations[String(v.issuer)]
       if (!folder || !client || !issuer) return t('cazalla.billing.noIssuer')
       const period = periodFrom(String(v.start), String(v.end))
+      await useTaskStore().LOAD()
       const sequence = nextInvoiceNumber(issuer.invoice_number)
       const invoice = buildInvoice({
         client,

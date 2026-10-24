@@ -1,5 +1,7 @@
 import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
+import notice from '@/services/notification'
+import { t } from '@/i18n'
 import { useContentFolder } from '../core/contentFolder'
 import { parse, updateFields, type Fields } from '../core/frontmatter'
 import { basename, join, listMarkdownFiles, readText, writeText } from '../core/fs'
@@ -50,6 +52,9 @@ export const useTaskStore = defineStore('cazallaTasks', () => {
 
   const tasks = ref<Record<string, TaskRecord>>({})
   const loaded = ref(false)
+  // Markdown files under a tasks folder whose frontmatter does not parse; reported once per change.
+  const invalid = ref<string[]>([])
+  let reportedInvalid = ''
 
   const list = computed(() => Object.values(tasks.value))
   const byProject = (slug: string): TaskRecord[] => list.value.filter((t) => t.project === slug)
@@ -63,26 +68,38 @@ export const useTaskStore = defineStore('cazallaTasks', () => {
     ]
   }
 
-  async function readOne(file: string, archived: boolean): Promise<TaskRecord | null> {
-    const fields = parse(await readText(file))
-    if (!fields || fields.category !== 'task') return null
+  async function readOne(file: string, archived: boolean, broken?: string[]): Promise<TaskRecord | null> {
+    const text = await readText(file)
+    const fields = parse(text)
+    if (!fields) {
+      if (broken && /^---/.test(text)) broken.push(file)
+      return null
+    }
+    if (fields.category !== 'task') return null
     return toRecord(fields, file, archived)
   }
 
   async function LOAD(): Promise<void> {
     const out: Record<string, TaskRecord> = {}
+    const broken: string[] = []
     if (contentFolder.value) {
       for (const project of metadata.projectsList) {
         for (const { dir, archived } of projectDirs(project)) {
           for (const file of await listMarkdownFiles(dir)) {
-            const record = await readOne(file, archived)
+            const record = await readOne(file, archived, broken)
             if (record) out[file] = record
           }
         }
       }
     }
     tasks.value = out
+    invalid.value = broken
     loaded.value = true
+    const key = broken.join('\n')
+    if (key && key !== reportedInvalid) {
+      reportedInvalid = key
+      notice.notify({ title: t('cazalla.task.invalidTitle'), type: 'warning', message: t('cazalla.task.invalid', { files: key }) })
+    }
   }
 
   /** Rewrites frontmatter keys of one task, stamps `modified`, and refreshes its record. */
@@ -117,5 +134,5 @@ export const useTaskStore = defineStore('cazallaTasks', () => {
     immediate: true
   })
 
-  return { tasks, list, active, loaded, byProject, LOAD, UPDATE, LISTEN }
+  return { tasks, list, active, loaded, invalid, byProject, LOAD, UPDATE, LISTEN }
 })

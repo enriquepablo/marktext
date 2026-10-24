@@ -62,6 +62,13 @@ Body line.
     expect(out).toBe('---\ntitle: t\nsubtasks:\n  - /a/b\n---\nx\n')
   })
 
+  it('repairs an empty list marker followed by hand-written items', () => {
+    const task = '---\ntitle: t\neffort: []\n  - 2026-10-24: 3\n  - 2026-10-25: 1.5\nsubtasks: []\n---\n'
+    expect(parse(task)?.effort).toEqual([{ '2026-10-24': 3 }, { '2026-10-25': 1.5 }])
+    expect(parse(task)?.subtasks).toEqual([])
+    expect(updateFields(task, { status: 'done' })).toContain('effort:\n  - 2026-10-24: 3\n  - 2026-10-25: 1.5\nsubtasks: []\nstatus: done\n')
+  })
+
   it('adds a block to a document without one', () => {
     expect(updateFields('# plain\n', { category: 'note' })).toBe('---\ncategory: note\n---\n# plain\n')
   })

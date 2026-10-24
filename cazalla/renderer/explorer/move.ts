@@ -24,7 +24,15 @@ export class MoveError extends Error {
 }
 
 const sep = (): string => window.path.sep
-const isUnder = (parent: string, child: string): boolean => child === parent || child.startsWith(parent + sep())
+const norm = (p: string): string => {
+  const n = window.path.normalize ? window.path.normalize(p) : p
+  return n.length > 1 ? n.replace(/[\\/]+$/, '') : n
+}
+const isUnder = (parent: string, child: string): boolean => {
+  const a = norm(parent)
+  const b = norm(child)
+  return b === a || b.startsWith(a + sep())
+}
 const join = (...p: string[]): string => window.path.join(...p)
 
 const stem = (file: string): string => basename(file).replace(/\.md$/, '')
@@ -53,7 +61,10 @@ const projectContaining = (contentFolder: string, projects: Project[], file: str
  * paths, task `project`/`path`, the parent's `subtasks` for single task files,
  * and relative links in every markdown document. Returns what changed.
  */
-export const moveEntry = async(from: string, to: string, ctx: MoveContext): Promise<MoveResult> => {
+export const moveEntry = async(fromRaw: string, toRaw: string, ctx: MoveContext): Promise<MoveResult> => {
+  const from = norm(fromRaw)
+  const to = norm(toRaw)
+  if (ctx.contentFolder) ctx = { ...ctx, contentFolder: norm(ctx.contentFolder) }
   if (!(await exists(from))) throw new MoveError('missing', from)
   if (isUnder(from, to)) throw new MoveError('into-self', to)
   if (await exists(to)) throw new MoveError('exists', to)
