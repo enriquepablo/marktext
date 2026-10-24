@@ -54,6 +54,8 @@ import { useTaskStore } from '../tasks/store'
 import { getKanbanMenuItem } from '../kanban/sidebarMenu'
 import { getOpenInSplitMenuItem } from '../panes/sidebarMenu'
 import { moveEntry, MoveError } from './move'
+import { usePaneStore } from '../panes/store'
+import { paneKindFor } from '../panes/linkRouter'
 
 interface Entry {
   path: string
@@ -122,7 +124,9 @@ const onClick = (e: Entry, _node: TreeNode, _comp: unknown, event?: MouseEvent):
   select(e)
   if (e.isDir || event?.detail === 2) return
   if (!isMarkdown(e.name)) {
-    void window.electron.ipcRenderer.invoke('mt::shell::open-path', e.path)
+    const kind = paneKindFor(e.path)
+    if (kind) usePaneStore().OPEN_IN_PANE(kind, e.path)
+    else void window.electron.ipcRenderer.invoke('mt::shell::open-path', e.path)
     return
   }
   const opened = tabs.value.find((f) => window.fileUtils.isSamePathSync(f.pathname, e.path))

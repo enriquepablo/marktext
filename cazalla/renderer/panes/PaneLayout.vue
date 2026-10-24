@@ -32,6 +32,11 @@
   >
     <slot />
   </div>
+  <pdf-pane
+    v-else-if="node.kind === 'pdf'"
+    :id="node.id"
+    :file="node.file"
+  />
   <file-pane
     v-else
     :id="node.id"
@@ -41,6 +46,7 @@
 
 <script setup lang="ts">
 import FilePane from './FilePane.vue'
+import PdfPane from '../pdf/PdfPane.vue'
 import { usePaneStore } from './store'
 import type { PaneNode, Split } from './tree'
 

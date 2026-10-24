@@ -120,6 +120,13 @@
       "exists": "Already exists: {path}",
       "into-self": "Cannot move a folder into itself: {path}",
       "missing": "Not found: {path}"
+    },
+    "pdf": {
+      "title": "PDF",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "missing": "File not found: {file}",
+      "loadError": "The PDF could not be read."
     }
   }
 }

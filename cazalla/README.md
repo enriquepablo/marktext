@@ -75,6 +75,7 @@ cazalla/
   renderer/billing/         data.ts, reportPdf.ts, invoicePdf.ts (ported from cazalla-net.plugin, pdf-lib), dialogs.ts (item 9); output under organizations/<slug>/assets/invoices/YYYY/MM
   renderer/panes/           tree.ts (pure layout tree), store.ts, PaneLayout.vue, FilePane.vue (second Muya instance per pane), sidebarMenu.ts (item 7)
   renderer/explorer/        Explorer.vue (el-tree file explorer, all files, drag and drop), move.ts (move with metadata sync), links.ts (link rewriting) (item 15)
+  renderer/pdf/             PdfPane.vue (vue-pdf-embed viewer as a pane leaf), panes/linkRouter.ts routes .pdf and .excalidraw links to panes (item 12)
   renderer/core/i18n.ts     registerLocales(): runtime merge of cazalla locale bundles
   renderer/core/layout.ts   reservedWidth = activity bar + daily notes panel
   renderer/dialogs/         EntityDialog.vue, a field-spec driven el-dialog opened by the bus event cazalla:dialog
@@ -93,6 +94,7 @@ Upstream files are changed only where a hook is unavoidable, each by one to thre
 - `packages/desktop/electron.vite.config.ts`, `vitest.config.ts`, `tsconfig.base.json`, `tsconfig.json`, `eslint.config.js`: the `@cazalla` alias and include paths.
 - `packages/desktop/src/renderer/src/pages/app.vue`: mount the activity bar, the kanban overlay and the panel; wrap the recent view and the editor in the pane layout.
 - `packages/desktop/src/renderer/src/components/sideBar/index.vue`: render the cazalla explorer in place of the upstream `<tree>` (the upstream tree components stay, unused).
+- `packages/desktop/src/renderer/src/store/editor.ts`: one line in `FORMAT_LINK_CLICK` routes `.pdf` and `.excalidraw` link targets to a pane.
 - `packages/desktop/src/renderer/src/contextMenu/sideBar/index.ts`: the "Open in split panel" and "Kanban board" entries at the end of the file-tree context menu.
 - `packages/desktop/src/main/contextMenu/editor/index.ts`: cazalla entries spread at the end of the editor context menu; `src/shared/types/ipc.ts` gains their channels.
 - `packages/desktop/src/renderer/src/components/editorWithTabs/index.vue`: subtract the panel width.

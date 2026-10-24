@@ -3,7 +3,10 @@
 
 export type Direction = 'horizontal' | 'vertical'
 
-export type Leaf = { kind: 'primary'; id: 'primary' } | { kind: 'file'; id: string; file: string }
+/** Leaf kinds that show a file: the markdown editor, the PDF viewer, the drawing board. */
+export type FileLeafKind = 'file' | 'pdf' | 'drawing'
+export const FILE_LEAF_KINDS: readonly FileLeafKind[] = ['file', 'pdf', 'drawing']
+export type Leaf = { kind: 'primary'; id: 'primary' } | { kind: FileLeafKind; id: string; file: string }
 export interface Split {
   kind: 'split'
   id: string
@@ -53,11 +56,14 @@ export const splitLeaf = (tree: PaneNode, id: string, direction: Direction, newL
 /** Removes leaf `id`; the primary leaf cannot be removed. */
 export const removeLeaf = (tree: PaneNode, id: string): PaneNode => {
   if (id === 'primary') return tree
-  return map(tree, (node) => (node.id === id && node.kind === 'file' ? null : node)) ?? tree
+  return map(tree, (node) => (node.id === id && node.kind !== 'split' && node.kind !== 'primary' ? null : node)) ?? tree
 }
 
-export const setFile = (tree: PaneNode, id: string, file: string): PaneNode =>
-  map(tree, (node) => (node.id === id && node.kind === 'file' ? { ...node, file } : node)) ?? tree
+/** Points leaf `id` at another file, changing its kind when the file type differs. */
+export const setFile = (tree: PaneNode, id: string, file: string, kind?: FileLeafKind): PaneNode =>
+  map(tree, (node) =>
+    node.id === id && node.kind !== 'split' && node.kind !== 'primary' ? { ...node, file, kind: kind ?? node.kind } : node
+  ) ?? tree
 
 export const setRatio = (tree: PaneNode, id: string, ratio: number): PaneNode =>
   map(tree, (node) =>
@@ -70,7 +76,7 @@ export const isValidTree = (value: unknown): value is PaneNode => {
     if (!node || typeof node !== 'object') return false
     const n = node as Record<string, unknown>
     if (n.kind === 'primary') return n.id === 'primary'
-    if (n.kind === 'file') return typeof n.id === 'string' && typeof n.file === 'string'
+    if ((FILE_LEAF_KINDS as readonly string[]).includes(String(n.kind))) return typeof n.id === 'string' && typeof n.file === 'string'
     if (n.kind === 'split') {
       return (
         typeof n.id === 'string' &&

@@ -39,6 +39,9 @@ describe('pane tree', () => {
     let tree: PaneNode = splitLeaf(PRIMARY, 'primary', 'vertical', fileLeaf('a'))
     tree = setFile(tree, 'a', '/vault/other.md')
     expect(findNode(tree, 'a')).toEqual({ kind: 'file', id: 'a', file: '/vault/other.md' })
+    tree = setFile(tree, 'a', '/vault/doc.pdf', 'pdf')
+    expect(findNode(tree, 'a')).toEqual({ kind: 'pdf', id: 'a', file: '/vault/doc.pdf' })
+    expect(removeLeaf(tree, 'a')).toEqual(PRIMARY)
     const id = tree.id
     expect((setRatio(tree, id, 0.95) as { ratio: number }).ratio).toBe(0.9)
     expect((setRatio(tree, id, 0.02) as { ratio: number }).ratio).toBe(0.1)
@@ -52,5 +55,7 @@ describe('pane tree', () => {
     expect(isValidTree({ kind: 'split', id: 's', direction: 'vertical', ratio: 0.5, children: [PRIMARY, PRIMARY] })).toBe(false)
     expect(isValidTree(null)).toBe(false)
     expect(isValidTree({ kind: 'file', id: 'x' })).toBe(false)
+    expect(isValidTree(splitLeaf(PRIMARY, 'primary', 'vertical', { kind: 'pdf', id: 'p', file: '/v/a.pdf' }))).toBe(true)
+    expect(isValidTree({ kind: 'video', id: 'v', file: '/v/a.mp4' })).toBe(false)
   })
 })

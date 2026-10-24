@@ -1,4 +1,5 @@
 import equal from 'deep-equal'
+import { routeLinkToPane } from '@cazalla/renderer/panes/linkRouter'
 import { prepareReading, applyReadOnly } from '../services/documentMode'
 import bus from '../bus'
 import { getUniqueId, deepClone } from '../util'
@@ -526,6 +527,7 @@ export const useEditorStore = defineStore('editor', {
         this.SCROLL_TO_ANCHOR(data.href.substring(1))
         return
       }
+      if (routeLinkToPane(data.href, dirname)) return
 
       window.electron.ipcRenderer.send('mt::format-link-click', {
         data,

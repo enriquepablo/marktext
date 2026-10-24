@@ -14,6 +14,7 @@ import {
   setRatio,
   splitLeaf,
   type Direction,
+  type FileLeafKind,
   type Leaf,
   type PaneNode
 } from './tree'
@@ -54,25 +55,26 @@ export const usePaneStore = defineStore('cazallaPanes', () => {
     return node && node.kind !== 'split' ? node : leaves(tree.value)[0]
   }
 
-  // The file a new pane shows: the focused pane's file, or the editor's current document.
-  const fileForNewPane = (): string | null => {
+  // What a new pane shows: the focused pane's file, or the editor's current document.
+  const contentForNewPane = (): { kind: FileLeafKind; file: string } | null => {
     const leaf = focusedLeaf()
-    if (leaf?.kind === 'file') return leaf.file
-    return useEditorStore().currentFile?.pathname ?? null
+    if (leaf && leaf.kind !== 'primary') return { kind: leaf.kind, file: leaf.file }
+    const file = useEditorStore().currentFile?.pathname
+    return file ? { kind: 'file', file } : null
   }
 
   function FOCUS(id: string): void {
     focusedId.value = id
   }
 
-  function SPLIT(direction: Direction, file: string | null = fileForNewPane()): void {
-    if (!file) {
+  function SPLIT(direction: Direction, content: { kind: FileLeafKind; file: string } | null = contentForNewPane()): void {
+    if (!content) {
       notice.notify({ title: t('cazalla.panes.title'), type: 'warning', message: t('cazalla.panes.noFile') })
       return
     }
     const leaf = focusedLeaf()
     if (!leaf) return
-    const created: Leaf = { kind: 'file', id: nextId(), file }
+    const created: Leaf = { kind: content.kind, id: nextId(), file: content.file }
     tree.value = splitLeaf(tree.value, leaf.id, direction, created)
     focusedId.value = created.id
   }
@@ -83,11 +85,15 @@ export const usePaneStore = defineStore('cazallaPanes', () => {
     if (focusedId.value === id) focusedId.value = 'primary'
   }
 
-  /** Shows `file` in the focused file pane, or opens a new pane beside the primary editor. */
-  function OPEN_IN_SPLIT(file: string): void {
+  /** Shows `file` in the focused secondary pane, or opens a new pane beside the primary editor. */
+  function OPEN_IN_PANE(kind: FileLeafKind, file: string): void {
     const leaf = focusedLeaf()
-    if (leaf?.kind === 'file') tree.value = setFile(tree.value, leaf.id, file)
-    else SPLIT('vertical', file)
+    if (leaf && leaf.kind !== 'primary') tree.value = setFile(tree.value, leaf.id, file, kind)
+    else SPLIT('vertical', { kind, file })
+  }
+
+  function OPEN_IN_SPLIT(file: string): void {
+    OPEN_IN_PANE('file', file)
   }
 
   function SET_RATIO(id: string, ratio: number): void {
@@ -110,5 +116,5 @@ export const usePaneStore = defineStore('cazallaPanes', () => {
     })
   }
 
-  return { tree, focusedId, isSplit, FOCUS, SPLIT, CLOSE, OPEN_IN_SPLIT, SET_RATIO, RESET, LISTEN }
+  return { tree, focusedId, isSplit, FOCUS, SPLIT, CLOSE, OPEN_IN_PANE, OPEN_IN_SPLIT, SET_RATIO, RESET, LISTEN }
 })

@@ -120,6 +120,13 @@
       "exists": "Ya existe: {path}",
       "into-self": "No se puede mover una carpeta dentro de sí misma: {path}",
       "missing": "No encontrado: {path}"
+    },
+    "pdf": {
+      "title": "PDF",
+      "zoomIn": "Acercar",
+      "zoomOut": "Alejar",
+      "missing": "Archivo no encontrado: {file}",
+      "loadError": "No se pudo leer el PDF."
     }
   }
 }
