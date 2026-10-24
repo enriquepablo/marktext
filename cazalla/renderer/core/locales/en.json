@@ -77,6 +77,24 @@
         "done": "Done",
         "archived": "Archived"
       }
+    },
+    "subtask": {
+      "menu": "Add subtask",
+      "title": "New subtask",
+      "name": "Title",
+      "notATask": "The current document is not a task."
+    },
+    "billing": {
+      "reportTitle": "Effort report",
+      "invoiceTitle": "Invoice",
+      "project": "Project",
+      "client": "Client",
+      "issuer": "Issuer",
+      "start": "From",
+      "end": "To",
+      "noEffort": "No effort recorded in that period.",
+      "noIssuer": "No organization with an IBAN can issue invoices.",
+      "written": "Written {file}"
     }
   }
 }

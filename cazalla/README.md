@@ -69,14 +69,17 @@ cazalla/
   renderer/dailyNotes/      util.ts, store.ts, i18n.ts, commands.ts, locales/, Panel.vue, Calendar.vue, NoteEditor.vue
   renderer/core/            frontmatter.ts, slug.ts, time.ts, fs.ts, contentFolder.ts (shared by every item)
   renderer/metadata/        types.ts, store.ts, create.ts, dialogs.ts (items 2, 3 and 6)
-  renderer/tasks/           types.ts, create.ts (notes and tasks), store.ts (task index), dialogs.ts (item 4), archive.ts (items 5 and 8)
+  renderer/tasks/           types.ts, create.ts (notes and tasks), store.ts (task index), dialogs.ts (item 4), archive.ts (items 5 and 8),
+                            subtasks.ts and subtaskMenu.ts (item 8)
   renderer/kanban/          KanbanView.vue (six-column board over the task index, vue-draggable-plus), sidebarMenu.ts (item 5)
+  renderer/billing/         data.ts, reportPdf.ts, invoicePdf.ts (ported from cazalla-net.plugin, pdf-lib), dialogs.ts (item 9); output under _invoices/YYYY/MM
   renderer/core/i18n.ts     registerLocales(): runtime merge of cazalla locale bundles
   renderer/core/layout.ts   reservedWidth = activity bar + daily notes panel
   renderer/dialogs/         EntityDialog.vue, a field-spec driven el-dialog opened by the bus event cazalla:dialog
   renderer/activityBar/     ActivityBar.vue, the 40 px icon strip left of the sidebar (lucide icons)
   scripts/migrate-vault.ts  one-time Obsidian vault migration (tsx cazalla/scripts/migrate-vault.ts <vault> [--apply])
   main/dailyNotes.ts        menu item, command, default shortcut, menu check state
+  main/contextMenu.ts       editor right-click entries (Add subtask), labels from renderer/core/locales
   test/unit/                Vitest specs
   test/e2e/                 Playwright specs
 ```
@@ -88,6 +91,7 @@ Upstream files are changed only where a hook is unavoidable, each by one to thre
 - `packages/desktop/electron.vite.config.ts`, `vitest.config.ts`, `tsconfig.base.json`, `tsconfig.json`, `eslint.config.js`: the `@cazalla` alias and include paths.
 - `packages/desktop/src/renderer/src/pages/app.vue`: mount the activity bar, the kanban overlay and the panel.
 - `packages/desktop/src/renderer/src/contextMenu/sideBar/index.ts`: the "Kanban board" entry at the end of the file-tree context menu.
+- `packages/desktop/src/main/contextMenu/editor/index.ts`: cazalla entries spread at the end of the editor context menu; `src/shared/types/ipc.ts` gains their channels.
 - `packages/desktop/src/renderer/src/components/editorWithTabs/index.vue`: subtract the panel width.
 - `packages/desktop/src/main/menu/templates/view.ts`, `src/main/menu/actions/view.ts`: menu item, command registration, check-state sync.
 - `packages/desktop/src/main/keyboard/keybindings{Linux,Windows,Darwin}.ts`: default shortcut.

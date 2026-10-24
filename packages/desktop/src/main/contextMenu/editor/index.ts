@@ -14,6 +14,7 @@ import {
 import spellcheckMenuBuilder from './spellcheck'
 import { t } from '../../i18n'
 import { isOsx } from '../../config'
+import { cazallaEditorContextItems } from '@cazalla/main/contextMenu'
 
 interface ContextMenuParams {
   isEditable: boolean
@@ -49,7 +50,8 @@ const getContextItems = (): MenuItemConstructorOptions[] => [
   SEPARATOR,
   getCopyAsRich(),
   getCopyAsHtml(),
-  getPasteAsPlainText()
+  getPasteAsPlainText(),
+  ...cazallaEditorContextItems()
 ]
 
 const isInsideEditor = (params: ContextMenuParams): boolean => {

@@ -77,6 +77,24 @@
         "done": "Hecho",
         "archived": "Archivado"
       }
+    },
+    "subtask": {
+      "menu": "Añadir subtarea",
+      "title": "Nueva subtarea",
+      "name": "Título",
+      "notATask": "El documento actual no es una tarea."
+    },
+    "billing": {
+      "reportTitle": "Informe de horas",
+      "invoiceTitle": "Factura",
+      "project": "Proyecto",
+      "client": "Cliente",
+      "issuer": "Emisor",
+      "start": "Desde",
+      "end": "Hasta",
+      "noEffort": "No hay horas registradas en ese periodo.",
+      "noIssuer": "Ninguna organización con IBAN puede emitir facturas.",
+      "written": "Escrito {file}"
     }
   }
 }
