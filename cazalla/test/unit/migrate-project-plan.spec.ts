@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { apply, plan } from '@cazalla/scripts/migrate-project/plan'
+import { apply, plan, planDaily } from '@cazalla/scripts/migrate-project/plan'
 
 const P = 'Projects/Org/L/SA'
 let root: string
@@ -85,5 +85,21 @@ describe('plan + apply', () => {
     expect(b && b.kind === 'write' && b.content).toContain('[Elsewhere](../../other/notes/elsewhere.md)')
     expect(result.report).toContain('metadata record exists, left alone: ' + path.join(notes, '_metadata/projects/sa.md'))
     expect(result.report).toContain('link into another project (other): Projects/Other/Notes/Elsewhere.md')
+  })
+})
+
+describe('planDaily', () => {
+  it('moves dailies into year/month folders, keeps frontmatter, rewrites links into projects', () => {
+    write('Daily/2026-01-03.md', fm('title: "2026-01-03"\ncategory: daily', 'did [[Child One]] and [[2026-01-02]]\n![[img.png]]\n'))
+    write('Daily/notes.md', 'stray\n')
+    const result = planDaily(root, notes)
+    const files = result.actions.filter((a) => a.kind === 'write').map((a) => path.relative(notes, (a as { file: string }).file))
+    expect(files.sort()).toEqual(['_daily/2026/01/2026-01-02.md', '_daily/2026/01/2026-01-03.md'])
+    const note = result.actions.find((a) => a.kind === 'write' && a.file.endsWith('2026-01-03.md'))
+    expect(note && note.kind === 'write' && note.content).toBe(
+      fm('title: "2026-01-03"\ncategory: daily', 'did [Child One](../../../projects/sa/tasks/parent-task/child-one.md) and [2026-01-02](2026-01-02.md)\n![img.png](../../assets/img.png)\n')
+    )
+    expect(result.actions).toContainEqual({ kind: 'copy', from: path.join(root, 'Files/img.png'), to: path.join(notes, '_daily/assets/img.png') })
+    expect([...result.report].sort()).toEqual(['link into another project (sa): Projects/Org/L/SA/Tasks/parent-task/Child One.md', 'not a daily note, skipped: Daily/notes.md'])
   })
 })

@@ -41,6 +41,7 @@ describe('pickCandidate', () => {
     expect(pickCandidate([`${P}/Attic/Tasks/2025/m.md`, `${P}/Tasks/m.md`], P)).toBe(`${P}/Tasks/m.md`)
     expect(pickCandidate(['Daily/x.md', 'Files/x.md', 'Projects/Other/x.md'], P)).toBe('Files/x.md')
     expect(pickCandidate(['Projects/Other/x.md', 'Daily/x.md'], P)).toBe('Daily/x.md')
+    expect(pickCandidate([`${P}/Tasks/m .md`, `${P}/Tasks/m.md`], P)).toBe(`${P}/Tasks/m.md`)
     expect(pickCandidate([], P)).toBeNull()
   })
 })

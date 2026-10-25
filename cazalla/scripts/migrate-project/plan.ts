@@ -49,6 +49,58 @@ export const place = (target: string, sub: string, doc: Doc | null): { newPath: 
   return { newPath: join(target, ...mapped), task: null }
 }
 
+type ResolverContext = {
+  root: string
+  notes: string
+  /** Vault folder of the project being migrated; empty when there is none. */
+  projectDir: string
+  index: Map<string, string[]>
+  records: Fields[]
+  infos: Map<string, Info>
+  /** Content-relative folder that receives copies of `Files/` targets. */
+  assetsDir: string
+  actions: Action[]
+  report: string[]
+}
+
+/** Resolves wiki link targets to their content-relative paths after migration, copying `Files/` targets as it goes. */
+const makeResolver = (c: ResolverContext): { resolve: (link: WikiLink) => string | null; resolveFile: (target: string) => string | null } => {
+  const assets = new Set<string>()
+  const foreign = new Set<string>()
+  const resolveFile = (target: string): string | null => pickCandidate(c.index.get(target) ?? [], c.projectDir)
+  const resolve = (link: WikiLink): string | null => {
+    const picked = resolveFile(link.target)
+    if (!picked) return null
+    const mine = c.infos.get(picked)
+    if (mine) return mine.newPath
+    if (picked.startsWith('Files/')) {
+      const to = join(c.assetsDir, basename(picked))
+      if (!assets.has(picked)) {
+        assets.add(picked)
+        c.actions.push({ kind: 'copy', from: path.join(c.root, picked), to: path.join(c.notes, to) })
+        if (picked.endsWith('.excalidraw.md')) c.report.push(`excalidraw copied as is, not converted: ${picked}`)
+      }
+      return to
+    }
+    if (picked.startsWith('Daily/')) return dailyPath(picked)
+    const other = c.records.find((r) => picked.startsWith(vaultPath(r.path as string) + '/'))
+    if (!other) return null
+    const otherDir = vaultPath(other.path as string)
+    if (!foreign.has(picked)) {
+      foreign.add(picked)
+      c.report.push(`link into another project (${String(other.slug)}): ${picked}`)
+    }
+    return place(join('projects', String(other.slug)), picked.slice(otherDir.length + 1), picked.endsWith('.md') ? readDoc(c.root, picked) : null).newPath
+  }
+  return { resolve, resolveFile }
+}
+
+/** `Daily/YYYY-MM-DD.md` → `_daily/YYYY/MM/YYYY-MM-DD.md`; null for any other name. */
+export const dailyPath = (rel: string): string | null => {
+  const m = /^(\d{4})-(\d{2})-\d{2}$/.exec(basename(rel, '.md'))
+  return m ? join('_daily', m[1], m[2], basename(rel)) : null
+}
+
 export const plan = (root: string, notes: string, projectRel: string, now = new Date().toISOString()): Plan => {
   const actions: Action[] = []
   const report: string[] = []
@@ -94,36 +146,7 @@ export const plan = (root: string, notes: string, projectRel: string, now = new 
     if (dir !== join(target, 'tasks') && !used.has(`${dir}.md`)) report.push(`subtask folder without parent task: ${dir}`)
   }
 
-  const assets = new Set<string>()
-  const foreign = new Set<string>()
-  const resolveFile = (target_: string): string | null => pickCandidate(index.get(target_) ?? [], projectDir)
-  const resolve = (link: WikiLink): string | null => {
-    const picked = resolveFile(link.target)
-    if (!picked) return null
-    const mine = infos.get(picked)
-    if (mine) return mine.newPath
-    if (picked.startsWith('Files/')) {
-      const to = join(target, 'assets', basename(picked))
-      if (!assets.has(picked)) {
-        assets.add(picked)
-        actions.push({ kind: 'copy', from: path.join(root, picked), to: out(to) })
-        if (picked.endsWith('.excalidraw.md')) report.push(`excalidraw copied as is, not converted: ${picked}`)
-      }
-      return to
-    }
-    if (picked.startsWith('Daily/')) {
-      const m = /^(\d{4})-(\d{2})-\d{2}$/.exec(basename(picked, '.md'))
-      return m ? join('_daily', m[1], m[2], basename(picked)) : null
-    }
-    const other = records.find((r) => picked.startsWith(vaultPath(r.path as string) + '/'))
-    if (!other) return null
-    const otherDir = vaultPath(other.path as string)
-    if (!foreign.has(picked)) {
-      foreign.add(picked)
-      report.push(`link into another project (${String(other.slug)}): ${picked}`)
-    }
-    return place(join('projects', String(other.slug)), picked.slice(otherDir.length + 1), picked.endsWith('.md') ? readDoc(root, picked) : null).newPath
-  }
+  const { resolve, resolveFile } = makeResolver({ root, notes, projectDir, index, records, infos, assetsDir: join(target, 'assets'), actions, report })
 
   // Pass two: write or copy each file.
   for (const info of infos.values()) {
@@ -179,6 +202,37 @@ export const plan = (root: string, notes: string, projectRel: string, now = new 
     actions.push({ kind: 'write', file: out(newPath), content })
   }
   return { actions, report, target }
+}
+
+/** Plans the migration of `Daily/` into `_daily/YYYY/MM/`, frontmatter kept, body links rewritten. */
+export const planDaily = (root: string, notes: string): Plan => {
+  const actions: Action[] = []
+  const report: string[] = []
+  const files = walk(root)
+  const { resolve } = makeResolver({
+    root,
+    notes,
+    projectDir: '',
+    index: indexByName(files),
+    records: projectRecords(root),
+    infos: new Map(),
+    assetsDir: join('_daily', 'assets'),
+    actions,
+    report
+  })
+  for (const rel of files.filter((f) => f.startsWith('Daily/'))) {
+    const newPath = dailyPath(rel)
+    if (!newPath || !rel.endsWith('.md')) {
+      report.push(`not a daily note, skipped: ${rel}`)
+      continue
+    }
+    const { yaml, body } = split(readDoc(root, rel).text)
+    const rewritten = rewriteWikiLinks(body, dirname(newPath), resolve)
+    rewritten.unresolved.forEach((u) => report.push(`unresolved link [[${u}]] in ${rel}`))
+    const content = yaml === null ? rewritten.text : `---\n${yaml}\n---\n${rewritten.text}`
+    actions.push({ kind: 'write', file: path.join(notes, newPath), content })
+  }
+  return { actions, report, target: '_daily' }
 }
 
 export const apply = (actions: Action[]): void => {

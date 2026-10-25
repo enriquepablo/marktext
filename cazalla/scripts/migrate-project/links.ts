@@ -59,6 +59,14 @@ export const rewriteWikiLinks = (
 const rank = (rel: string, project: string): number =>
   rel.startsWith(project + '/') ? 0 : rel.startsWith('Files/') ? 1 : rel.startsWith('Daily/') ? 2 : 3
 
-/** Obsidian's name match can be ambiguous: same project first, then Files/, Daily/, the rest; shallower paths win ties. */
+const trailingSpace = (rel: string): number => Number(/\s\.md$/.test(rel))
+
+/**
+ * Obsidian's name match can be ambiguous: same project first, then Files/, Daily/,
+ * the rest; shallower paths win ties, and a name with a space before `.md`
+ * (Obsidian's accidental duplicate) loses to the plain one.
+ */
 export const pickCandidate = (candidates: string[], project: string): string | null =>
-  [...candidates].sort((a, b) => rank(a, project) - rank(b, project) || a.split('/').length - b.split('/').length)[0] ?? null
+  [...candidates].sort(
+    (a, b) => rank(a, project) - rank(b, project) || a.split('/').length - b.split('/').length || trailingSpace(a) - trailingSpace(b)
+  )[0] ?? null
