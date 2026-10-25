@@ -1014,3 +1014,27 @@ Files without frontmatter are copied with link conversion only and reported. Tim
 ## Status
 
 Done on 2026-10-25. `cazalla/scripts/migrate-project.ts` with the modules `vault.ts`, `tasks.ts`, `links.ts` and `plan.ts` under `cazalla/scripts/migrate-project/`, each with a Vitest spec. Trial runs on SeamlessAccess, EduSign and OCM-STA from the VM copy of the vault resolved every wiki link. The reports showed three things to know before running on the host: EduSign has a duplicate task file whose name ends in a space before `.md`, which the script treats as the duplicate and renames with the suffix `-2`; OCM-STA has the subtask folder `nextcloud-should-use-short-lived-access-tokens-for-webdav` at the top of `Tasks/` while its parent file sits in `Tasks/development/`, which the script reports as a folder without a parent; one EduSign note embeds an Excalidraw drawing, copied as `.excalidraw.md` into `assets/`.
+
+# 28 daily notes migration
+
+add a migration step for the daily notes too. In obsidian vault in a flat dir, migrate to <year>/<month>/
+
+## Findings
+
+`Daily/` holds 681 files, all named `YYYY-MM-DD.md`, no subfolders. The frontmatter has `title`, `slug`, `tags`, `date` (local time without zone, quoted) and `category: daily`; some files also have `modified`. The app writes `created` instead of `date` for new notes, but it reads a note by path and only rewrites the `modified:` line on save, so the vault frontmatter can stay as it is. The bodies hold 272 wiki links, nearly all to project tasks by title, five to other daily notes, and four embeds of files in `Files/`.
+
+## Design
+
+The same script, with `--daily` in place of the project path:
+
+```
+pnpm exec tsx cazalla/scripts/migrate-project.ts --daily [--vault ~/work/Work] [--notes ~/notes] [--apply]
+```
+
+`Daily/YYYY-MM-DD.md` is written to `_daily/YYYY/MM/YYYY-MM-DD.md`, the layout `dailyNotes/util.ts` reads. Frontmatter is kept verbatim. Wiki links in the body are rewritten with the resolver of the project migration: a target in a project maps to its future place under `projects/<slug>/` through the project record, a target in `Daily/` maps to its `_daily/YYYY/MM/` path, and a target in `Files/` is copied to `_daily/assets/`. Files in `Daily/` that are not named as a date are reported and skipped. Links to targets without a project record stay as written and are reported.
+
+Code: the resolver in `plan.ts` is factored out so that it works without a current project, and `planDaily(root, notes)` reuses it; the CLI gains the flag.
+
+## Open questions
+
+- Dailies are not renamed and not given `created`; the panel treats them like any other note file.
