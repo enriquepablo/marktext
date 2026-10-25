@@ -66,15 +66,20 @@ export const kanbanStatuses = (text: string): Map<string, string> => {
   return out
 }
 
-const normalise = (p: string): string => p.replace(/^\/+|\/+$/g, '').replace(/cazalla\.net/g, 'cazalla-net')
+/** A vault path without surrounding slashes; the stale `cazalla.net` spelling of the records maps to the folder name. */
+export const vaultPath = (p: string): string => p.replace(/^\/+|\/+$/g, '').replace(/cazalla\.net/g, 'cazalla-net')
 
-/** The `Metadata/projects` record whose `path` names `rel`, stale `cazalla.net` spelling tolerated. */
-export const findProject = (root: string, rel: string): Fields | null => {
+/** Every record under `Metadata/projects` that has a string `path`. */
+export const projectRecords = (root: string): Fields[] => {
   const dir = path.join(root, 'Metadata', 'projects')
-  if (!fs.existsSync(dir)) return null
-  for (const name of fs.readdirSync(dir).filter((n) => n.endsWith('.md'))) {
-    const record = readRecord(root, `Metadata/projects/${name}`)
-    if (record && typeof record.path === 'string' && normalise(record.path) === normalise(rel)) return record
-  }
-  return null
+  if (!fs.existsSync(dir)) return []
+  return fs
+    .readdirSync(dir)
+    .filter((n) => n.endsWith('.md'))
+    .map((n) => readRecord(root, `Metadata/projects/${n}`))
+    .filter((r): r is Fields => r !== null && typeof r.path === 'string')
 }
+
+/** The project record whose `path` names `rel`. */
+export const findProject = (root: string, rel: string): Fields | null =>
+  projectRecords(root).find((r) => vaultPath(r.path as string) === vaultPath(rel)) ?? null
