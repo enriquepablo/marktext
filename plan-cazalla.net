@@ -1066,3 +1066,7 @@ Code: `planMetadata(root, notes)` in `plan.ts`, reading with `readRecord` of `va
 ## Open questions
 
 - `cazalla/scripts/migrate-vault.ts` and its spec did this migration in place inside the vault. `--metadata` supersedes them; removing them is a separate decision.
+
+## Status
+
+Done on 2026-10-25. `--metadata` in `cazalla/scripts/migrate-project.ts`, planned by `planMetadata` in `plan.ts`. The trial run on the VM copy wrote the 5 organizations, 11 people and 12 projects with an empty report: no `service` key remains, and every `organization` value names an existing organization, the nine `cazalla.net` references now reading `cazalla-net`. Run it before the projects, so that the project migration finds the records and leaves them alone.
