@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { apply, plan, planDaily } from '@cazalla/scripts/migrate-project/plan'
+import { apply, plan, planDaily, planMetadata } from '@cazalla/scripts/migrate-project/plan'
 
 const P = 'Projects/Org/L/SA'
 let root: string
@@ -101,5 +101,24 @@ describe('planDaily', () => {
     )
     expect(result.actions).toContainEqual({ kind: 'copy', from: path.join(root, 'Files/img.png'), to: path.join(notes, '_daily/assets/img.png') })
     expect(result.report).toEqual(['not a daily note, skipped: Daily/notes.md'])
+  })
+})
+
+
+describe('planMetadata', () => {
+  it('fences records under _metadata by slug, renames company, drops service, rewrites project paths', () => {
+    write('Metadata/companies/Org.md', 'name: Org\nslug: org\nleader: lee\nbilling:\n  - sa\ninvoice_details:\n  - "VAT: 1"\n')
+    write('Metadata/companies/CN.md', 'name: cazalla.net\nslug: cazalla-net\n')
+    write('Metadata/people/lee.md', 'name: Lee\nslug: lee\ncompany: cazalla.net\nemail: lee@x\n')
+    write('Metadata/people/kim.md', 'name: Kim\nslug: kim\ncompany:\n  - nowhere\n')
+    write('Metadata/categories.md', '- a\n')
+    const result = planMetadata(root, notes)
+    const written = Object.fromEntries(result.actions.map((a) => [path.relative(notes, (a as { file: string }).file), (a as { content: string }).content]))
+    expect(Object.keys(written).sort()).toEqual(['_metadata/organizations/cazalla-net.md', '_metadata/organizations/org.md', '_metadata/people/kim.md', '_metadata/people/lee.md', '_metadata/projects/other.md', '_metadata/projects/sa.md'])
+    expect(written['_metadata/projects/sa.md']).toBe('---\nname: SA\nslug: sa\norganization: org\nleader: lee\npath: projects/sa\n---\n')
+    expect(written['_metadata/people/lee.md']).toBe('---\nname: Lee\nslug: lee\norganization: cazalla-net\nemail: lee@x\n---\n')
+    expect(written['_metadata/people/kim.md']).toBe('---\nname: Kim\nslug: kim\norganization: nowhere\n---\n')
+    expect(written['_metadata/organizations/org.md']).toBe('---\nname: Org\nslug: org\nleader: lee\nbilling:\n  - sa\ninvoice_details:\n  - "VAT: 1"\n---\n')
+    expect(result.report).toEqual(['organization not found: nowhere in Metadata/people/kim.md'])
   })
 })

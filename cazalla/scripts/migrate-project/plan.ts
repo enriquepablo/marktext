@@ -8,7 +8,7 @@ import { serialize, split, type Fields } from '../../renderer/core/frontmatter'
 import { slug as toSlug } from '../../renderer/core/slug'
 import { pickCandidate, rewriteWikiLinks, type WikiLink } from './links'
 import { checklistLinks, normalisePath, taskFields, withoutLines } from './tasks'
-import { findProject, indexByName, kanbanStatuses, projectRecords, readDoc, vaultPath, walk, type Doc } from './vault'
+import { findProject, indexByName, kanbanStatuses, projectRecords, readDoc, readRecord, vaultPath, walk, type Doc } from './vault'
 
 export type Action =
   | { kind: 'mkdir'; dir: string }
@@ -233,6 +233,51 @@ export const planDaily = (root: string, notes: string): Plan => {
     actions.push({ kind: 'write', file: path.join(notes, newPath), content })
   }
   return { actions, report, target: '_daily' }
+}
+
+const METADATA_KINDS: [string, string][] = [
+  ['companies', 'organizations'],
+  ['people', 'people'],
+  ['projects', 'projects']
+]
+
+/**
+ * Plans `Metadata/{companies,people,projects}` → `_metadata/{organizations,people,projects}/<slug>.md`
+ * with fences; `company` becomes `organization` (normalised to an organization slug),
+ * `service` is dropped, a project's `path` becomes `projects/<slug>`.
+ */
+export const planMetadata = (root: string, notes: string): Plan => {
+  const actions: Action[] = []
+  const report: string[] = []
+  const records = METADATA_KINDS.flatMap(([from, to]) => {
+    const dir = path.join(root, 'Metadata', from)
+    if (!fs.existsSync(dir)) return []
+    return fs
+      .readdirSync(dir)
+      .filter((n) => n.endsWith('.md'))
+      .map((n) => ({ rel: `Metadata/${from}/${n}`, to, fields: readRecord(root, `Metadata/${from}/${n}`) }))
+  })
+  const organizations = new Set(records.filter((r) => r.to === 'organizations').map((r) => str(r.fields?.slug)))
+  for (const { rel, to, fields } of records) {
+    if (!fields) {
+      report.push(`unreadable record, skipped: ${rel}`)
+      continue
+    }
+    const slug = str(fields.slug) ?? toSlug(str(fields.name) ?? basename(rel, '.md'))
+    const out: Fields = {}
+    for (const [key, value] of Object.entries(fields)) {
+      if (key === 'service') continue
+      if (key === 'company') {
+        const raw = str(first(value))
+        const org = raw !== null && !organizations.has(raw) && organizations.has(toSlug(raw)) ? toSlug(raw) : raw
+        if (org !== null && !organizations.has(org)) report.push(`organization not found: ${org} in ${rel}`)
+        out.organization = org
+      } else if (key === 'path' && to === 'projects') out.path = join('projects', slug)
+      else out[key] = value
+    }
+    actions.push({ kind: 'write', file: path.join(notes, '_metadata', to, `${slug}.md`), content: serialize(out) })
+  }
+  return { actions, report, target: '_metadata' }
 }
 
 export const apply = (actions: Action[]): void => {
