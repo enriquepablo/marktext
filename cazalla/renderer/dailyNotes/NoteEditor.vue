@@ -19,6 +19,7 @@ import { getMuyaLocale } from '@/util/muyaLocale'
 import { DEFAULT_CODE_FONT_FAMILY, DEFAULT_EDITOR_FONT_FAMILY } from '@/config'
 import { isDarkThemeId } from 'common/theme'
 import { useDailyNotesStore } from './store'
+import { registerPaneMuya, unregisterPaneMuya } from '../editor/registry'
 
 const store = useDailyNotesStore()
 const preferencesStore = usePreferencesStore()
@@ -70,6 +71,8 @@ onMounted(() => {
   muya.on('json-change', () => store.SAVE_NOTE(muya.getMarkdown()))
   muya.on('blur', () => void store.FLUSH_SAVE())
   editor.value = muya
+  // Registered so `[[` and the date dialog work here; the directory follows the selected day.
+  registerPaneMuya('daily-notes', muya, () => (store.notePath ? window.path.dirname(store.notePath) : null))
 })
 
 // Reload only when another file is selected; `markdown` itself is not watched so saves do not re-render.
@@ -95,6 +98,7 @@ watch(spellcheckerEnabled, (value) => editor.value?.setOptions({ spellcheckEnabl
 
 onBeforeUnmount(() => {
   void store.FLUSH_SAVE()
+  unregisterPaneMuya('daily-notes')
   editor.value?.destroy()
   editor.value = null
 })
