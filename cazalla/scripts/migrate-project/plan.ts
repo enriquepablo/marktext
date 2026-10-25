@@ -52,7 +52,7 @@ export const place = (target: string, sub: string, doc: Doc | null): { newPath: 
 type ResolverContext = {
   root: string
   notes: string
-  /** Vault folder of the project being migrated; empty when there is none. */
+  /** Vault folder of the project being migrated; empty when there is none, and links into projects are then not reported. */
   projectDir: string
   index: Map<string, string[]>
   records: Fields[]
@@ -86,7 +86,7 @@ const makeResolver = (c: ResolverContext): { resolve: (link: WikiLink) => string
     const other = c.records.find((r) => picked.startsWith(vaultPath(r.path as string) + '/'))
     if (!other) return null
     const otherDir = vaultPath(other.path as string)
-    if (!foreign.has(picked)) {
+    if (c.projectDir && !foreign.has(picked)) {
       foreign.add(picked)
       c.report.push(`link into another project (${String(other.slug)}): ${picked}`)
     }

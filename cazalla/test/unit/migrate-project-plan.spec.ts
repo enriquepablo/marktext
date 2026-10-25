@@ -100,6 +100,6 @@ describe('planDaily', () => {
       fm('title: "2026-01-03"\ncategory: daily', 'did [Child One](../../../projects/sa/tasks/parent-task/child-one.md) and [2026-01-02](2026-01-02.md)\n![img.png](../../assets/img.png)\n')
     )
     expect(result.actions).toContainEqual({ kind: 'copy', from: path.join(root, 'Files/img.png'), to: path.join(notes, '_daily/assets/img.png') })
-    expect([...result.report].sort()).toEqual(['link into another project (sa): Projects/Org/L/SA/Tasks/parent-task/Child One.md', 'not a daily note, skipped: Daily/notes.md'])
+    expect(result.report).toEqual(['not a daily note, skipped: Daily/notes.md'])
   })
 })

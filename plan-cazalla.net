@@ -1038,3 +1038,7 @@ Code: the resolver in `plan.ts` is factored out so that it works without a curre
 ## Open questions
 
 - Dailies are not renamed and not given `created`; the panel treats them like any other note file.
+
+## Status
+
+Done on 2026-10-25. `--daily` in `cazalla/scripts/migrate-project.ts`, planned by `planDaily` in `plan.ts`. The trial run on the VM copy wrote the 681 notes into `_daily/<year>/<month>/`, copied five embedded files into `_daily/assets/`, and left two links unresolved, `[[test 25]]` and `[[OpenID Connect Federation]]`, whose targets do not exist in the vault. Links into projects are not reported in this mode, since every resolved link is one. One project record carries the slug `sunet.se`, so its links point at `projects/sunet.se/`; the folder name follows the record.

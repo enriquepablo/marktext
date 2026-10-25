@@ -89,7 +89,7 @@ cazalla/
   renderer/dialogs/         EntityDialog.vue, a field-spec driven el-dialog opened by the bus event cazalla:dialog
   renderer/activityBar/     ActivityBar.vue, the 40 px icon strip left of the sidebar (lucide icons)
   scripts/migrate-vault.ts  one-time Obsidian vault migration (tsx cazalla/scripts/migrate-vault.ts <vault> [--apply])
-  scripts/migrate-project.ts, scripts/migrate-project/  one project from the vault into the content folder: folders, slug file names, task frontmatter, wiki links (item 27)
+  scripts/migrate-project.ts, scripts/migrate-project/  one project from the vault into the content folder: folders, slug file names, task frontmatter, wiki links (item 27); `--daily` moves Daily/ into _daily/YYYY/MM/ (item 28)
   main/dailyNotes.ts        menu item, command, default shortcut, menu check state
   main/contextMenu.ts       editor right-click entries (Add subtask, Add sub-webpage, split and close panel), labels from renderer/core/locales
   main/sites.ts             IPC handler that runs the Pelican venv setup, make draft/publish/rsync_upload per site, streaming the log
