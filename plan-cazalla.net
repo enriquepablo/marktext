@@ -1042,3 +1042,27 @@ Code: the resolver in `plan.ts` is factored out so that it works without a curre
 ## Status
 
 Done on 2026-10-25. `--daily` in `cazalla/scripts/migrate-project.ts`, planned by `planDaily` in `plan.ts`. The trial run on the VM copy wrote the 681 notes into `_daily/<year>/<month>/`, copied five embedded files into `_daily/assets/`, and left two links unresolved, `[[test 25]]` and `[[OpenID Connect Federation]]`, whose targets do not exist in the vault. Links into projects are not reported in this mode, since every resolved link is one. One project record carries the slug `sunet.se`, so its links point at `projects/sunet.se/`; the folder name follows the record.
+
+# 29 migration of metadata
+
+migration of metadata. basically surrounding frontmatter with "---", removing the `services` key, moving from the Matadata dir in the ob vault to _metadata in the new thing, change companies to organizations
+
+## Findings
+
+`Metadata/` holds `companies/` (5 records), `people/` (11) and `projects/` (12), all plain YAML without fences and named by display name, plus the old lists `actions.md`, `categories.md` and `states.md`, which nothing reads any more. Every record has a `slug`. The key is `service`, present on 5 projects. People and projects refer to their company by slug under the key `company`, except that two people and seven projects say `cazalla.net`, while that company's slug is `cazalla-net`. Company records carry `billing`, `invoice_details`, `iban`, `swift` and `phone`, which the app's `Organization` type reads under the same names.
+
+## Design
+
+The same script, with `--metadata`:
+
+```
+pnpm exec tsx cazalla/scripts/migrate-project.ts --metadata [--vault ~/work/Work] [--notes ~/notes] [--apply]
+```
+
+Each record of `Metadata/companies`, `Metadata/people` and `Metadata/projects` is written to `_metadata/organizations`, `_metadata/people` and `_metadata/projects` as `<slug>.md` with `---` fences. Keys are kept in their order with these changes: `company` becomes `organization`, holding the first value when it was a list; `service` is dropped; a project's `path` becomes `projects/<slug>`. An `organization` value that is no organization slug is slugified, `cazalla.net` to `cazalla-net`, and when that still matches no organization the value is kept and reported. The three old list files are not copied. A target record that already exists is overwritten, since the project migration writes the same five keys for a project and these records are the fuller source.
+
+Code: `planMetadata(root, notes)` in `plan.ts`, reading with `readRecord` of `vault.ts`; the CLI gains the flag.
+
+## Open questions
+
+- `cazalla/scripts/migrate-vault.ts` and its spec did this migration in place inside the vault. `--metadata` supersedes them; removing them is a separate decision.
