@@ -925,3 +925,85 @@ upside down and left right
 ## Status
 
 Fixed on 2026-10-24. The pane set a device-pixel transform on the canvas context and also handed the canvas to pdf.js, which applies its own viewport transform; the two compounded into a 180° turn. The pixel ratio now goes into the viewport scale and pdf.js alone draws into a reset context.
+
+# 26 more bugs
+
+## "[[" should also work to create links in the daily panel below the calendar.
+
+## Design
+
+`cazalla/renderer/links/linkDialog.ts` listens for `[[` through the typed-input listeners of `cazalla/renderer/editor/registry.ts`. Only registered Muya instances fire those events. The primary editor and the file panes register themselves; the daily-notes editor in `dailyNotes/NoteEditor.vue` creates its Muya and does not. The fix registers it under the id `daily-notes` when it mounts and unregisters it before it is destroyed, as `panes/FilePane.vue` does. The directory callback reads the current note path at link time, because the note changes with the selected day; links from a daily note are relative to `_daily/YYYY/MM/`. Registration also attaches the frontmatter fold, which stays invisible there because the pane hides the frontmatter block entirely. While the daily editor has focus it is the active instance, so the date dialog inserts into the daily note.
+
+# 27 migration script
+
+I want a script to migrate projects from the obsidian vault to the new marktext repo.
+I will execute the migration in the host,
+where the obsidian vault is at ~/work/Work/ and the new marktext repo at ~/notes
+The script should accept a path to a project relative to ~/work/Work
+and create the new project under ~/notes/projects
+
+The obsidian vault can be seen in the VM at ~/cazalla/ob-vault
+
+Main things to watch:
+- convert wiki links to markdown links
+- capitalization of project subfolders
+- keep project subfolders different from Notes Tasks and Assets as they are
+- when a project has <project>/Tasks/archived, move it to <project>/archived
+- frontmatter differences
+  - for tasks
+    - if the origin doc has keys due and/or a status different from archived set kanban to true, otherwise set to false
+    - if the origin doc has key due keep it, if not set it to today
+    - if the origin doc has key status keep it, otheriwise set it as new
+    - if the body of the origin doc has a list of links that correspond to subtasks, set those links in the subtasks frontmatter key
+  - for notes and webpages just keep the frontmatter as is
+
+## Findings
+
+The vault differs from the app's layout beyond the points listed above.
+
+- Task and note files are named by title. The app finds a task's parent as the file named after the containing folder (`explorer/move.ts`) and builds `subtasks` entries from file stems, so migrated files must be `<slug>.md`.
+- The vault's `path` values have trailing slashes, are wrong for nested tasks and are missing on most tasks. The app computes `path` from the file's location.
+- Archived tasks sit flat in `Tasks/archived/` with `path: /archived/` and `archived-path: /<original>/`. The app expects `archived/<original>/<slug>.md` with `path: /<original>` (`tasks/archive.ts`).
+- Each project has an Obsidian Kanban board `kanban.md` whose columns `continuous`, `new`, `pending`, `wip`, `done`, `archive` hold the real status. The task files mostly say `new` or nothing.
+- Embeds `![[x.png]]` resolve to the vault-wide `Files/`. Excalidraw embeds resolve to `Files/x.excalidraw.md`, Obsidian's compressed format, not the JSON the app opens.
+- Project records in `Metadata/projects/*.md` are unfenced YAML with `company` and a vault-relative `path` with a trailing slash. Some paths are stale.
+- About two dozen project files have no frontmatter; a few have two blocks.
+- `cazalla/scripts/migrate-vault.ts` is a whole-vault pass over metadata and folder names. It does not rewrite links, file names or task frontmatter. Its action list, dry run and `--apply` flag are the model for the new script.
+
+## Design
+
+Script `cazalla/scripts/migrate-project.ts`, pure modules under `cazalla/scripts/migrate-project/`. It copies and never moves; the vault is read only.
+
+```
+pnpm exec tsx cazalla/scripts/migrate-project.ts <project path relative to the vault> [--vault ~/work/Work] [--notes ~/notes] [--apply]
+```
+
+Without `--apply` the script prints the planned actions and a report.
+
+Project identity. The record in `Metadata/projects/` whose normalised `path` equals the argument gives the slug; otherwise the slug of the last path segment. The target is `projects/<slug>`. `_metadata/projects/<slug>.md` is written with `name`, `slug`, `organization` (the first `company`), `leader` and `path: projects/<slug>` when it does not exist, and left alone otherwise.
+
+Folders. `Tasks/`, `Notes/`, `Assets/` become `tasks/`, `notes/`, `assets/`; `Tasks/archived/` becomes `archived/`; all four are created. Other folders keep their names and their markdown gets link conversion only. `.git`, `.obsidian` and `kanban.md` are not copied. The note `Tasks/archived.md` goes to `notes/archived.md`.
+
+File names. Tasks under `tasks/` and `archived/` and notes under `notes/` are renamed to `<slug>.md`, the slug taken from the frontmatter, else from the title, else from the file name. Collisions get a numeric suffix and a report line. The old-to-new path map drives link rewriting.
+
+Task frontmatter, written in the key order of `tasks/create.ts`:
+
+- `path` is computed from the folders between `tasks/` and the file. An archived task takes `archived-path` and lands at `archived/<path>/<slug>.md`; without `archived-path` it is flat with `path: /`.
+- `status` comes from the kanban column, then the file, then `new`. Files under `Tasks/archived/` are `archived`.
+- `due` is kept, else set to now.
+- `kanban` is `false` for archived tasks, `true` when the origin had `due` or `status`, else `false`.
+- `effort` and `tags` null become `[]`. `archived-path` is dropped. Other keys are kept.
+- `subtasks`: body lines `- [ ] [[Title]]` that resolve to a task in `tasks/<path>/<slug>/` become entries `/<path>/<slug>/<child>` and are removed from the body. Children in that folder missing from the list are added and reported. Children that are archived are skipped.
+
+Notes, webpages and all other files keep their frontmatter.
+
+Links. The vault is indexed by trimmed base name and by vault-relative path. `[[target|alias]]`, `[[target#heading]]` and `![[target]]` resolve preferring the same project, then `Files/`, then `Daily/`, then the rest. Same-project targets map to their new paths. `Files/` targets are copied to `<project>/assets/`. Daily targets map to `_daily/YYYY/MM/YYYY-MM-DD.md`. Targets in another project map to `projects/<its slug>/` with the same rules and are reported. The output is `[label](href)` with the href URI-encoded and relative to the new file's folder, as `links/linkDialog.ts` writes it. Unresolved links stay and are reported. Existing markdown links are untouched.
+
+Files without frontmatter are copied with link conversion only and reported. Timestamps are not normalised.
+
+## Open questions
+
+- Excalidraw embeds are copied as `.excalidraw.md` and linked. Converting them to the JSON format the drawing pane opens is a follow-up.
+- Links to daily notes assume the daily notes are migrated to `_daily/` as well. That migration is not part of this script.
+- Tasks under `Attic/` keep their frontmatter and are not indexed by the app.
+- Dates in `date` written without a time zone are left as they are.
