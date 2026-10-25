@@ -73,9 +73,13 @@ describe('plan + apply', () => {
     ])
   })
 
-  it('leaves an existing record alone and maps links into other projects', () => {
+  it('leaves an existing record alone, maps links into other projects, reports duplicates and orphans', () => {
     write(`${P}/Notes/B.md`, fm('title: B\ncategory: note', '[[Elsewhere]]\n'))
+    write(`${P}/Tasks/parent-task/Child One .md`, fm('title: Child One\nslug: child-one\ncategory: task'))
+    write(`${P}/Tasks/orphan/Lost.md`, fm('title: Lost\nslug: lost\ncategory: task'))
     const result = plan(root, notes, P)
+    expect(result.report).toContain(`name collision, renamed: ${P}/Tasks/parent-task/Child One .md → projects/sa/tasks/parent-task/child-one-2.md`)
+    expect(result.report).toContain('subtask folder without parent task: projects/sa/tasks/orphan')
     expect(result.actions.find((a) => a.kind === 'write' && a.file.endsWith('_metadata/projects/sa.md'))).toBeUndefined()
     const b = result.actions.find((a) => a.kind === 'write' && a.file.endsWith('notes/b.md'))
     expect(b && b.kind === 'write' && b.content).toContain('[Elsewhere](../../other/notes/elsewhere.md)')

@@ -933,6 +933,9 @@ Fixed on 2026-10-24. The pane set a device-pixel transform on the canvas context
 ## Design
 
 `cazalla/renderer/links/linkDialog.ts` listens for `[[` through the typed-input listeners of `cazalla/renderer/editor/registry.ts`. Only registered Muya instances fire those events. The primary editor and the file panes register themselves; the daily-notes editor in `dailyNotes/NoteEditor.vue` creates its Muya and does not. The fix registers it under the id `daily-notes` when it mounts and unregisters it before it is destroyed, as `panes/FilePane.vue` does. The directory callback reads the current note path at link time, because the note changes with the selected day; links from a daily note are relative to `_daily/YYYY/MM/`. Registration also attaches the frontmatter fold, which stays invisible there because the pane hides the frontmatter block entirely. While the daily editor has focus it is the active instance, so the date dialog inserts into the daily note.
+## Status
+
+Fixed on 2026-10-25. The daily editor registers itself with the editor registry under the id `daily-notes`.
 
 # 27 migration script
 
@@ -1007,3 +1010,7 @@ Files without frontmatter are copied with link conversion only and reported. Tim
 - Links to daily notes assume the daily notes are migrated to `_daily/` as well. That migration is not part of this script.
 - Tasks under `Attic/` keep their frontmatter and are not indexed by the app.
 - Dates in `date` written without a time zone are left as they are.
+
+## Status
+
+Done on 2026-10-25. `cazalla/scripts/migrate-project.ts` with the modules `vault.ts`, `tasks.ts`, `links.ts` and `plan.ts` under `cazalla/scripts/migrate-project/`, each with a Vitest spec. Trial runs on SeamlessAccess, EduSign and OCM-STA from the VM copy of the vault resolved every wiki link. The reports showed three things to know before running on the host: EduSign has a duplicate task file whose name ends in a space before `.md`, which the script treats as the duplicate and renames with the suffix `-2`; OCM-STA has the subtask folder `nextcloud-should-use-short-lived-access-tokens-for-webdav` at the top of `Tasks/` while its parent file sits in `Tasks/development/`, which the script reports as a folder without a parent; one EduSign note embeds an Excalidraw drawing, copied as `.excalidraw.md` into `assets/`.

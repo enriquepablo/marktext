@@ -75,7 +75,10 @@ export const plan = (root: string, notes: string, projectRel: string, now = new 
   // Pass one: every project file gets its destination, so links can be rewritten in pass two.
   const infos = new Map<string, Info>()
   const used = new Set<string>()
-  for (const rel of files.filter((f) => f.startsWith(projectDir + '/') && f !== boardFile)) {
+  // Names with a space before the extension are Obsidian's accidental duplicates; they lose slug collisions.
+  const trailing = (f: string): number => Number(/\s\.md$/.test(f))
+  const own = files.filter((f) => f.startsWith(projectDir + '/') && f !== boardFile).sort((a, b) => trailing(a) - trailing(b))
+  for (const rel of own) {
     const doc = rel.endsWith('.md') ? readDoc(root, rel) : null
     const placed = place(target, rel.slice(projectDir.length + 1), doc)
     let { newPath } = placed
@@ -87,6 +90,9 @@ export const plan = (root: string, notes: string, projectRel: string, now = new 
     used.add(newPath)
     infos.set(rel, { rel, newPath, doc, task: placed.task })
   }
+  for (const dir of new Set([...infos.values()].filter((i) => i.task && !i.task.archived).map((i) => dirname(i.newPath)))) {
+    if (dir !== join(target, 'tasks') && !used.has(`${dir}.md`)) report.push(`subtask folder without parent task: ${dir}`)
+  }
 
   const assets = new Set<string>()
   const foreign = new Set<string>()
@@ -94,8 +100,8 @@ export const plan = (root: string, notes: string, projectRel: string, now = new 
   const resolve = (link: WikiLink): string | null => {
     const picked = resolveFile(link.target)
     if (!picked) return null
-    const own = infos.get(picked)
-    if (own) return own.newPath
+    const mine = infos.get(picked)
+    if (mine) return mine.newPath
     if (picked.startsWith('Files/')) {
       const to = join(target, 'assets', basename(picked))
       if (!assets.has(picked)) {
