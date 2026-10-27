@@ -1120,3 +1120,14 @@ Developer tools. The main-process command `view.toggle-dev-tools` only works wit
 Inline math. Muya's `.mu-math-render` is an inline block with `overflow: auto hidden`; an inline block whose overflow is not visible takes its baseline from its bottom edge, so the formula's own baseline sits a descender above the text. Muya also sets `vertical-align: middle` on `.katex`, which the earlier rule did not override. The cazalla rule for inline math in hidden mode sets `overflow: visible` and `vertical-align: baseline` on the render element and `vertical-align: baseline` on `.katex`. The element stays an inline block, so `white-space: nowrap` keeps working.
 
 Events view. `events/group.ts` puts every due date before tomorrow under Today and flags those before the start of today as overdue. Tasks due before the start of today are now left out; the overdue flag compares with the current time, so today's tasks whose time has passed show in red. The spec changes accordingly.
+
+## Status
+
+Done on 2026-10-27, one commit per point.
+
+- Kanban cards: no change; double click opens the task and closes the board.
+- Top-level tasks: `tasks/create.ts` writes `status: continuous` and `kanban: false`; subtasks keep `new` and `true`.
+- Links from daily notes: `editor/registry.ts` records the editor that last showed the link popover and `jumpClick` in the primary editor resolves the href against that editor's folder. The daily editor and the file panes also handle Ctrl-click on links with their own folder.
+- Activity bar: reordered as listed, with separators, and a developer tools button at the end that toggles the window's developer tools through `cazalla/main/devtools.ts`, in release builds too.
+- Inline math: the render element gets `overflow: visible`, so its baseline is the KaTeX baseline instead of its bottom edge, and `.katex` drops Muya's `vertical-align: middle`. Reasoned from the DOM and CSS; not seen on screen here.
+- Events view: tasks due before today are left out; today's tasks whose time has passed are marked overdue.
