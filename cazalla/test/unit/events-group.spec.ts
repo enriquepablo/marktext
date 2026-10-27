@@ -14,10 +14,11 @@ describe('events grouping', () => {
     expect(endOfWeek(now, 0)).toEqual(new Date(2026, 9, 25))
   })
 
-  it('places open tasks by due date and marks overdue ones', () => {
+  it('places open tasks by due date, drops older days, marks past ones of today', () => {
     const groups = groupEvents(
       [
         task('late', new Date(2026, 9, 20, 9).toISOString()),
+        task('yesterday', new Date(2026, 9, 23, 23, 59).toISOString()),
         task('today-pm', new Date(2026, 9, 24, 18).toISOString(), 'wip'),
         task('today-am', new Date(2026, 9, 24, 8).toISOString()),
         task('tomorrow', new Date(2026, 9, 25, 12).toISOString(), 'pending'),
@@ -30,7 +31,9 @@ describe('events grouping', () => {
       now,
       1
     )
-    expect(groups.today.map((i) => [i.task.slug, i.overdue])).toEqual([['late', true], ['today-am', false], ['today-pm', false]])
+    expect(groups.today.map((i) => [i.task.slug, i.overdue])).toEqual([['today-am', true], ['today-pm', false]])
+    expect(Object.values(groups).flat().map((i) => i.task.slug)).not.toContain('late')
+    expect(Object.values(groups).flat().map((i) => i.task.slug)).not.toContain('yesterday')
     expect(groups.tomorrow.map((i) => i.task.slug)).toEqual(['tomorrow'])
     // Monday starts the next week, so this week (Sunday only) is covered by tomorrow.
     expect(groups.week).toEqual([])

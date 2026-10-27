@@ -23,7 +23,8 @@ export const endOfWeek = (now: Date, weekStart: number): Date => {
 }
 
 /**
- * Groups open tasks with a due date. Overdue tasks fall under `today`, marked.
+ * Groups open tasks with a due date. Tasks due before today are left out;
+ * today's tasks whose time has passed are marked overdue.
  * `week` runs from the day after tomorrow to the end of the current week; when
  * tomorrow already closes the week, it is empty.
  */
@@ -36,8 +37,8 @@ export const groupEvents = (tasks: TaskRecord[], now: Date, weekStart: number): 
   for (const task of tasks) {
     if (task.archived || !OPEN.includes(task.status) || !task.due) continue
     const due = new Date(task.due)
-    if (Number.isNaN(due.getTime())) continue
-    const item: EventItem = { task, due, overdue: due.getTime() < today.getTime() }
+    if (Number.isNaN(due.getTime()) || due < today) continue
+    const item: EventItem = { task, due, overdue: due.getTime() < now.getTime() }
     if (due < tomorrow) out.today.push(item)
     else if (due < afterTomorrow) out.tomorrow.push(item)
     else if (due < weekEnd) out.week.push(item)
