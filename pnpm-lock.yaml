@@ -177,6 +177,9 @@ importers:
       lucide-vue-next:
         specifier: ^1.0.0
         version: 1.0.0(vue@3.5.43(typescript@6.0.3))
+      lz-string:
+        specifier: 1.5.0
+        version: 1.5.0
       mermaid:
         specifier: ^12.1.0
         version: 12.1.0
@@ -7632,6 +7635,10 @@ packages:
     deprecated: Package deprecated. Please use @lucide/vue instead.
     peerDependencies:
       vue: '>=3.0.1'
+
+  lz-string@1.5.0:
+    resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}
+    hasBin: true
 
   madge@8.0.0:
     resolution: {integrity: sha512-9sSsi3TBPhmkTCIpVQF0SPiChj1L7Rq9kU2KDG1o6v2XH9cCw086MopjVCD+vuoL5v8S77DTbVopTO8OUiQpIw==}
@@ -18165,6 +18172,8 @@ snapshots:
   lucide-vue-next@1.0.0(vue@3.5.43(typescript@6.0.3)):
     dependencies:
       vue: 3.5.43(typescript@6.0.3)
+
+  lz-string@1.5.0: {}
 
   madge@8.0.0(typescript@6.0.3):
     dependencies:
