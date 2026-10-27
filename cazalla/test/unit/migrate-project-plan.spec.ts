@@ -30,6 +30,8 @@ beforeAll(() => {
   write(`${P}/Assets/doc.pdf`, 'pdf')
   write(`${P}/Attic/old.md`, 'no frontmatter [[A Note]]\n')
   write('Files/img.png', 'png')
+  write('Files/draw.excalidraw.md', '---\nexcalidraw-plugin: parsed\n---\n## Embedded Files\n' + 'f'.repeat(40) + ': [[img.png]]\n\n## Drawing\n```json\n{"elements":[{"id":"a"}],"appState":{},"files":{}}\n```\n')
+  write(`${P}/Notes/Sketch.md`, fm('title: Sketch\nslug: sketch\ncategory: note', '![[draw.excalidraw]] and again ![[draw.excalidraw]]\n'))
   write('Daily/2026-01-02.md', fm('category: daily'))
   write('Projects/Other/Notes/Elsewhere.md', fm('title: Elsewhere\nslug: elsewhere\ncategory: note'))
   write('Metadata/projects/Other.md', 'name: Other\nslug: other\npath: Projects/Other\n')
@@ -64,6 +66,11 @@ describe('plan + apply', () => {
     expect(read('projects/sa/notes/a-note.md')).toBe(fm('title: A Note\nslug: a-note\ncategory: note\nproject: sa', 'body\n'))
     expect(read('projects/sa/assets/doc.pdf')).toBe('pdf')
     expect(read('projects/sa/assets/img.png')).toBe('png')
+    expect(read('projects/sa/notes/sketch.md')).toContain('![draw.excalidraw](../assets/draw.excalidraw) and again ![draw.excalidraw](../assets/draw.excalidraw)\n')
+    const drawing = JSON.parse(read('projects/sa/assets/draw.excalidraw'))
+    expect(drawing).toMatchObject({ type: 'excalidraw', elements: [{ id: 'a' }] })
+    expect(drawing.files['f'.repeat(40)]).toMatchObject({ mimeType: 'image/png', dataURL: 'data:image/png;base64,' + Buffer.from('png').toString('base64') })
+    expect(fs.existsSync(path.join(notes, 'projects/sa/assets/draw.excalidraw.md'))).toBe(false)
     expect(read('projects/sa/Attic/old.md')).toBe('no frontmatter [A Note](../notes/a-note.md)\n')
 
     expect([...result.report].sort()).toEqual([

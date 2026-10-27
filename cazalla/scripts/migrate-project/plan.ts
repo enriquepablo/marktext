@@ -8,6 +8,7 @@ import { serialize, split, type Fields } from '../../renderer/core/frontmatter'
 import { slug as toSlug } from '../../renderer/core/slug'
 import { pickCandidate, rewriteWikiLinks, type WikiLink } from './links'
 import { checklistLinks, normalisePath, taskFields, withoutLines } from './tasks'
+import { mimeFor, parseObsidianDrawing, toExcalidraw } from './excalidraw'
 import { findProject, indexByName, kanbanStatuses, projectRecords, readDoc, readRecord, vaultPath, walk, type Doc } from './vault'
 
 export type Action =
@@ -65,7 +66,7 @@ type ResolverContext = {
 
 /** Resolves wiki link targets to their content-relative paths after migration, copying `Files/` targets as it goes. */
 const makeResolver = (c: ResolverContext): { resolve: (link: WikiLink) => string | null; resolveFile: (target: string) => string | null } => {
-  const assets = new Set<string>()
+  const assets = new Map<string, string>()
   const foreign = new Set<string>()
   const resolveFile = (target: string): string | null => pickCandidate(c.index.get(target) ?? [], c.projectDir)
   const resolve = (link: WikiLink): string | null => {
@@ -74,12 +75,13 @@ const makeResolver = (c: ResolverContext): { resolve: (link: WikiLink) => string
     const mine = c.infos.get(picked)
     if (mine) return mine.newPath
     if (picked.startsWith('Files/')) {
-      const to = join(c.assetsDir, basename(picked))
-      if (!assets.has(picked)) {
-        assets.add(picked)
-        c.actions.push({ kind: 'copy', from: path.join(c.root, picked), to: path.join(c.notes, to) })
-        if (picked.endsWith('.excalidraw.md')) c.report.push(`excalidraw copied as is, not converted: ${picked}`)
-      }
+      const known = assets.get(picked)
+      if (known) return known
+      // An Obsidian drawing becomes the app's `.excalidraw`; anything else, or an undecodable drawing, is copied as is.
+      const converted = picked.endsWith('.excalidraw.md') ? join(c.assetsDir, basename(picked, '.md')) : null
+      const to = converted && convertDrawing(c, picked, converted) ? converted : join(c.assetsDir, basename(picked))
+      if (to !== converted) c.actions.push({ kind: 'copy', from: path.join(c.root, picked), to: path.join(c.notes, to) })
+      assets.set(picked, to)
       return to
     }
     if (picked.startsWith('Daily/')) return dailyPath(picked)
@@ -93,6 +95,28 @@ const makeResolver = (c: ResolverContext): { resolve: (link: WikiLink) => string
     return place(join('projects', String(other.slug)), picked.slice(otherDir.length + 1), picked.endsWith('.md') ? readDoc(c.root, picked) : null).newPath
   }
   return { resolve, resolveFile }
+}
+
+/**
+ * Writes an Obsidian drawing as `.excalidraw` JSON with its embedded images,
+ * read from beside the drawing, as data URLs. False when the file holds no
+ * scene, in which case the caller copies it unchanged.
+ */
+const convertDrawing = (c: ResolverContext, picked: string, to: string): boolean => {
+  const parsed = parseObsidianDrawing(fs.readFileSync(path.join(c.root, picked), 'utf8'))
+  if (!parsed) {
+    c.report.push(`drawing not decoded, copied as is: ${picked}`)
+    return false
+  }
+  const dir = path.join(c.root, path.posix.dirname(picked))
+  const { json, missing } = toExcalidraw(parsed, (name) => {
+    const file = path.join(dir, name)
+    const mime = mimeFor(name)
+    return mime && fs.existsSync(file) ? `data:${mime};base64,${fs.readFileSync(file).toString('base64')}` : null
+  })
+  missing.forEach((name) => c.report.push(`image embedded in drawing not found: ${name} in ${picked}`))
+  c.actions.push({ kind: 'write', file: path.join(c.notes, to), content: json })
+  return true
 }
 
 /** `Daily/YYYY-MM-DD.md` → `_daily/YYYY/MM/YYYY-MM-DD.md`; null for any other name. */
