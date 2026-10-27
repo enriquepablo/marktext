@@ -1,7 +1,7 @@
 import bus from '@/bus'
 import { t } from '@/i18n'
 import notice from '@/services/notification'
-import { DIALOG_EVENT, type DialogSpec, type Option, type Values } from '../dialogs/types'
+import { DIALOG_EVENT, type DialogSpec, type FieldSpec, type Option, type Values } from '../dialogs/types'
 import { useContentFolder } from '../core/contentFolder'
 import { dateKey, addMonths } from '../core/time'
 import { useMetadataStore } from '../metadata/store'
@@ -44,10 +44,17 @@ const projectField = (): DialogSpec['fields'][number] => ({
   options: projectOptions
 })
 
-export const openNoteDialog = (): void =>
+/** `project` presets the select, e.g. from the folder clicked in the explorer. */
+export interface ProjectPreset {
+  project?: string
+}
+
+const withPreset = (field: FieldSpec, preset?: ProjectPreset): FieldSpec => (preset?.project ? { ...field, default: preset.project } : field)
+
+export const openNoteDialog = (preset?: ProjectPreset): void =>
   open({
     title: t('cazalla.note.title'),
-    fields: [{ key: 'title', label: t('cazalla.note.name'), type: 'text', required: true }, projectField()],
+    fields: [{ key: 'title', label: t('cazalla.note.name'), type: 'text', required: true }, withPreset(projectField(), preset)],
     submit: async(v: Values) => {
       const folder = useContentFolder().value
       const project = useMetadataStore().projects[String(v.project)]
@@ -60,12 +67,12 @@ export const openNoteDialog = (): void =>
     }
   })
 
-export const openTaskDialog = (): void =>
+export const openTaskDialog = (preset?: ProjectPreset): void =>
   open({
     title: t('cazalla.task.title'),
     fields: [
       { key: 'title', label: t('cazalla.task.name'), type: 'text', required: true },
-      projectField(),
+      withPreset(projectField(), preset),
       { key: 'due', label: t('cazalla.task.due'), type: 'date', default: dateKey(addMonths(new Date(), 1)) }
     ],
     submit: async(v: Values) => {

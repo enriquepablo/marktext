@@ -75,7 +75,8 @@ export const openSiteDialog = (): void => {
   bus.emit(DIALOG_EVENT, spec)
 }
 
-export const openPageDialog = (): void => {
+/** `site` presets the select, e.g. from the folder clicked in the explorer. */
+export const openPageDialog = (preset?: { site?: string }): void => {
   const title = t('cazalla.sites.newPage')
   if (!guard(title, true)) return
   bus.emit(DIALOG_EVENT, {
@@ -87,6 +88,7 @@ export const openPageDialog = (): void => {
         label: t('cazalla.sites.site'),
         type: 'select',
         required: true,
+        default: preset?.site,
         options: (): Option[] => useMetadataStore().sitesList.map((s) => ({ value: s.slug, label: s.name }))
       }
     ],

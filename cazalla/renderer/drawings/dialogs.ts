@@ -8,7 +8,8 @@ import { useCazallaLayoutStore } from '../core/layout'
 import { ExistsError } from '../tasks/create'
 import { createDrawing } from './create'
 
-export const openDrawingDialog = (): void => {
+/** `project` presets the select, e.g. from the folder clicked in the explorer. */
+export const openDrawingDialog = (preset?: { project?: string }): void => {
   const title = t('cazalla.drawing.title')
   if (!useContentFolder().value) {
     notice.notify({ title, type: 'warning', message: t('cazalla.dialog.noContentFolder') })
@@ -27,6 +28,7 @@ export const openDrawingDialog = (): void => {
         label: t('cazalla.note.project'),
         type: 'select',
         required: true,
+        default: preset?.project,
         options: (): Option[] => useMetadataStore().projectsList.map((p) => ({ value: p.slug, label: p.name }))
       }
     ],

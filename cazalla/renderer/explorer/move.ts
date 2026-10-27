@@ -1,7 +1,7 @@
 import { parse, updateFields } from '../core/frontmatter'
 import { basename, dirname, exists, listMarkdownFiles, move, readText, writeText } from '../core/fs'
 import { isoNow } from '../core/time'
-import type { Project } from '../metadata/types'
+import type { Project, Site } from '../metadata/types'
 import { TASKS_DIR } from '../tasks/create'
 import { remapper, rewriteLinks } from './links'
 
@@ -53,7 +53,8 @@ const taskPathFor = (contentFolder: string, project: Project, file: string): str
   return rel ? '/' + rel.split(sep()).join('/') : '/'
 }
 
-const projectContaining = (contentFolder: string, projects: Project[], file: string): Project | undefined =>
+/** The project (or site) whose folder holds `file`; paths of the records are relative to the content folder. */
+export const projectContaining = <T extends Project | Site>(contentFolder: string, projects: T[], file: string): T | undefined =>
   projects.find((p) => isUnder(join(contentFolder, p.path), file))
 
 /**
