@@ -1178,3 +1178,11 @@ Drawings embedded in markdown. Muya's `getImageSrc` in `utils/image.ts` accepts 
 
 - A click on an embedded drawing could open it in the drawing pane; the image click path in Muya is separate from links and is left as a follow-up.
 - Exported HTML and PDF keep the `.excalidraw` source and would need the SVG substituted.
+
+## Status
+
+Done on 2026-10-27, one commit per step.
+
+- Explorer menu: add note, add task, add web page and add drawing open the existing dialogs with the project or site of the clicked folder preselected; add file from outside copies files chosen in a native dialog (`cazalla/main/files.ts`) into the folder, leaving an existing name alone.
+- Drawings as files: the migration decodes Obsidian drawings (`scripts/migrate-project/excalidraw.ts`, `lz-string` added) and writes `<name>.excalidraw` into `assets/` with the embedded images inlined; notes link to it. All 76 drawings of the vault decode and every embedded image was found. Projects migrated before this change keep their `.excalidraw.md` copies until rerun; the old copies can then be deleted by hand.
+- Drawings embedded in markdown: Muya accepts a host image renderer (`setImageSourceRenderer`); `renderer/drawings/render.ts` draws `.excalidraw` embeds as SVG, cached by modification time. Not seen on screen here.
