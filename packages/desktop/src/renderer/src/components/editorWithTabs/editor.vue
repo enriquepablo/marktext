@@ -85,23 +85,6 @@ import {
 import log from 'electron-log'
 import {
   Muya,
-  CodeBlockLanguageSelector,
-  EmojiSelector,
-  FootnoteTool,
-  ImageEditTool,
-  ImagePathPicker,
-  ImageResizeBar,
-  ImageToolBar,
-  InlineFormatToolbar,
-  LinkTools,
-  ParagraphFrontButton,
-  ParagraphFrontMenu,
-  ParagraphQuickInsertMenu,
-  PreviewToolBar,
-  TableChessboard,
-  TableColumnToolbar,
-  TableDragBar,
-  TableRowColumMenu,
   wordCount as muyaWordCount,
   type IHistorySelection,
   type IPreviewDiagramPayload,
@@ -111,7 +94,8 @@ import {
   type ISerializedHistory
 } from '@muyajs/core'
 import { getMuyaLocale } from '@/util/muyaLocale'
-import { linkToolsDir, setPrimaryMuya } from '@cazalla/renderer/editor/registry'
+import { setPrimaryMuya } from '@cazalla/renderer/editor/registry'
+import { registerMuyaPlugins, setMuyaImageHooks } from '@cazalla/renderer/editor/plugins'
 import { exportStyledHTML, type HeaderFooterPart } from '@/util/exportHtml'
 import { applyCursor, isIndexCursor } from '@/util/cursor'
 import EditorSearch from '../search/index.vue'
@@ -154,14 +138,6 @@ import { type InputNumberInstance } from 'element-plus'
 
 const { t } = useI18n()
 const STANDAR_Y = 320
-
-// `Muya.use(...)` appends to the static `Muya.plugins` array, and every
-// `init()` instantiates the full list. Registration is process-global, so guard
-// it with a module-level flag — otherwise remounting this component in the same
-// renderer (window reuse / HMR) would register duplicate plugins and spawn
-// duplicate UI handlers. The per-plugin option closures (imageAction/jumpClick)
-// only read app-singleton Pinia stores, so capturing them once is correct.
-let muyaPluginsRegistered = false
 
 // Desktop fields consumed from engine change events; other engine fields remain opaque.
 interface MuyaChange {
@@ -793,13 +769,6 @@ watch(
   },
   { flush: 'sync' }
 )
-
-// Engine links may have no usable href (#4356).
-const jumpClick = (linkInfo: { href?: string | null } | null) => {
-  if (!linkInfo) return
-  const { href } = linkInfo
-  editorStore.FORMAT_LINK_CLICK({ data: { href: href ?? null }, dirname: linkToolsDir() ?? window.DIRNAME })
-}
 
 interface ImagePathSuggestion {
   type: 'directory' | 'file' | string
@@ -1677,32 +1646,9 @@ onMounted(() => {
   const ele = editorRef.value
   if (!ele) return
 
-  if (!muyaPluginsRegistered) {
-    muyaPluginsRegistered = true
-    Muya.use(TableChessboard)
-    Muya.use(ParagraphQuickInsertMenu)
-    Muya.use(CodeBlockLanguageSelector)
-    Muya.use(EmojiSelector)
-    Muya.use(ImagePathPicker)
-    Muya.use(ImageEditTool, {
-      imageAction: muyaImageAction,
-      imagePathPicker,
-      imagePathAutoComplete
-    })
-    Muya.use(ImageResizeBar)
-    Muya.use(ImageToolBar)
-    Muya.use(InlineFormatToolbar)
-    Muya.use(ParagraphFrontButton)
-    Muya.use(ParagraphFrontMenu)
-    Muya.use(PreviewToolBar)
-    Muya.use(LinkTools, {
-      jumpClick
-    })
-    Muya.use(FootnoteTool)
-    Muya.use(TableColumnToolbar)
-    Muya.use(TableDragBar)
-    Muya.use(TableRowColumMenu)
-  }
+  // Plugins are process-wide and registered by cazalla before any instance exists.
+  setMuyaImageHooks({ imageAction: muyaImageAction, imagePathPicker, imagePathAutoComplete })
+  registerMuyaPlugins()
 
   const options: Partial<IMuyaOptions> = {
     focusMode: focus.value,

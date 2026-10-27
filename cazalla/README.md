@@ -79,7 +79,7 @@ cazalla/
   renderer/drawings/        DrawingPane.vue (Excalidraw React component in a pane, react + react-dom), create.ts, dialogs.ts (item 11)
   renderer/events/          group.ts (today / tomorrow / this week / later), EventsView.vue (third sidebar column) (item 14)
   renderer/sites/           pages.ts (web pages and sub-pages), dialogs.ts, subpageMenu.ts, publish.ts, PublishDialog.vue (item 13)
-  renderer/editor/          registry.ts: live Muya instances (primary + panes), insertion at the caret, typed-input listeners; frontmatterFold.ts collapses frontmatter blocks (item 23)
+  renderer/editor/          registry.ts: live Muya instances (primary + panes), insertion at the caret, typed-input listeners; plugins.ts registers Muya's UI plugins once, the link popover's jump resolving against the editor that showed it (item 31); frontmatterFold.ts collapses frontmatter blocks (item 23)
   renderer/links/           docIndex.ts (document titles, newest first), linkDialog.ts (`[[` opens the link dialog in every registered editor, the daily note included) (item 16)
   renderer/dates/           dialog.ts (Insert date) (item 17)
   renderer/search/          extract.ts, pdfText.ts, store.ts (MiniSearch index persisted in <content>/.cazalla/search-index.json), SearchView.vue (item 15 search)
@@ -114,7 +114,7 @@ Upstream files are changed only where a hook is unavoidable, each by one to thre
 - `packages/desktop/src/renderer/src/contextMenu/sideBar/index.ts`: the "Open in split panel" and "Kanban board" entries at the end of the file-tree context menu.
 - `packages/desktop/src/main/contextMenu/editor/index.ts`: cazalla entries spread at the end of the editor context menu; `src/shared/types/ipc.ts` gains their channels.
 - `packages/desktop/src/main/ipc/index.ts`: registers the cazalla site, terminal, git and devtools handlers; `electron-builder.yml` ships `cazalla/pelican` as an extra resource; `pnpm-workspace.yaml` allows node-pty's build.
-- `packages/desktop/src/renderer/src/components/editorWithTabs/editor.vue`: `setPrimaryMuya(muya)` after the instance is created and `setPrimaryMuya(null)` before it is destroyed; `jumpClick` resolves the link popover's href against `linkToolsDir()`, the folder of the editor that showed the popover (item 30).
+- `packages/desktop/src/renderer/src/components/editorWithTabs/editor.vue`: `setMuyaImageHooks(...)` and `registerMuyaPlugins()` in place of its `Muya.use` block (plugins are registered by `renderer/editor/plugins.ts` before any instance exists, item 31), `setPrimaryMuya(muya)` after the instance is created and `setPrimaryMuya(null)` before it is destroyed.
 - `packages/desktop/src/renderer/src/components/editorWithTabs/index.vue`: subtract the panel width.
 - `packages/desktop/src/main/menu/templates/view.ts`, `src/main/menu/actions/view.ts`: menu item, command registration, check-state sync.
 - `packages/desktop/src/main/keyboard/keybindings{Linux,Windows,Darwin}.ts`: default shortcut.

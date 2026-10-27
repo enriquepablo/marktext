@@ -1131,3 +1131,21 @@ Done on 2026-10-27, one commit per point.
 - Activity bar: reordered as listed, with separators, and a developer tools button at the end that toggles the window's developer tools through `cazalla/main/devtools.ts`, in release builds too.
 - Inline math: the render element gets `overflow: visible`, so its baseline is the KaTeX baseline instead of its bottom edge, and `.katex` drops Muya's `vertical-align: middle`. Reasoned from the DOM and CSS; not seen on screen here.
 - Events view: tasks due before today are left out; today's tasks whose time has passed are marked overdue.
+
+# 31 More details
+
+## links in daily notes
+
+Hovering over the links in the daily notes has stopped showing the options to follow the link or remove it
+
+## Finding
+
+Muya's UI plugins, the link popover among them, are registered process-wide with `Muya.use(...)` and instantiated inside every `init()`. The primary editor registers them in its mount hook, and the primary editor mounts only while a file is open (`app.vue`, `v-if="hasCurrentFile"`). The daily-notes panel mounts at startup. When the app starts on the content folder with no tab open and a day selected, the daily editor's Muya is created before the plugins exist, so that instance has no popover, no image toolbar and no format toolbar; opening a file afterwards does not repair it, since plugins are instantiated at `init()`. Split panes opened in that state have the same gap. The popover appears only when a file was open before the daily note was first shown, which is why it seemed to work and then stop.
+
+## Design
+
+A cazalla module `cazalla/renderer/editor/plugins.ts` owns the registration. `registerMuyaPlugins()` calls `Muya.use` for the same plugin list once, guarded by a flag, and every creator of a Muya instance calls it before `new Muya`: the primary editor, the daily editor and the file panes. The plugin options that depend on the primary editor's current file, `imageAction`, `imagePathPicker` and `imagePathAutoComplete` of the image edit tool, are forwarding functions that call the hooks the primary editor sets with `setMuyaImageHooks({...})` when it mounts, and do nothing while it is not mounted. The link popover's `jumpClick` lives in the module and needs no component: it calls `FORMAT_LINK_CLICK` of the editor store with the folder of the editor that showed the popover, `linkToolsDir()` of the registry, else `window.DIRNAME`. The upstream hook in `editorWithTabs/editor.vue` shrinks from the twenty-line `Muya.use` block, the flag and `jumpClick` to the two calls, and the plugin imports go with it.
+
+## Status
+
+Fixed on 2026-10-27. `cazalla/renderer/editor/plugins.ts` registers the plugins; the primary editor, the daily editor and the file panes call it before creating their instance. The popover, the image toolbar and the format toolbar are therefore present in a daily note shown at startup without an open tab. Not seen on screen here; the check is to start on the content folder with no tab, hover a link in the daily note, and see the arrow and the unlink button.

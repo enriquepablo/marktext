@@ -52,6 +52,7 @@ import { isDarkThemeId } from 'common/theme'
 import { basename, exists, readText, writeText } from '../core/fs'
 import { usePaneStore } from './store'
 import { registerPaneMuya, unregisterPaneMuya } from '../editor/registry'
+import { registerMuyaPlugins } from '../editor/plugins'
 
 const props = defineProps<{ id: string; file: string }>()
 const { t } = useI18n()
@@ -122,6 +123,7 @@ onMounted(async() => {
     clipboardWriteText: window.electron.clipboard.writeText,
     ...themeOptions()
   }
+  registerMuyaPlugins()
   const muya = markRaw(new Muya(el, options))
   muya.init({ focus: false })
   muya.on('json-change', () => {

@@ -21,6 +21,7 @@ import { DEFAULT_CODE_FONT_FAMILY, DEFAULT_EDITOR_FONT_FAMILY } from '@/config'
 import { isDarkThemeId } from 'common/theme'
 import { useDailyNotesStore } from './store'
 import { registerPaneMuya, unregisterPaneMuya } from '../editor/registry'
+import { registerMuyaPlugins } from '../editor/plugins'
 
 const store = useDailyNotesStore()
 const preferencesStore = usePreferencesStore()
@@ -67,6 +68,7 @@ onMounted(() => {
     clipboardWriteText: window.electron.clipboard.writeText,
     ...themeOptions()
   }
+  registerMuyaPlugins()
   const muya = markRaw(new Muya(el, options))
   muya.init({ focus: false })
   muya.on('json-change', () => store.SAVE_NOTE(muya.getMarkdown()))
