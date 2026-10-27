@@ -14,6 +14,7 @@ import { registerLinkHtmlHandler } from './linkHtml'
 import { registerCazallaSiteHandlers } from '@cazalla/main/sites'
 import { registerCazallaTerminalHandlers } from '@cazalla/main/terminal'
 import { registerCazallaGitHandlers } from '@cazalla/main/git'
+import { registerCazallaDevtoolsHandlers } from '@cazalla/main/devtools'
 
 export const registerSandboxIpcHandlers = (): void => {
   registerBootInfo()
@@ -32,4 +33,5 @@ export const registerSandboxIpcHandlers = (): void => {
   registerCazallaSiteHandlers()
   registerCazallaTerminalHandlers()
   registerCazallaGitHandlers()
+  registerCazallaDevtoolsHandlers()
 }

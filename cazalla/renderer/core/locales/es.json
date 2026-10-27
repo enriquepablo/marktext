@@ -11,7 +11,8 @@
       "invoice": "Factura",
       "newDrawing": "Nuevo dibujo",
       "toggleLeft": "Mostrar u ocultar panel izquierdo",
-      "toggleRight": "Mostrar u ocultar panel derecho"
+      "toggleRight": "Mostrar u ocultar panel derecho",
+      "devTools": "Herramientas de desarrollo"
     },
     "dialog": {
       "cancel": "Cancelar",

@@ -102,6 +102,7 @@ export interface IpcSendChannels {
   'mt::cazalla-term-input': [id: string, data: string]
   'mt::cazalla-term-resize': [id: string, cols: number, rows: number]
   'mt::cazalla-term-close': [id: string]
+  'mt::cazalla-toggle-devtools': []
   'mt::cmd-add-folder': []
   'mt::project-renderer-ready': []
   'mt::forget-document': [tabId: string]

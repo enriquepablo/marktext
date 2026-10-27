@@ -35,7 +35,7 @@
 <script setup lang="ts">
 import { computed, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Building2, CalendarPlus, ClipboardList, FilePlus, FolderPlus, GitBranch, Globe, Kanban, ListTodo, Newspaper, PanelLeft, PanelRight, PenTool, Receipt, Rocket, UserPlus } from 'lucide-vue-next'
+import { Bug, Building2, CalendarPlus, ClipboardList, FilePlus, FolderPlus, GitBranch, Globe, Kanban, ListTodo, Newspaper, PanelLeft, PanelRight, PenTool, Receipt, Rocket, UserPlus } from 'lucide-vue-next'
 import '../core/styles.css'
 import IconTooltip from '@/components/iconTooltip/index.vue'
 import EntityDialog from '../dialogs/EntityDialog.vue'
@@ -118,7 +118,9 @@ const entries = computed<Entry[]>(() => [
   { key: 'publish', label: t('cazalla.sites.publishTitle'), icon: Rocket, run: openPublishDialog },
   sep(6),
   { key: 'report', label: t('cazalla.activity.effortReport'), icon: ClipboardList, run: openReportDialog },
-  { key: 'invoice', label: t('cazalla.activity.invoice'), icon: Receipt, run: openInvoiceDialog }
+  { key: 'invoice', label: t('cazalla.activity.invoice'), icon: Receipt, run: openInvoiceDialog },
+  sep(7),
+  { key: 'devtools', label: t('cazalla.activity.devTools'), icon: Bug, run: () => window.electron.ipcRenderer.send('mt::cazalla-toggle-devtools') }
 ])
 </script>
 

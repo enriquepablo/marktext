@@ -11,7 +11,8 @@
       "invoice": "Invoice",
       "newDrawing": "New drawing",
       "toggleLeft": "Toggle left panel",
-      "toggleRight": "Toggle right panel"
+      "toggleRight": "Toggle right panel",
+      "devTools": "Developer tools"
     },
     "dialog": {
       "cancel": "Cancel",
