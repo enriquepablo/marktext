@@ -28,6 +28,8 @@ export interface Registered {
 const instances = new Map<string, Registered>()
 let primaryDir: () => string | null = () => (window.DIRNAME ? window.DIRNAME : null)
 let focusedId = 'primary'
+// Instance whose link popover was shown last; Muya's link tools are process-wide and only know the href.
+let linkToolsId: string | null = null
 
 type TypedListener = (ctx: { registered: Registered; position: CursorPosition; text: string }) => void
 const typedListeners: TypedListener[] = []
@@ -37,6 +39,9 @@ const attach = (registered: Registered): void => {
   attachFrontmatterFold(registered)
   registered.muya.on('focus', () => {
     focusedId = registered.id
+  })
+  registered.muya.on('muya-link-tools', () => {
+    linkToolsId = registered.id
   })
   registered.muya.on('content-change', ({ block }: { block: TextBlock }) => {
     const cursor = block.getCursor()
@@ -49,7 +54,7 @@ const attach = (registered: Registered): void => {
 /** Called by the upstream editor hook when its instance is created or destroyed. */
 export const setPrimaryMuya = (muya: Muya | null): void => {
   if (muya) attach({ id: 'primary', muya, dir: primaryDir })
-  else instances.delete('primary')
+  else forget('primary')
 }
 
 export const setPrimaryDirResolver = (resolver: () => string | null): void => {
@@ -57,10 +62,15 @@ export const setPrimaryDirResolver = (resolver: () => string | null): void => {
 }
 
 export const registerPaneMuya = (id: string, muya: Muya, dir: () => string | null): void => attach({ id, muya, dir })
-export const unregisterPaneMuya = (id: string): void => {
+const forget = (id: string): void => {
   instances.delete(id)
   if (focusedId === id) focusedId = 'primary'
+  if (linkToolsId === id) linkToolsId = null
 }
+export const unregisterPaneMuya = (id: string): void => forget(id)
+
+/** Folder of the document whose link popover was shown last, for resolving its relative hrefs. */
+export const linkToolsDir = (): string | null => (linkToolsId ? (instances.get(linkToolsId)?.dir() ?? null) : null)
 
 /** The instance that last had focus, falling back to the primary editor. */
 export const activeInstance = (): Registered | null => instances.get(focusedId) ?? instances.get('primary') ?? null

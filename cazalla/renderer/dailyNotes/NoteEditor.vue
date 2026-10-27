@@ -15,6 +15,7 @@ import { markRaw, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue
 import { storeToRefs } from 'pinia'
 import { Muya, type IMuyaOptions } from '@muyajs/core'
 import { usePreferencesStore } from '@/store/preferences'
+import { useEditorStore } from '@/store/editor'
 import { getMuyaLocale } from '@/util/muyaLocale'
 import { DEFAULT_CODE_FONT_FAMILY, DEFAULT_EDITOR_FONT_FAMILY } from '@/config'
 import { isDarkThemeId } from 'common/theme'
@@ -70,6 +71,11 @@ onMounted(() => {
   muya.init({ focus: false })
   muya.on('json-change', () => store.SAVE_NOTE(muya.getMarkdown()))
   muya.on('blur', () => void store.FLUSH_SAVE())
+  muya.on('format-click', ({ event, formatType, data }: { event: MouseEvent; formatType: string; data: { href: string } }) => {
+    if (formatType === 'link' && (event.ctrlKey || event.metaKey) && store.notePath) {
+      useEditorStore().FORMAT_LINK_CLICK({ data, dirname: window.path.dirname(store.notePath) })
+    }
+  })
   editor.value = muya
   // Registered so `[[` and the date dialog work here; the directory follows the selected day.
   registerPaneMuya('daily-notes', muya, () => (store.notePath ? window.path.dirname(store.notePath) : null))

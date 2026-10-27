@@ -45,6 +45,7 @@ import { storeToRefs } from 'pinia'
 import { X } from 'lucide-vue-next'
 import { Muya, type IMuyaOptions } from '@muyajs/core'
 import { usePreferencesStore } from '@/store/preferences'
+import { useEditorStore } from '@/store/editor'
 import { getMuyaLocale } from '@/util/muyaLocale'
 import { DEFAULT_CODE_FONT_FAMILY, DEFAULT_EDITOR_FONT_FAMILY } from '@/config'
 import { isDarkThemeId } from 'common/theme'
@@ -128,6 +129,11 @@ onMounted(async() => {
   })
   muya.on('focus', () => panes.FOCUS(props.id))
   muya.on('blur', () => void flush())
+  muya.on('format-click', ({ event, formatType, data }: { event: MouseEvent; formatType: string; data: { href: string } }) => {
+    if (formatType === 'link' && (event.ctrlKey || event.metaKey)) {
+      useEditorStore().FORMAT_LINK_CLICK({ data, dirname: window.path.dirname(props.file) })
+    }
+  })
   editor.value = muya
   registerPaneMuya(props.id, muya, () => window.path.dirname(props.file))
 })

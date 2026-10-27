@@ -111,7 +111,7 @@ import {
   type ISerializedHistory
 } from '@muyajs/core'
 import { getMuyaLocale } from '@/util/muyaLocale'
-import { setPrimaryMuya } from '@cazalla/renderer/editor/registry'
+import { linkToolsDir, setPrimaryMuya } from '@cazalla/renderer/editor/registry'
 import { exportStyledHTML, type HeaderFooterPart } from '@/util/exportHtml'
 import { applyCursor, isIndexCursor } from '@/util/cursor'
 import EditorSearch from '../search/index.vue'
@@ -798,7 +798,7 @@ watch(
 const jumpClick = (linkInfo: { href?: string | null } | null) => {
   if (!linkInfo) return
   const { href } = linkInfo
-  editorStore.FORMAT_LINK_CLICK({ data: { href: href ?? null }, dirname: window.DIRNAME })
+  editorStore.FORMAT_LINK_CLICK({ data: { href: href ?? null }, dirname: linkToolsDir() ?? window.DIRNAME })
 }
 
 interface ImagePathSuggestion {

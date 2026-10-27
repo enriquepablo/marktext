@@ -114,7 +114,7 @@ Upstream files are changed only where a hook is unavoidable, each by one to thre
 - `packages/desktop/src/renderer/src/contextMenu/sideBar/index.ts`: the "Open in split panel" and "Kanban board" entries at the end of the file-tree context menu.
 - `packages/desktop/src/main/contextMenu/editor/index.ts`: cazalla entries spread at the end of the editor context menu; `src/shared/types/ipc.ts` gains their channels.
 - `packages/desktop/src/main/ipc/index.ts`: registers the cazalla site, terminal, git and devtools handlers; `electron-builder.yml` ships `cazalla/pelican` as an extra resource; `pnpm-workspace.yaml` allows node-pty's build.
-- `packages/desktop/src/renderer/src/components/editorWithTabs/editor.vue`: `setPrimaryMuya(muya)` after the instance is created and `setPrimaryMuya(null)` before it is destroyed.
+- `packages/desktop/src/renderer/src/components/editorWithTabs/editor.vue`: `setPrimaryMuya(muya)` after the instance is created and `setPrimaryMuya(null)` before it is destroyed; `jumpClick` resolves the link popover's href against `linkToolsDir()`, the folder of the editor that showed the popover (item 30).
 - `packages/desktop/src/renderer/src/components/editorWithTabs/index.vue`: subtract the panel width.
 - `packages/desktop/src/main/menu/templates/view.ts`, `src/main/menu/actions/view.ts`: menu item, command registration, check-state sync.
 - `packages/desktop/src/main/keyboard/keybindings{Linux,Windows,Darwin}.ts`: default shortcut.
