@@ -26,13 +26,28 @@ export function getImageInfo(image: HTMLElement): IImageInfo {
     };
 }
 
+// A host-provided renderer for image sources the browser cannot show itself,
+// such as drawing files: `test` says which sources it takes, `render` turns the
+// resolved file URL into a URL an <img> can load (cazalla: Excalidraw to SVG).
+export interface IImageSourceRenderer {
+    test: (src: string) => boolean;
+    render: (fileUrl: string) => Promise<string>;
+}
+let imageSourceRenderer: IImageSourceRenderer | null = null;
+export function setImageSourceRenderer(renderer: IImageSourceRenderer | null) {
+    imageSourceRenderer = renderer;
+}
+export function getImageSourceRenderer() {
+    return imageSourceRenderer;
+}
+
 export function getImageSrc(src: string) {
     const EXT_REG = /\.(?:jpeg|jpg|png|gif|svg|webp)(?=\?|$)/i;
     const URL_REG
         = /^https?:\/\/(?:[\w\-.~]+\.[a-z]{2,}|[0-9.]+|localhost|\[[a-f0-9.:]+\])(?::\d{1,5})?\/\S+/i;
     const DATA_URL_REG
         = /^data:image\/[\w+-]+(?:;[\w-]+=[\w-]+|;base64)*,[a-zA-Z0-9+/]+={0,2}$/;
-    const imageExtension = EXT_REG.test(src);
+    const imageExtension = EXT_REG.test(src) || !!imageSourceRenderer?.test(src);
     const isFileUrl = /^file:\/\//i.test(src);
     const isUrl = URL_REG.test(src) || (imageExtension && isFileUrl);
     if (imageExtension) {

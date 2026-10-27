@@ -2,7 +2,7 @@ import type Renderer from './index';
 import { CLASS_NAMES } from '../../config';
 import { getUniqueId } from '../../utils';
 import { insertAfter, operateClassName } from '../../utils/dom';
-import { loadImage, usesDefaultObjectSize } from '../../utils/image';
+import { getImageSourceRenderer, loadImage, usesDefaultObjectSize } from '../../utils/image';
 
 export default function loadImageAsync(
     this: Renderer,
@@ -36,7 +36,8 @@ export default function loadImageAsync(
         const loadSrc = /^file:\/\//i.test(src)
             ? `${src}${src.includes('?') ? '&' : '?'}mucache=${id}`
             : src;
-        loadImage(loadSrc, isUnknownType)
+        const sourceRenderer = getImageSourceRenderer();
+        (sourceRenderer?.test(src) ? sourceRenderer.render(src).then(url => loadImage(url)) : loadImage(loadSrc, isUnknownType))
             .then(({ url, width, height }) => {
                 const imageText: HTMLElement | null = document.querySelector(`#${id}`);
                 const img = document.createElement('img');

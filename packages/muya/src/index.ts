@@ -37,6 +37,7 @@ export { TableRowColumMenu } from './ui/tableRowColumMenu';
 export { renderDiagramForExport } from './utils/diagram/render';
 export type { IExportRenderOptions } from './utils/diagram/render';
 export type { IImageInfo } from './utils/image';
-export { getImageInfo } from './utils/image';
+export { getImageInfo, setImageSourceRenderer } from './utils/image';
+export type { IImageSourceRenderer } from './utils/image';
 export { escapeHTML, sanitize, unescapeHTML, wordCount } from './utils/index';
 export { generateGithubSlug } from './utils/slug';

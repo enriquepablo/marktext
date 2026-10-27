@@ -120,6 +120,7 @@ Upstream files are changed only where a hook is unavoidable, each by one to thre
 - `packages/desktop/src/main/menu/templates/view.ts`, `src/main/menu/actions/view.ts`: menu item, command registration, check-state sync.
 - `packages/desktop/src/main/keyboard/keybindings{Linux,Windows,Darwin}.ts`: default shortcut.
 - `packages/desktop/src/renderer/src/commands/index.ts`, `commands/descriptions.ts`: command palette entry.
+- `packages/muya/src/utils/image.ts`, `src/inlineRenderer/renderer/loadImageAsync.ts`, `src/index.ts`: `setImageSourceRenderer`, a host renderer for image sources the browser cannot show, so a `.excalidraw` embed resolves like an image and is drawn by cazalla (item 32).
 - `packages/desktop/test/e2e/cazalla-daily-notes.spec.ts`: a one-line import of the Playwright suite in `cazalla/test/e2e/`, because Playwright collects specs only under its `testDir`.
 
 Panel visibility and width are stored in `localStorage`, not in the preferences schema, so no preference files change. Unit specs under `cazalla/test/unit/` run with `pnpm -C packages/desktop exec vitest run ../../cazalla/test/unit/` and are also included in `pnpm test:unit`. The preference labels for the content folder are not reworded; the panel's hint text explains that the content folder is the startup default directory.
