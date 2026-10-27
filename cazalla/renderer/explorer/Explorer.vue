@@ -58,7 +58,10 @@ import { useTaskStore } from '../tasks/store'
 import { getKanbanMenuItem } from '../kanban/sidebarMenu'
 import { getOpenInSplitMenuItem } from '../panes/sidebarMenu'
 import { useGitStatusStore } from '../git/store'
-import { moveEntry, MoveError } from './move'
+import { moveEntry, MoveError, projectContaining } from './move'
+import { openNoteDialog, openTaskDialog } from '../tasks/dialogs'
+import { openPageDialog } from '../sites/dialogs'
+import { openDrawingDialog } from '../drawings/dialogs'
 import { useCazallaLayoutStore } from '../core/layout'
 import { paneKindFor } from '../panes/linkRouter'
 
@@ -245,9 +248,18 @@ const onDrop = async(drag: TreeNode, drop: TreeNode): Promise<void> => {
 const onContextMenu = (event: MouseEvent, e: Entry): void => {
   select(e)
   const dir = e.isDir ? e.path : dirname(e.path)
+  // The dialogs write where they always do; the clicked folder only picks the project or site.
+  const folder = contentFolder.value
+  const project = folder ? projectContaining(folder, metadata.projectsList, dir)?.slug : undefined
+  const site = folder ? projectContaining(folder, metadata.sitesList, dir)?.slug : undefined
   const items: ContextMenuItem[] = [
     { label: t('cazalla.explorer.newFile'), click: () => createIn(dir, 'file') },
     { label: t('cazalla.explorer.newFolder'), click: () => createIn(dir, 'folder') },
+    { type: 'separator' },
+    { label: t('cazalla.explorer.addNote'), click: () => openNoteDialog({ project }) },
+    { label: t('cazalla.explorer.addTask'), click: () => openTaskDialog({ project }) },
+    { label: t('cazalla.explorer.addPage'), click: () => openPageDialog({ site }) },
+    { label: t('cazalla.explorer.addDrawing'), click: () => openDrawingDialog({ project }) },
     { type: 'separator' },
     { label: t('cazalla.explorer.rename'), enabled: !e.root, click: () => rename(e) },
     {
