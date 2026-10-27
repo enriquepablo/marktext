@@ -8,13 +8,21 @@
 /* Inline math on the text baseline. Muya wraps a hidden formula in an
    inline-block whose first child is a zero-size span holding the source; the
    wrapper's baseline then comes from that span, not from KaTeX. Letting the
-   wrapper flow inline hands the baseline to the KaTeX output. Block display
+   wrapper flow inline hands the baseline to the KaTeX output. The render
+   element is an inline block with `overflow: auto`, and an inline block whose
+   overflow is not visible takes its baseline from its bottom edge, a descender
+   below the formula's own baseline; `overflow: visible` restores the KaTeX
+   baseline, and `.katex` drops Muya's `vertical-align: middle`. Block display
    math (a paragraph that is only formulas) keeps Muya's centred block. */
 .mu-container .mu-hide.mu-math:not(.mu-display-math) {
   display: inline;
   vertical-align: baseline;
 }
 .mu-container .mu-hide.mu-math:not(.mu-display-math) > .mu-math-render {
+  overflow: visible;
+  vertical-align: baseline;
+}
+.mu-container .mu-hide.mu-math:not(.mu-display-math) > .mu-math-render .katex {
   vertical-align: baseline;
 }
 
