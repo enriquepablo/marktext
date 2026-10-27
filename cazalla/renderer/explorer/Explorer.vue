@@ -51,7 +51,7 @@ import { useEditorStore } from '@/store/editor'
 import { usePreferencesStore } from '@/store/preferences'
 import { useProjectStore } from '@/store/project'
 import { useContentFolder } from '../core/contentFolder'
-import { basename, dirname, ensureDir, exists, join, listDir, writeText } from '../core/fs'
+import { basename, copy, dirname, ensureDir, exists, join, listDir, writeText } from '../core/fs'
 import { DIALOG_EVENT, type Values } from '../dialogs/types'
 import { useMetadataStore } from '../metadata/store'
 import { useTaskStore } from '../tasks/store'
@@ -194,6 +194,17 @@ const warn = (message: string): void => {
   void notice.notify({ title: t('cazalla.explorer.title'), type: 'warning', message })
 }
 
+/** Copies files chosen in the native dialog into `dir`; an existing name is left alone and reported. */
+const addFromOutside = async(dir: string): Promise<void> => {
+  const chosen = await window.electron.ipcRenderer.invoke('mt::cazalla-pick-files')
+  for (const src of chosen) {
+    const dest = join(dir, basename(src))
+    if (await exists(dest)) warn(t('cazalla.explorer.exists', { path: dest }))
+    else await copy(src, dest)
+  }
+  if (chosen.length) await Promise.all([refresh(dir), git.REFRESH()])
+}
+
 const askName = (title: string, initial: string, onSubmit: (name: string) => Promise<string | void>): void =>
   bus.emit(DIALOG_EVENT, {
     title,
@@ -260,6 +271,7 @@ const onContextMenu = (event: MouseEvent, e: Entry): void => {
     { label: t('cazalla.explorer.addTask'), click: () => openTaskDialog({ project }) },
     { label: t('cazalla.explorer.addPage'), click: () => openPageDialog({ site }) },
     { label: t('cazalla.explorer.addDrawing'), click: () => openDrawingDialog({ project }) },
+    { label: t('cazalla.explorer.addFromOutside'), click: () => void addFromOutside(dir) },
     { type: 'separator' },
     { label: t('cazalla.explorer.rename'), enabled: !e.root, click: () => rename(e) },
     {

@@ -7,6 +7,8 @@ export const basename = (p: string, ext?: string): string => window.path.basenam
 export const exists = (p: string): Promise<boolean> => window.fileUtils.pathExists(p)
 export const ensureDir = (p: string): Promise<void> => window.fileUtils.ensureDir(p)
 export const move = (from: string, to: string): Promise<void> => window.fileUtils.move(from, to)
+/** Copies a file; the target is overwritten, so callers check `exists` first. */
+export const copy = (from: string, to: string): Promise<void> => window.fileUtils.copy(from, to)
 export const remove = (p: string): Promise<void> => window.fileUtils.unlink(p)
 
 export const readText = async(p: string): Promise<string> =>

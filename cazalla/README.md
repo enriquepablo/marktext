@@ -96,6 +96,7 @@ cazalla/
   main/terminal.ts          node-pty sessions for the terminal pane (lazygit by default)
   main/git.ts               git status --porcelain of the content folder for the explorer colours
   main/devtools.ts          toggles the window's developer tools for the activity bar button (item 30)
+  main/files.ts             native open dialog for the explorer's add-file-from-outside entry (item 32)
   renderer/git/             porcelain.ts (parser, folder aggregation), store.ts (refresh with tree events) (item 24)
   pelican/                  Pelican project copied from cazalla-net-site.plugin (theme, vault_metadata plugin, Makefile); shipped as an extra resource
   test/unit/                Vitest specs
@@ -113,7 +114,7 @@ Upstream files are changed only where a hook is unavoidable, each by one to thre
 - `packages/desktop/src/renderer/src/store/editor.ts`: one line in `FORMAT_LINK_CLICK` routes `.pdf` and `.excalidraw` link targets to a pane.
 - `packages/desktop/src/renderer/src/contextMenu/sideBar/index.ts`: the "Open in split panel" and "Kanban board" entries at the end of the file-tree context menu.
 - `packages/desktop/src/main/contextMenu/editor/index.ts`: cazalla entries spread at the end of the editor context menu; `src/shared/types/ipc.ts` gains their channels.
-- `packages/desktop/src/main/ipc/index.ts`: registers the cazalla site, terminal, git and devtools handlers; `electron-builder.yml` ships `cazalla/pelican` as an extra resource; `pnpm-workspace.yaml` allows node-pty's build.
+- `packages/desktop/src/main/ipc/index.ts`: registers the cazalla site, terminal, git, devtools and file handlers; `electron-builder.yml` ships `cazalla/pelican` as an extra resource; `pnpm-workspace.yaml` allows node-pty's build.
 - `packages/desktop/src/renderer/src/components/editorWithTabs/editor.vue`: `setMuyaImageHooks(...)` and `registerMuyaPlugins()` in place of its `Muya.use` block (plugins are registered by `renderer/editor/plugins.ts` before any instance exists, item 31), `setPrimaryMuya(muya)` after the instance is created and `setPrimaryMuya(null)` before it is destroyed.
 - `packages/desktop/src/renderer/src/components/editorWithTabs/index.vue`: subtract the panel width.
 - `packages/desktop/src/main/menu/templates/view.ts`, `src/main/menu/actions/view.ts`: menu item, command registration, check-state sync.

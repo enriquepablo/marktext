@@ -122,6 +122,7 @@
       "addTask": "Add task",
       "addPage": "Add web page",
       "addDrawing": "Add drawing",
+      "addFromOutside": "Add file from outside…",
       "rename": "Rename",
       "trash": "Move to trash",
       "copyPath": "Copy path",
