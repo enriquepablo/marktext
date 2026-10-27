@@ -5,7 +5,7 @@
       :key="entry.key"
     >
       <hr
-        v-if="entry.key === 'sep'"
+        v-if="entry.key.startsWith('sep')"
         class="activity-separator"
       >
       <icon-tooltip
@@ -95,22 +95,28 @@ const openTerminal = (): void => {
   }
   layout.TOGGLE_TERMINAL()
 }
+const sep = (n: number): Entry => ({ key: `sep${n}`, label: '', icon: PanelLeft, run: () => {} })
 const entries = computed<Entry[]>(() => [
   { key: 'left', label: t('cazalla.activity.toggleLeft'), icon: PanelLeft, run: () => bus.emit('view:toggle-layout-entry', 'showSideBar') },
   { key: 'right', label: t('cazalla.activity.toggleRight'), icon: PanelRight, run: () => dailyNotes.TOGGLE() },
-  { key: 'sep', label: '', icon: PanelLeft, run: () => {} },
+  sep(1),
   { key: 'person', label: t('cazalla.activity.newPerson'), icon: UserPlus, run: openPersonDialog },
   { key: 'organization', label: t('cazalla.activity.newOrganization'), icon: Building2, run: openOrganizationDialog },
   { key: 'project', label: t('cazalla.activity.newProject'), icon: FolderPlus, run: openProjectDialog },
+  { key: 'site', label: t('cazalla.sites.newSite'), icon: Globe, run: openSiteDialog },
+  sep(2),
   { key: 'note', label: t('cazalla.activity.newNote'), icon: FilePlus, run: openNoteDialog },
   { key: 'task', label: t('cazalla.activity.newTask'), icon: ListTodo, run: openTaskDialog },
-  { key: 'drawing', label: t('cazalla.activity.newDrawing'), icon: PenTool, run: openDrawingDialog },
-  { key: 'kanban', label: t('cazalla.activity.kanban'), icon: Kanban, run: () => layout.TOGGLE_KANBAN() },
-  { key: 'site', label: t('cazalla.sites.newSite'), icon: Globe, run: openSiteDialog },
   { key: 'page', label: t('cazalla.sites.newPage'), icon: Newspaper, run: openPageDialog },
-  { key: 'publish', label: t('cazalla.sites.publishTitle'), icon: Rocket, run: openPublishDialog },
+  { key: 'drawing', label: t('cazalla.activity.newDrawing'), icon: PenTool, run: openDrawingDialog },
+  sep(3),
   { key: 'date', label: t('cazalla.date.title'), icon: CalendarPlus, run: openDateDialog },
+  sep(4),
+  { key: 'kanban', label: t('cazalla.activity.kanban'), icon: Kanban, run: () => layout.TOGGLE_KANBAN() },
+  sep(5),
   { key: 'git', label: t('cazalla.terminal.title'), icon: GitBranch, run: openTerminal },
+  { key: 'publish', label: t('cazalla.sites.publishTitle'), icon: Rocket, run: openPublishDialog },
+  sep(6),
   { key: 'report', label: t('cazalla.activity.effortReport'), icon: ClipboardList, run: openReportDialog },
   { key: 'invoice', label: t('cazalla.activity.invoice'), icon: Receipt, run: openInvoiceDialog }
 ])
