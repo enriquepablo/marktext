@@ -79,8 +79,9 @@ export const createTask = (
       category: 'task',
       project: project.slug,
       path: '/',
-      status: 'new',
-      kanban: true,
+      // Top-level tasks are ongoing containers of subtasks and stay off the kanban board.
+      status: 'continuous',
+      kanban: false,
       due: dueFrom(input.due, now),
       effort: [],
       subtasks: []

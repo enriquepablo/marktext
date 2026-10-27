@@ -28,11 +28,11 @@ describe('note and task creation', () => {
     )
   })
 
-  it('writes a task with status new and a due date one month ahead', async() => {
+  it('writes a top-level task as continuous, off the board, due one month ahead', async() => {
     const file = await createTask('/vault', project, { title: 'Some Task' }, now)
     expect(file).toBe('/vault/projects/site/tasks/some-task.md')
     expect(files.get(file)).toBe(
-      '---\ntitle: Some Task\nslug: some-task\ntags: []\ndate: 2026-10-22T15:06:42.215Z\nmodified: 2026-10-22T15:06:42.215Z\ncategory: task\nproject: site\npath: /\nstatus: new\nkanban: true\ndue: 2026-11-22T15:06:42.215Z\neffort: []\nsubtasks: []\n---\n'
+      '---\ntitle: Some Task\nslug: some-task\ntags: []\ndate: 2026-10-22T15:06:42.215Z\nmodified: 2026-10-22T15:06:42.215Z\ncategory: task\nproject: site\npath: /\nstatus: continuous\nkanban: false\ndue: 2026-11-22T15:06:42.215Z\neffort: []\nsubtasks: []\n---\n'
     )
   })
 
