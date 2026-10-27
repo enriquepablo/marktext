@@ -1149,3 +1149,32 @@ A cazalla module `cazalla/renderer/editor/plugins.ts` owns the registration. `re
 ## Status
 
 Fixed on 2026-10-27. `cazalla/renderer/editor/plugins.ts` registers the plugins; the primary editor, the daily editor and the file panes call it before creating their instance. The popover, the image toolbar and the format toolbar are therefore present in a daily note shown at startup without an open tab. Not seen on screen here; the check is to start on the content folder with no tab, hover a link in the daily note, and see the arrow and the unlink button.
+
+# 32 More details
+
+## Add docs in the contextual menu in the file explorer
+
+In addition to add file: add note, add task, add web page, add drawing - with corresponding dialogs - and also add file (any type) from outside the root directory, with a file chooser
+
+## visualize excalidraw drawinfgs
+
+both as files and embedded in markdown.
+
+## Findings
+
+The explorer's right-click menu is built in `explorer/Explorer.vue`, not in the upstream sidebar menu, which the files view no longer mounts. New file and new folder call local closures with the clicked folder. The four creation dialogs take no arguments; their project or site is a select without a default, and they write to fixed places: `notes/`, `tasks/`, `<site>/pages/`, `assets/drawings/YYYY/MM/`. No invoke channel returns a chosen path to the renderer; `window.fileUtils.copy` exists and overwrites.
+
+The vault's embeds are 72 drawings, 14 PNG and 1 JPG; no PDF. PNG and JPG render in the editor and open with the system viewer. PDF opens in the pane and cannot be embedded, since Muya resolves only image extensions. The migrated drawings are `.excalidraw.md` files in Obsidian's format: frontmatter `excalidraw-plugin: parsed`, a `## Drawing` section with a `compressed-json` block (LZ-string, base64, line-wrapped) in 56 files or a plain `json` block in 20, and a `## Embedded Files` section mapping a 40-hex file id to a `[[image.png]]` in `Files/`, which the migration does not copy. The drawing pane opens only `.excalidraw` JSON (`panes/linkRouter.ts`), so these files open as markdown, and an embed of one shows the empty image placeholder. Excalidraw 0.18.1 exports `exportToSvg` and `restore` usable without the component; `lz-string` is not installed.
+
+## Design
+
+Explorer menu. After new file and new folder: add note, add task, add web page, add drawing, add file from outside. The first four open the existing dialogs with the project or site that contains the clicked folder preselected; the dialogs gain an optional preset argument that becomes the select's default, and `projectContaining` of `explorer/move.ts` is exported with a `siteContaining` beside it. Files are written where the dialogs write them today, so a task keeps the `path` and subtasks conventions. The fifth entry asks the main process for files through a new invoke channel `mt::cazalla-pick-files` in `cazalla/main/files.ts` (`dialog.showOpenDialog`, multiple selection), copies each into the clicked folder with `window.fileUtils.copy` unless a file of that name exists, then refreshes the folder and the git state. Labels under `cazalla.explorer` in both locales.
+
+Drawings as files. Converted once by the migration. `scripts/migrate-project/excalidraw.ts` decodes the block, LZ-string for `compressed-json`, parses the JSON, reads the embedded files from `Files/` into the scene's `files` map as data URLs, and the plan writes `<project>/assets/<name>.excalidraw`; links to the drawing point at that file. The `.excalidraw.md` is not copied. `lz-string` is added to the desktop package. Drawings with embedded images missing from the vault are written without them and reported.
+
+Drawings embedded in markdown. Muya's `getImageSrc` in `utils/image.ts` accepts the `.excalidraw` extension as a local image, and `loadImageAsync.ts` hands such sources to an optional renderer-side hook instead of loading them as an image, two small hooks in the engine. Cazalla sets the hook in `editor/plugins.ts`: `drawings/render.ts` reads the file, restores the scene and returns an SVG data URL from `exportToSvg`, cached by path and modification time, so a drawing edited in the pane re-renders in the note. This covers drawings made in the app as well as migrated ones.
+
+## Open questions
+
+- A click on an embedded drawing could open it in the drawing pane; the image click path in Muya is separate from links and is left as a follow-up.
+- Exported HTML and PDF keep the `.excalidraw` source and would need the SVG substituted.
