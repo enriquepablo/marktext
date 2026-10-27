@@ -76,7 +76,7 @@ cazalla/
   renderer/panes/           tree.ts (pure layout tree), store.ts, PaneLayout.vue, FilePane.vue (second Muya instance per pane), sidebarMenu.ts (item 7)
   renderer/explorer/        Explorer.vue (el-tree file explorer, all files, drag and drop), move.ts (move with metadata sync), links.ts (link rewriting) (item 15)
   renderer/pdf/             pdfjs.ts (worker setup shared with search), PdfPane.vue (pages rendered on canvases with pdfjs-dist); panes/ViewerOverlay.vue fills the editor column for PDFs and drawings (item 12)
-  renderer/drawings/        DrawingPane.vue (Excalidraw React component in a pane, react + react-dom), create.ts, dialogs.ts (item 11)
+  renderer/drawings/        DrawingPane.vue (Excalidraw React component in a pane, react + react-dom), create.ts, dialogs.ts (item 11); render.ts draws embedded `.excalidraw` files as SVG for Muya (item 32)
   renderer/events/          group.ts (today / tomorrow / this week / later), EventsView.vue (third sidebar column) (item 14)
   renderer/sites/           pages.ts (web pages and sub-pages), dialogs.ts, subpageMenu.ts, publish.ts, PublishDialog.vue (item 13)
   renderer/editor/          registry.ts: live Muya instances (primary + panes), insertion at the caret, typed-input listeners; plugins.ts registers Muya's UI plugins once, the link popover's jump resolving against the editor that showed it (item 31); frontmatterFold.ts collapses frontmatter blocks (item 23)

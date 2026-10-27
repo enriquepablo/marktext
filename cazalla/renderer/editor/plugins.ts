@@ -26,10 +26,12 @@ import {
   TableColumnToolbar,
   TableDragBar,
   TableRowColumMenu,
+  setImageSourceRenderer,
   type IImagePathSuggestion
 } from '@muyajs/core'
 import { useEditorStore } from '@/store/editor'
 import { linkToolsDir } from './registry'
+import { drawingImageRenderer } from '../drawings/render'
 
 export interface ImageHooks {
   imageAction: (state: { src: string; alt?: string; title?: string }) => Promise<string>
@@ -55,6 +57,8 @@ let registered = false
 export const registerMuyaPlugins = (): void => {
   if (registered) return
   registered = true
+  // Embedded `.excalidraw` files are drawn as SVG.
+  setImageSourceRenderer(drawingImageRenderer)
   Muya.use(TableChessboard)
   Muya.use(ParagraphQuickInsertMenu)
   Muya.use(CodeBlockLanguageSelector)
