@@ -1070,3 +1070,53 @@ Code: `planMetadata(root, notes)` in `plan.ts`, reading with `readRecord` of `va
 ## Status
 
 Done on 2026-10-25. `--metadata` in `cazalla/scripts/migrate-project.ts`, planned by `planMetadata` in `plan.ts`. The trial run on the VM copy wrote the 5 organizations, 11 people and 12 projects with an empty report: no `service` key remains, and every `organization` value names an existing organization, the nine `cazalla.net` references now reading `cazalla-net`. Run it before the projects, so that the project migration finds the records and leaves them alone.
+
+# 30 Details
+
+## link to doc in kanban cards
+
+onclick open task in main panel and close kanban board
+
+## top level tasks not in kanban
+
+When we add a top level task through the button in the left tool bar, the kanban frontmatter should be set to false
+also set status to continuous for these top level tasks
+
+## following links from daily notes not working
+
+When hovering on a link in a daily note, it appears a button with an arrow, clicking on the arrow should open the link in the main panel, but does nothing.
+
+## re-order icons in left tool bar
+
+1st the toggle panel icons, separator, then new person, new organization, new project, new site, separator, then new note, new task, new web page, new drawing, separator, insert date, separator, kanban, separator, lazy git, publish site, separator, effort report, invoice
+
+then, new:
+
+separator, open electron developer tools
+
+## issue inline math expressions
+
+they are still rendered too high above normal text
+baseline currently over a lowercase "a"
+
+## issue in the events view
+
+All tasks with a due date in the past show up in the list for Today.
+It should only show past events due today - if in the evening, events due this morning.
+never show yesterday's or older events
+
+## Design
+
+Kanban cards. `KanbanView.vue` already opens a card's file in the main editor and closes the board on double click (`openTask`). That is kept as it is; no change.
+
+Top-level tasks. The activity bar's new-task dialog is the only caller of `createTask` in `tasks/create.ts`; subtasks are written by `tasks/subtasks.ts` on their own. `createTask` writes `status: continuous` and `kanban: false`; the due date field of the dialog stays. The subtask path keeps `new` and `true`.
+
+Links in daily notes. Muya registers its UI plugins process-wide, so the arrow of the link popover in the daily note already calls the primary editor's `jumpClick` in `editorWithTabs/editor.vue`, which resolves the href against `window.DIRNAME`, the folder of the current tab. Relative links of the daily note therefore point at the wrong place. The editor registry (`cazalla/renderer/editor/registry.ts`) learns which instance last showed the link popover, through Muya's `muya-link-tools` event, and exposes that instance's directory; `jumpClick` uses it when set, else `window.DIRNAME`, a one-line change. The same fix serves the file panes. Ctrl-click on a link, Muya's `format-click` event, is only handled for the primary instance; the daily editor and the file panes subscribe to it as well and call `FORMAT_LINK_CLICK` with their own directory.
+
+Activity bar order. The entries array of `ActivityBar.vue` is reordered to: toggle left panel, toggle right panel, separator, new person, new organization, new project, new site, separator, new note, new task, new web page, new drawing, separator, insert date, separator, kanban, separator, lazygit, publish site, separator, effort report, invoice, separator, developer tools. Separators get distinct keys `sep1`… and the template matches the prefix.
+
+Developer tools. The main-process command `view.toggle-dev-tools` only works with the debug flag and cannot be run from the renderer. A cazalla IPC channel `mt::cazalla-toggle-devtools` is handled in `cazalla/main/devtools.ts` by `webContents.toggleDevTools()` on the sender, without the debug gate; one registration line in `main/ipc/index.ts` and one channel line in `shared/types/ipc.ts`. The button sends on that channel.
+
+Inline math. Muya's `.mu-math-render` is an inline block with `overflow: auto hidden`; an inline block whose overflow is not visible takes its baseline from its bottom edge, so the formula's own baseline sits a descender above the text. Muya also sets `vertical-align: middle` on `.katex`, which the earlier rule did not override. The cazalla rule for inline math in hidden mode sets `overflow: visible` and `vertical-align: baseline` on the render element and `vertical-align: baseline` on `.katex`. The element stays an inline block, so `white-space: nowrap` keeps working.
+
+Events view. `events/group.ts` puts every due date before tomorrow under Today and flags those before the start of today as overdue. Tasks due before the start of today are now left out; the overdue flag compares with the current time, so today's tasks whose time has passed show in red. The spec changes accordingly.
