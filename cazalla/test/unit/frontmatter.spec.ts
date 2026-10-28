@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parse, serialize, split, updateFields } from '@cazalla/renderer/core/frontmatter'
+import { parse, sameExceptModified, serialize, split, touchModified, updateFields } from '@cazalla/renderer/core/frontmatter'
 
 const note = `---
 title: Some Note
@@ -71,5 +71,19 @@ Body line.
 
   it('adds a block to a document without one', () => {
     expect(updateFields('# plain\n', { category: 'note' })).toBe('---\ncategory: note\n---\n# plain\n')
+  })
+
+  it('touchModified rewrites only the modified line of the leading block', () => {
+    const out = touchModified(note, 'X')
+    expect(out).toContain('modified: X')
+    expect(out.replace('modified: X', 'modified: 2026-10-22T15:06:42.215Z')).toBe(note)
+    expect(touchModified('# No block\nmodified: a\n', 'X')).toBe('# No block\nmodified: a\n')
+    expect(touchModified('---\ntitle: t\n---\nbody\n', 'X')).toBe('---\ntitle: t\n---\nbody\n')
+  })
+
+  it('sameExceptModified ignores the modified line and nothing else', () => {
+    expect(sameExceptModified(note, touchModified(note, 'X'))).toBe(true)
+    expect(sameExceptModified(note, note + 'more\n')).toBe(false)
+    expect(sameExceptModified('a', 'a')).toBe(true)
   })
 })

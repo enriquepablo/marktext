@@ -214,7 +214,8 @@
     "frontmatter": {
       "collapsed": "+ metadatos",
       "expand": "Mostrar metadatos",
-      "collapse": "Ocultar metadatos"
+      "collapse": "Ocultar metadatos",
+      "touch": "Poner modificado a ahora"
     }
   }
 }

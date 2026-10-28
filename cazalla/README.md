@@ -79,7 +79,7 @@ cazalla/
   renderer/drawings/        DrawingPane.vue (Excalidraw React component in a pane, react + react-dom), create.ts, dialogs.ts (item 11); render.ts draws embedded `.excalidraw` files as SVG for Muya (item 32)
   renderer/events/          group.ts (today / tomorrow / this week / later), EventsView.vue (third sidebar column) (item 14)
   renderer/sites/           pages.ts (web pages and sub-pages), dialogs.ts, subpageMenu.ts, publish.ts, PublishDialog.vue (item 13)
-  renderer/editor/          registry.ts: live Muya instances (primary + panes), insertion at the caret, typed-input listeners; plugins.ts registers Muya's UI plugins once, the link popover's jump resolving against the editor that showed it (item 31); frontmatterFold.ts collapses frontmatter blocks (item 23)
+  renderer/editor/          registry.ts: live Muya instances (primary + panes), insertion at the caret, typed-input listeners; plugins.ts registers Muya's UI plugins once, the link popover's jump resolving against the editor that showed it (item 31); frontmatterFold.ts collapses frontmatter blocks (item 23) and carries the stamp button; modified.ts stamps `modified` in the live block, modifiedOnSave.ts decides it on save (item 33)
   renderer/links/           docIndex.ts (document titles, newest first), linkDialog.ts (`[[` opens the link dialog in every registered editor, the daily note included) (item 16)
   renderer/dates/           dialog.ts (Insert date) (item 17)
   renderer/search/          extract.ts, pdfText.ts, store.ts (MiniSearch index persisted in <content>/.cazalla/search-index.json), SearchView.vue (item 15 search)
@@ -111,7 +111,7 @@ Upstream files are changed only where a hook is unavoidable, each by one to thre
 - `packages/desktop/src/renderer/src/pages/app.vue`: mount the activity bar, the kanban overlay and the panel; wrap the recent view and the editor in the pane layout.
 - `packages/desktop/src/renderer/src/components/sideBar/index.vue`: render the cazalla explorer in place of the upstream `<tree>` and the cazalla search view in place of the upstream search (both upstream components stay, unused); an events button in the header and the `events` column branch.
 - `packages/desktop/src/shared/types/preferences.ts` and `src/renderer/src/store/layout.ts`: `events` accepted as a sidebar column.
-- `packages/desktop/src/renderer/src/store/editor.ts`: one line in `FORMAT_LINK_CLICK` routes `.pdf` and `.excalidraw` link targets to a pane.
+- `packages/desktop/src/renderer/src/store/editor.ts`: one line in `FORMAT_LINK_CLICK` routes `.pdf` and `.excalidraw` link targets to a pane; one line each in `FILE_SAVE`, the autosave timer and `ASK_FOR_SAVE_ALL` calls `touchModifiedBeforeSave` so a changed document gets a fresh `modified` (item 33).
 - `packages/desktop/src/renderer/src/contextMenu/sideBar/index.ts`: the "Open in split panel" and "Kanban board" entries at the end of the file-tree context menu.
 - `packages/desktop/src/main/contextMenu/editor/index.ts`: cazalla entries spread at the end of the editor context menu; `src/shared/types/ipc.ts` gains their channels.
 - `packages/desktop/src/main/ipc/index.ts`: registers the cazalla site, terminal, git, devtools and file handlers; `electron-builder.yml` ships `cazalla/pelican` as an extra resource; `pnpm-workspace.yaml` allows node-pty's build.

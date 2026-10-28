@@ -1,5 +1,6 @@
 import equal from 'deep-equal'
 import { routeLinkToPane } from '@cazalla/renderer/panes/linkRouter'
+import { touchModifiedBeforeSave } from '@cazalla/renderer/editor/modifiedOnSave'
 import { prepareReading, applyReadOnly } from '../services/documentMode'
 import bus from '../bus'
 import { getUniqueId, deepClone } from '../util'
@@ -640,6 +641,7 @@ export const useEditorStore = defineStore('editor', {
     FILE_SAVE(): void {
       if (this.currentFile?.readOnly || this.currentFile?.modeChanging) return
       if (!this.currentFile) return
+      touchModifiedBeforeSave(this.currentFile, true)
       this.flushActiveEditor()
       const projectStore = useProjectStore()
       const { id, filename, pathname, markdown } = this.currentFile
@@ -841,6 +843,7 @@ export const useEditorStore = defineStore('editor', {
         notice.notify({ title: t('readingMode.skipped'), showConfirm: false })
       }
       const projectStore = useProjectStore()
+      for (const tab of tabs) if (!tab.readOnly) touchModifiedBeforeSave(tab, tab === this.currentFile)
       const unsavedFiles = tabs
         .filter((file) => closeTabs || !file.readOnly)
         .filter((file) => !(file.isSaved && /[^\n]/.test(file.markdown)))
@@ -1821,6 +1824,7 @@ export const useEditorStore = defineStore('editor', {
 
         const tab = this.tabs.find((t) => t.id === id)
         if (tab && !tab.isSaved && !tab.readOnly && !tab.modeChanging && !tab.diskConflict) {
+          touchModifiedBeforeSave(tab, tab === this.currentFile)
           const defaultPath = getRootFolderFromState(projectStore)
           window.electron.ipcRenderer.send(
             'mt::response-file-save',

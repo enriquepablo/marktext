@@ -1195,3 +1195,34 @@ When I edit a document the `modified` frontmatter is not updated
 nor is there an icon to update it
 there
 
+## Findings
+
+Three editors write markdown. The upstream editor saves through the store `store/editor.ts`: `FILE_SAVE` on Ctrl+S, the timer in `HANDLE_AUTO_SAVE`, `ASK_FOR_SAVE_ALL`, and the close paths all send `tab.markdown` to the main process, which writes it as is. The cazalla file panes (`panes/FilePane.vue`) write `getMarkdown()` of their Muya instance one second after the last change. The daily-notes store is the only writer that stamps: `touchModified` in `dailyNotes/util.ts` rewrites the `modified:` line of the leading YAML block, in local time with offset, while notes and tasks are stamped by `updateFields` with the UTC ISO string of `isoNow`. So a note or task edited in the editor keeps the `modified` of its creation or of its last dialog change.
+
+Muya holds the frontmatter as a `frontmatter` block, always the first child of the scroll page, with one code content block whose `text` is the YAML without fences. Setting `text` on a content block queues a JSON operation; the DOM is re-rendered only by `update()` or by `setCursor(start, end, true)`, and the operation reaches the editor's `json-change` listener on the next animation frame or on `muya.flush()`. The upstream editor turns `json-change` into `LISTEN_FOR_CONTENT_CHANGE`, which sets `tab.markdown`, marks the tab dirty and, with autosave on, schedules a save. The store marks a tab saved when the main process echoes a markdown equal to `tab.markdown`. The frontmatter fold (item 23) floats one +/− button over the block from outside Muya's DOM; a second button fits beside it.
+
+## Design
+
+Stamp. `touchModified(markdown, stamp)` in `core/frontmatter.ts` rewrites the `modified:` line of a leading YAML block and returns other input unchanged. The daily-notes helper delegates to it with its local-time stamp. Every other writer stamps with `isoNow()`, the format of notes and tasks.
+
+Which saves stamp. A save stamps when the document changed in anything but its `modified` line since the last write of this session; the comparison blanks that line on both sides. This stops the loop in which a stamp dirties the tab, the tab autosaves, and the save stamps again. A tab never written in this session stamps when it is dirty and not when it is clean, so Ctrl+S on an untouched document leaves it alone. The decision is a pure function in `renderer/editor/modified.ts`, with the last written markdown kept per tab id.
+
+How the editor shows it. The stamp is written into the live Muya block, not only into the string: `stampModified(muya)` finds the frontmatter block, replaces the line in its content's `text`, re-renders the block, keeps the caret where it was if it was inside the block, and calls `muya.flush()` so the change reaches `tab.markdown` before the save reads it. The resulting content change marks the tab dirty and schedules another autosave, which finds the tab saved by then and does nothing, or restamps nothing because only the `modified` line differs. When the tab is not the one shown, or the editor is in source-code mode, the string in `tab.markdown` is stamped instead; the editor shows the new value when the tab is shown again.
+
+Hooks. `store/editor.ts` gets one line in `FILE_SAVE`, one in the autosave timer and one in `ASK_FOR_SAVE_ALL`, each calling `touchModifiedBeforeSave(tab, isCurrent)`. The close-window save and save-as are left unstamped. `FilePane.vue` stamps its Muya instance in `flush` when the pane's markdown differs from the last written text beyond the `modified` line.
+
+Icon. The fold gains a second floating button, shown only while the block is expanded, that stamps now. The stamp is an ordinary edit: the document turns dirty and is saved by the usual path, which does not stamp again because only the `modified` line changed. Labels under `cazalla.frontmatter` in both locales.
+
+## Open questions
+
+- The stamp enters Muya's undo stack; Ctrl+Z after a save restores the previous `modified`.
+- The close-window save path writes without a stamp.
+
+## Status
+
+Done on 2026-10-28.
+
+- `touchModified` and `sameExceptModified` in `core/frontmatter.ts`; the daily-notes helper delegates to the first.
+- `editor/modified.ts` stamps the live Muya block and flushes; `editor/modifiedOnSave.ts` decides per tab and is called from three one-line hooks in `store/editor.ts`; `FilePane.vue` stamps in `flush`.
+- The fold shows a ↻ button beside +/− while the block is expanded; it stamps now and the usual save path writes it.
+- Unit specs for the helpers, the block stamp and the decision pass with the rest of the cazalla suite; lint and typecheck are clean. The button and the on-save stamp are not seen on screen here.

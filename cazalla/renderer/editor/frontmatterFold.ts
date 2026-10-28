@@ -1,4 +1,5 @@
 import { t } from '@/i18n'
+import { stampModified } from './modified'
 import type { Registered } from './registry'
 
 // Collapses the frontmatter block of each document to a greyed "metadata" line.
@@ -17,6 +18,14 @@ export const attachFrontmatterFold = (registered: Registered): void => {
   toggle.type = 'button'
   toggle.className = 'cz-fm-toggle plain-button'
   document.body.appendChild(toggle)
+  // Stamps `modified` with the current time; shown only while the block is expanded.
+  const touch = document.createElement('button')
+  touch.type = 'button'
+  touch.className = 'cz-fm-toggle cz-fm-touch plain-button'
+  touch.textContent = '↻'
+  touch.setAttribute('aria-label', t('cazalla.frontmatter.touch'))
+  touch.title = t('cazalla.frontmatter.touch')
+  document.body.appendChild(touch)
 
   const block = (): HTMLElement | null => root.querySelector<HTMLElement>('pre.mu-frontmatter')
 
@@ -31,12 +40,16 @@ export const attachFrontmatterFold = (registered: Registered): void => {
     const pre = block()
     if (!pre || !pre.isConnected || pre.getClientRects().length === 0) {
       toggle.style.display = 'none'
+      touch.style.display = 'none'
       return
     }
     const rect = pre.getBoundingClientRect()
     toggle.style.display = ''
     toggle.style.top = `${rect.top + 4}px`
     toggle.style.left = `${rect.right - 26}px`
+    touch.style.display = pre.classList.contains(COLLAPSED) ? 'none' : ''
+    touch.style.top = toggle.style.top
+    touch.style.left = `${rect.right - 50}px`
   }
 
   const sync = (): void => {
@@ -63,6 +76,11 @@ export const attachFrontmatterFold = (registered: Registered): void => {
     place()
   })
 
+  touch.addEventListener('mousedown', (e) => {
+    e.preventDefault()
+    stampModified(registered.muya)
+  })
+
   const observer = new MutationObserver(sync)
   observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] })
   const onScroll = (): void => place()
@@ -76,6 +94,7 @@ export const attachFrontmatterFold = (registered: Registered): void => {
     document.removeEventListener('scroll', onScroll, { capture: true })
     window.removeEventListener('resize', onScroll)
     toggle.remove()
+    touch.remove()
   }
   registered.muya.on('destroy', detach)
   const rootObserver = new MutationObserver(() => {

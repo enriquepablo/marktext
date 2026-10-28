@@ -72,6 +72,9 @@ export const unregisterPaneMuya = (id: string): void => forget(id)
 /** Folder of the document whose link popover was shown last, for resolving its relative hrefs. */
 export const linkToolsDir = (): string | null => (linkToolsId ? (instances.get(linkToolsId)?.dir() ?? null) : null)
 
+/** The upstream editor's instance, when it exists. */
+export const primaryInstance = (): Registered | null => instances.get('primary') ?? null
+
 /** The instance that last had focus, falling back to the primary editor. */
 export const activeInstance = (): Registered | null => instances.get(focusedId) ?? instances.get('primary') ?? null
 

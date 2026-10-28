@@ -52,6 +52,8 @@ import { isDarkThemeId } from 'common/theme'
 import { basename, exists, readText, writeText } from '../core/fs'
 import { usePaneStore } from './store'
 import { registerPaneMuya, unregisterPaneMuya } from '../editor/registry'
+import { stampModified } from '../editor/modified'
+import { sameExceptModified } from '../core/frontmatter'
 import { registerMuyaPlugins } from '../editor/plugins'
 
 const props = defineProps<{ id: string; file: string }>()
@@ -84,6 +86,7 @@ const flush = async(): Promise<void> => {
     saveTimer = null
   }
   if (!dirty.value || !editor.value) return
+  if (!sameExceptModified(editor.value.getMarkdown(), lastSaved)) stampModified(editor.value)
   const markdown = editor.value.getMarkdown()
   await writeText(props.file, markdown)
   lastSaved = markdown

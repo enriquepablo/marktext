@@ -1,6 +1,8 @@
 // Pure helpers for the daily notes panel. Paths are returned as segments so
 // callers join them with `window.path` and this module stays free of globals.
 
+import { touchModified as touchModifiedLine } from '../core/frontmatter'
+
 export const DAILY_NOTES_DIR = '_daily'
 
 const pad = (n: number): string => String(n).padStart(2, '0')
@@ -37,17 +39,8 @@ export const newNoteContent = (date: Date, now: Date): string => {
   return `---\ntitle: "${key}"\nslug: ${key}\ncreated: ${stamp}\nmodified: ${stamp}\ncategory: daily\ntags: []\n---\n`
 }
 
-const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---(\r?\n|$)/
-
-/** Rewrites the `modified:` line of a leading YAML block. Other input is returned as is. */
-export const touchModified = (markdown: string, now: Date): string => {
-  const match = FRONTMATTER.exec(markdown)
-  if (!match) return markdown
-  const body = match[1]
-  if (!/^modified:/m.test(body)) return markdown
-  const updated = body.replace(/^modified:.*$/m, `modified: ${formatTimestamp(now)}`)
-  return markdown.slice(0, 4) + updated + markdown.slice(4 + body.length)
-}
+/** Rewrites the `modified:` line of a leading YAML block, in local time. Other input is returned as is. */
+export const touchModified = (markdown: string, now: Date): string => touchModifiedLine(markdown, formatTimestamp(now))
 
 /** 0 = Sunday … 6 = Saturday, from the locale's week info when the engine exposes it. */
 export const weekStartFor = (locale: string): number => {
