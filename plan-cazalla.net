@@ -1226,3 +1226,43 @@ Done on 2026-10-28.
 - `editor/modified.ts` stamps the live Muya block and flushes; `editor/modifiedOnSave.ts` decides per tab and is called from three one-line hooks in `store/editor.ts`; `FilePane.vue` stamps in `flush`.
 - The fold shows a ↻ button beside +/− while the block is expanded; it stamps now and the usual save path writes it.
 - Unit specs for the helpers, the block stamp and the decision pass with the rest of the cazalla suite; lint and typecheck are clean. The button and the on-save stamp are not seen on screen here.
+
+# 34 More details
+
+## refresh file explorer
+
+after closing lazy git, after any rename or delete or move or add in the file explorer
+
+## problem moving tasks and webpages
+
+When we move webpages or tasks in the file explorer,
+theuir path frontmatter should be updated.
+for tasks, the path should be from <project name>/tasks/
+for webpàges it should be from <site>/pages/
+
+## Findings
+
+Refresh. `explorer/Explorer.vue` already reloads a folder after each of its actions through `refresh(dir)`, which looks the folder up by its tree key and replaces its children when the node is loaded. Three things defeat it. The trash entry emits the upstream `SIDEBAR::remove` event and reloads after a fixed 300 ms, but the main process first shows a confirmation dialog, so the reload runs before the file is gone. The git state is reloaded after moves but not after new files or folders. Nothing runs when the lazygit overlay closes: `TerminalOverlay.vue` only flips `mainView` back to `editor`, and commits made there leave the green and blue names in place until the next tree event. Two spellings add failures: the content folder is the raw preference value, so a trailing slash makes the git store's prefix test and the project lookup miss, and the root key of the tree is the root's pathname, which the `dirname` of a child never carries a trailing slash for.
+
+Paths. `explorer/move.ts` rewrites `project` and `path` for tasks that move, relative to `<project>/tasks/`, and the unit spec covers a subtask leaving its parent and a task entering another task's folder. Webpages are not handled: the context carries projects only, `category: webpage` is never examined, and a site folder that moves keeps its metadata `path`. Pages are created by `sites/pages.ts` with `project` set to the site slug and `path` relative to `<site>/pages/`, the same shape as tasks.
+
+## Design
+
+Content folder. `core/contentFolder.ts` strips trailing separators, so every consumer compares the same spelling.
+
+Refresh. `refresh(dir)` resolves its node by exact key, then by a root whose trimmed path matches. `refreshAll()` reloads the roots and every expanded folder. The trash entry invokes `mt::fs-trash-item` itself and reloads the folder and the git state after the call returns, so the confirmation is awaited. New file, new folder and rename reload the git state too, and rename reloads the folder whether the move succeeded or not. A watcher on `mainView` leaving `terminal` runs `refreshAll()` and the git refresh. The metadata and task index reloads after a move no longer sit between the move and the tree reload.
+
+Paths. `MoveContext` gains `sites`. The metadata `path` rewrite covers sites as it covers projects. In the pass over moved files, a `webpage` gets `project` set to the containing site's slug and `path` relative to `<site>/pages/`, through the same helper tasks use, generalized to a record and a subfolder. The explorer passes `metadata.sitesList`. Specs add a site fixture: a page moved under another page, a site folder moved, and a task moved into a plain subfolder.
+
+## Open questions
+
+- A page moved into a folder that no page owns gets a `path` naming that folder; Pelican will publish it there. Nothing checks that a parent page exists.
+
+## Status
+
+Done on 2026-10-30.
+
+- `core/contentFolder.ts` trims trailing separators.
+- `explorer/Explorer.vue`: `refresh` resolves roots by trimmed path; `refreshAll` reloads roots and expanded folders; trash awaits the upstream channel before reloading; new file, folder and rename reload the git state; the overlay's close reloads everything; index reloads after a move no longer block the tree.
+- `explorer/move.ts`: `sites` in the context, site `path` rewritten on folder moves, webpages get `project` and `path` relative to `<site>/pages/` through the helper tasks use.
+- Three specs added to `explorer-move.spec.ts`; the suite, lint and typecheck are clean. Not seen on screen here.

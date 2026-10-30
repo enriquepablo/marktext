@@ -83,6 +83,7 @@ const taskStore = useTaskStore()
 const contentFolder = useContentFolder()
 const { tabs, currentFile } = storeToRefs(editorStore)
 const git = useGitStatusStore()
+const layout = useCazallaLayoutStore()
 git.LISTEN()
 
 const tree = ref<{ updateKeyChildren: (key: string, data: Entry[]) => void; getNode: (key: string) => Node | null } | null>(null)
@@ -160,11 +161,34 @@ watch(roots, (list) => {
   for (const r of list) if (expanded.value.length === 0 || !expanded.value.some((p) => p.startsWith(r.path))) remember(r.path, true)
 }, { immediate: true })
 
-const refresh = async(dir: string): Promise<void> => {
-  const node = tree.value?.getNode(dir)
-  if (!node || !node.loaded) return
-  tree.value?.updateKeyChildren(dir, await readEntries(dir))
+const trim = (p: string): string => (p.length > 1 ? p.replace(/[\\/]+$/, '') : p)
+// A root's key is its pathname as configured, which may carry a trailing separator.
+const nodeFor = (dir: string): Node | null => {
+  const direct = tree.value?.getNode(dir)
+  if (direct) return direct
+  const root = roots.value.find((r) => trim(r.path) === trim(dir))
+  return root ? (tree.value?.getNode(root.path) ?? null) : null
 }
+
+/** Reloads one folder from disk when the tree has it loaded. */
+const refresh = async(dir: string): Promise<void> => {
+  const node = nodeFor(dir)
+  if (!node || !node.loaded) return
+  tree.value?.updateKeyChildren(String(node.key), await readEntries(node.data.path))
+}
+
+/** Reloads every loaded folder: the roots and the expanded folders. */
+const refreshAll = async(): Promise<void> => {
+  for (const dir of [...roots.value.map((r) => r.path), ...expanded.value]) await refresh(dir)
+}
+
+// Lazygit may have committed, moved or deleted anything while the overlay was up.
+watch(
+  () => layout.mainView,
+  (_now, before) => {
+    if (before === 'terminal') void Promise.all([refreshAll(), git.REFRESH()])
+  }
+)
 
 const select = (e: Entry): void =>
   projectStore.CHANGE_ACTIVE_ITEM({ pathname: e.path, isFile: !e.isDir, isDirectory: e.isDir, isMarkdown: !e.isDir && isMarkdown(e.name) })
@@ -174,7 +198,7 @@ const onClick = (e: Entry, _node: TreeNode, _comp: unknown, event?: MouseEvent):
   if (e.isDir || event?.detail === 2) return
   if (!isMarkdown(e.name)) {
     const kind = paneKindFor(e.path)
-    if (kind === 'pdf' || kind === 'drawing') useCazallaLayoutStore().OPEN_VIEWER(kind, e.path)
+    if (kind === 'pdf' || kind === 'drawing') layout.OPEN_VIEWER(kind, e.path)
     else void window.electron.ipcRenderer.invoke('mt::shell::open-path', e.path)
     return
   }
@@ -219,19 +243,20 @@ const createIn = (dir: string, kind: 'file' | 'folder'): void =>
     if (await exists(path)) return t('cazalla.dialog.exists', { file: path })
     if (kind === 'folder') await ensureDir(path)
     else await writeText(path, '')
-    await refresh(dir)
+    await Promise.all([refresh(dir), git.REFRESH()])
   })
 
 const doMove = async(from: string, to: string): Promise<boolean> => {
   try {
-    const result = await moveEntry(from, to, { contentFolder: contentFolder.value, projects: metadata.projectsList })
+    const result = await moveEntry(from, to, { contentFolder: contentFolder.value, projects: metadata.projectsList, sites: metadata.sitesList })
     void git.REFRESH()
     void notice.notify({
       title: t('cazalla.explorer.title'),
       type: 'primary',
       message: t('cazalla.explorer.moved', { name: basename(result.to), links: result.rewrittenLinks })
     })
-    await Promise.all([metadata.LOAD(), taskStore.LOAD()])
+    // The indexes follow the files; a failure there must not hold up the tree.
+    void Promise.all([metadata.LOAD(), taskStore.LOAD()]).catch((err: unknown) => warn(String(err)))
     return true
   } catch (err) {
     warn(err instanceof MoveError ? t(`cazalla.explorer.${err.code}`, { path: err.detail }) : String(err))
@@ -243,8 +268,19 @@ const rename = (e: Entry): void =>
   askName(t('cazalla.explorer.rename'), e.name, async(name) => {
     if (name === e.name) return
     const to = join(dirname(e.path), name)
-    if (await doMove(e.path, to)) await refresh(dirname(e.path))
+    await doMove(e.path, to)
+    await refresh(dirname(e.path))
   })
+
+/** Moves an entry to the trash through the upstream channel, which asks first, then reloads its folder. */
+const trash = async(e: Entry): Promise<void> => {
+  try {
+    await window.electron.ipcRenderer.invoke('mt::fs-trash-item', e.path)
+  } catch (err) {
+    warn(String(err))
+  }
+  await Promise.all([refresh(dirname(e.path)), git.REFRESH()])
+}
 
 const onDrop = async(drag: TreeNode, drop: TreeNode): Promise<void> => {
   const from = drag.data.path
@@ -274,14 +310,7 @@ const onContextMenu = (event: MouseEvent, e: Entry): void => {
     { label: t('cazalla.explorer.addFromOutside'), click: () => void addFromOutside(dir) },
     { type: 'separator' },
     { label: t('cazalla.explorer.rename'), enabled: !e.root, click: () => rename(e) },
-    {
-      label: t('cazalla.explorer.trash'),
-      enabled: !e.root,
-      click: () => {
-        bus.emit('SIDEBAR::remove')
-        setTimeout(() => void refresh(dirname(e.path)), 300)
-      }
-    },
+    { label: t('cazalla.explorer.trash'), enabled: !e.root, click: () => void trash(e) },
     { type: 'separator' },
     { label: t('cazalla.explorer.copyPath'), click: () => bus.emit('SIDEBAR::copy-path') },
     { label: t('cazalla.explorer.showInFolder'), click: () => bus.emit('SIDEBAR::show-in-folder') },

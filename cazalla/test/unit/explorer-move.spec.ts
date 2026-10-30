@@ -33,12 +33,13 @@ await vi.hoisted(async() => {
 
 import { rewriteLinks, remapper } from '@cazalla/renderer/explorer/links'
 import { moveEntry, MoveError } from '@cazalla/renderer/explorer/move'
-import type { Project } from '@cazalla/renderer/metadata/types'
+import type { Project, Site } from '@cazalla/renderer/metadata/types'
 
 const V = '/vault'
 const site: Project = { name: 'Site', slug: 'site', organization: 'acme', leader: null, path: 'projects/site', file: `${V}/_metadata/projects/site.md` }
 const ops: Project = { ...site, name: 'Ops', slug: 'ops', path: 'projects/ops', file: `${V}/_metadata/projects/ops.md` }
-const ctx = { contentFolder: V, projects: [site, ops] }
+const web: Site = { name: 'Web', slug: 'web', siteUrl: null, path: 'sites/web', sshHost: null, sshPort: 22, sshUser: null, sshTargetDir: null, file: `${V}/_metadata/sites/web.md` }
+const ctx = { contentFolder: V, projects: [site, ops], sites: [web] }
 
 describe('rewriteLinks', () => {
   it('re-resolves relative targets and leaves external ones', () => {
@@ -72,6 +73,31 @@ describe('moveEntry', () => {
     files.set(`${V}/projects/site/notes/n.md`, '---\ncategory: note\n---\n[task](../tasks/parent.md) ![d](../assets/d.png)\n')
     files.set(`${V}/projects/site/assets/d.png`, 'PNG')
     files.set(`${V}/projects/ops/tasks/other.md`, '---\ntitle: other\nslug: other\ncategory: task\nproject: ops\npath: /\nsubtasks: []\n---\n')
+    files.set(web.file, '---\nname: Web\nslug: web\npath: sites/web\n---\n')
+    files.set(`${V}/sites/web/pages/home.md`, '---\ntitle: Home\nslug: home\ncategory: webpage\nproject: web\npath: /\norder: 0\n---\n')
+    files.set(`${V}/sites/web/pages/about.md`, '---\ntitle: About\nslug: about\ncategory: webpage\nproject: web\npath: /\norder: 1\n---\n')
+  })
+
+  it('moves a task into a plain subfolder: path follows', async() => {
+    const to = `${V}/projects/ops/tasks/later/other.md`
+    await moveEntry(`${V}/projects/ops/tasks/other.md`, to, ctx)
+    expect(files.get(to)).toContain('path: /later\n')
+    expect(files.get(to)).toContain('project: ops\n')
+  })
+
+  it('moves a webpage under another page: path follows, site kept', async() => {
+    const to = `${V}/sites/web/pages/home/about.md`
+    await moveEntry(`${V}/sites/web/pages/about.md`, to, ctx)
+    expect(files.get(to)).toContain('path: /home\n')
+    expect(files.get(to)).toContain('project: web\n')
+    expect(files.get(`${V}/sites/web/pages/home.md`)).toContain('path: /\n')
+  })
+
+  it('moves a site folder: metadata path follows, page paths stay', async() => {
+    const result = await moveEntry(`${V}/sites/web`, `${V}/www/web`, ctx)
+    expect(files.get(web.file)).toContain('path: www/web\n')
+    expect(files.get(`${V}/www/web/pages/about.md`)).toContain('path: /\n')
+    expect(result.updatedFiles).toEqual([web.file])
   })
 
   it('moves a subtask out to another project: parent unlinked, project and path rewritten, links fixed', async() => {

@@ -131,7 +131,7 @@ The upstream editor stays the primary pane. Secondary panes are `FilePane` compo
 
 ## Explorer (item 15)
 
-The sidebar's file view is `Explorer.vue`, an `el-tree` over the open roots. It lists every file (hidden entries and `node_modules` excluded), opens markdown as tabs and other files with the system opener, and moves entries by drag and drop or rename. A move rewrites project `path`s, task `project` and `path`, the parent's `subtasks` for single task files, and every relative markdown link under the content folder (`move.ts`, `links.ts`). Wiki links are not rewritten. The upstream watcher reports only markdown and folders, so non-markdown changes made outside the app appear after Refresh or on re-expanding the folder. The upstream inline new/rename inputs are replaced by dialogs.
+The sidebar's file view is `Explorer.vue`, an `el-tree` over the open roots. It lists every file (hidden entries and `node_modules` excluded), opens markdown as tabs and other files with the system opener, and moves entries by drag and drop or rename. A move rewrites project and site `path`s, task and webpage `project` and `path` (relative to `tasks/` and `pages/`), the parent's `subtasks` for single task files, and every relative markdown link under the content folder (`move.ts`, `links.ts`). The tree reloads the affected folder and the git state after each of its own actions, trash included once the confirmation returns, and every loaded folder when the lazygit overlay closes (item 34). Wiki links are not rewritten. The upstream watcher reports only markdown and folders, so non-markdown changes made outside the app appear after Refresh or on re-expanding the folder. The upstream inline new/rename inputs are replaced by dialogs.
 
 ## Drawings (item 11)
 

@@ -3,12 +3,14 @@ import { basename, dirname, exists, listMarkdownFiles, move, readText, writeText
 import { isoNow } from '../core/time'
 import type { Project, Site } from '../metadata/types'
 import { TASKS_DIR } from '../tasks/create'
+import { PAGES_DIR } from '../sites/pages'
 import { remapper, rewriteLinks } from './links'
 
 export interface MoveContext {
   // The vault root; link rewriting scans every markdown file below it. Null disables sync.
   contentFolder: string | null
   projects: Project[]
+  sites?: Site[]
 }
 
 export interface MoveResult {
@@ -46,10 +48,11 @@ const addToList = (list: unknown, entry: string): string[] => {
   return out
 }
 
-const taskPathFor = (contentFolder: string, project: Project, file: string): string | null => {
-  const tasksDir = join(contentFolder, project.path, TASKS_DIR)
-  if (!isUnder(tasksDir, dirname(file))) return null
-  const rel = window.path.relative(tasksDir, dirname(file))
+/** `path` of a task or page: its folder relative to `<record>/<subdir>`, or null when it lies elsewhere. */
+const pathWithin = (contentFolder: string, record: Project | Site, subdir: string, file: string): string | null => {
+  const base = join(contentFolder, record.path, subdir)
+  if (!isUnder(base, dirname(file))) return null
+  const rel = window.path.relative(base, dirname(file))
   return rel ? '/' + rel.split(sep()).join('/') : '/'
 }
 
@@ -93,17 +96,19 @@ export const moveEntry = async(fromRaw: string, toRaw: string, ctx: MoveContext)
   let rewrittenLinks = 0
   if (ctx.contentFolder) {
     const folder = ctx.contentFolder
-    // Project paths are relative to the vault; rewrite those the move touched.
-    for (const project of ctx.projects) {
-      const abs = join(folder, project.path)
+    // Project and site paths are relative to the vault; rewrite those the move touched.
+    for (const record of [...ctx.projects, ...(ctx.sites ?? [])]) {
+      const abs = join(folder, record.path)
       const next = remap(abs)
       if (next !== abs) {
-        const file = remap(project.file)
+        const file = remap(record.file)
         await writeText(file, updateFields(await readText(file), { path: window.path.relative(folder, next).split(sep()).join('/') }))
         updated.add(file)
       }
     }
-    const projects = ctx.projects.map((p) => ({ ...p, path: window.path.relative(folder, remap(join(folder, p.path))).split(sep()).join('/') }))
+    const relocate = <T extends Project | Site>(r: T): T => ({ ...r, path: window.path.relative(folder, remap(join(folder, r.path))).split(sep()).join('/') })
+    const projects = ctx.projects.map(relocate)
+    const sites = (ctx.sites ?? []).map(relocate)
 
     if (oldParentEntry) {
       const text = await readText(oldParentEntry.file)
@@ -112,18 +117,19 @@ export const moveEntry = async(fromRaw: string, toRaw: string, ctx: MoveContext)
       updated.add(oldParentEntry.file)
     }
 
-    // Every markdown file: tasks get their project and path refreshed; links are re-resolved.
+    // Every markdown file: moved tasks and pages get their project and path refreshed; links are re-resolved.
     const files = await listMarkdownFiles(folder)
     const movedFiles = new Set(files.filter((f) => isUnder(to, f)))
     for (const file of files) {
       let text = await readText(file)
       const original = text
       const fields = parse(text)
-      if (fields?.category === 'task' && movedFiles.has(file)) {
-        const project = projectContaining(folder, projects, file)
-        const path = project ? taskPathFor(folder, project, file) : null
+      const kind = fields?.category === 'task' ? 'task' : fields?.category === 'webpage' ? 'webpage' : null
+      if (fields && kind && movedFiles.has(file)) {
+        const owner = projectContaining<Project | Site>(folder, kind === 'task' ? projects : sites, file)
+        const path = owner ? pathWithin(folder, owner, kind === 'task' ? TASKS_DIR : PAGES_DIR, file) : null
         const patch: Record<string, unknown> = {}
-        if (project && fields.project !== project.slug) patch.project = project.slug
+        if (owner && fields.project !== owner.slug) patch.project = owner.slug
         if (path && fields.path !== path) patch.path = path
         if (Object.keys(patch).length) text = updateFields(text, { ...patch, modified: stamp })
       }
